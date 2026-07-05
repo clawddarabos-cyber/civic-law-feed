@@ -8,11 +8,11 @@ This is a clickable React/Vite prototype for a civic social feed where people ca
 
 The project was created as a fast prototype, then published publicly so it could be viewed at:
 
-- Live site: http://civics.johndarabos.com/
+- Live site: https://civics.johndarabos.com/
 - GitHub repo: https://github.com/clawddarabos-cyber/civic-law-feed
 - Local path: `/Users/adam/.openclaw/workspace/civic-law-feed`
 
-Important caveat: the live site was deployed through GitHub Pages with a Cloudflare DNS record pointing `civics.johndarabos.com` to `clawddarabos-cyber.github.io`. At the time of the deploy, plain HTTP worked. HTTPS was still pending because GitHub Pages had not yet issued the custom-domain certificate.
+The live site is deployed through GitHub Pages with a Cloudflare DNS record pointing `civics.johndarabos.com` to `clawddarabos-cyber.github.io`. On 2026-07-05, the Cloudflare record was switched to proxied so the public site serves valid browser SSL through Cloudflare while GitHub Pages still reports no custom-domain certificate of its own.
 
 ## Why It Exists
 
@@ -88,6 +88,7 @@ Deployment used GitHub Pages and Cloudflare DNS:
 - Custom domain: `civics.johndarabos.com`
 - DNS: `civics.johndarabos.com` points to `clawddarabos-cyber.github.io`
 - HTTP verified returning `200 OK` from GitHub Pages on 2026-07-05.
+- HTTPS verified through Cloudflare proxy on 2026-07-05.
 
 If work resumes, first check:
 
@@ -96,7 +97,7 @@ curl -I http://civics.johndarabos.com/
 curl -I https://civics.johndarabos.com/
 ```
 
-If HTTPS is still broken, either finish the GitHub Pages certificate flow or move the site to Cloudflare Pages for cleaner TLS handling.
+GitHub Pages may still report `https_enforced: false` because it has not issued its own certificate. The browser-facing HTTPS path currently works via Cloudflare proxy.
 
 ## Product Surface Implemented
 
@@ -130,7 +131,7 @@ Seed bill data:
 - Friend votes are fake seed data.
 - Summary trust/review workflow is not implemented.
 - No official source links or bill text parsing.
-- HTTPS status should be rechecked before sharing the live URL again.
+- GitHub Pages native HTTPS enforcement is still off; Cloudflare is handling public SSL for the custom domain.
 
 ## Good Next Directions
 
