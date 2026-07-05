@@ -409,18 +409,30 @@ function getCommentCount(bill, localComments) {
 function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onOpenOverview, onVote, onSave }) {
   const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
   const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
+  const overviewHref = `#overview/${bill.id}`;
+
+  function handleOverviewClick(event) {
+    event.preventDefault();
+    onOpenOverview();
+  }
 
   return (
     <article className={selected ? 'bill-card selected' : 'bill-card'}>
       <button className="card-hit-area" onClick={onSelect} aria-label={`Open ${bill.title}`} />
-      <img src={bill.image} alt="" className="bill-image" />
+      <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open AI overview for ${bill.title}`}>
+        <img src={bill.image} alt="" className="bill-image" />
+      </a>
       <div className="bill-content">
         <div className="meta-row">
           <span>{bill.chamber}</span>
           <span>{bill.jurisdiction}</span>
         </div>
-        <h2>{bill.title}</h2>
-        <p>{bill.summary}</p>
+        <a className="post-title-link" href={overviewHref} onClick={handleOverviewClick}>
+          <h2>{bill.title}</h2>
+        </a>
+        <a className="summary-link" href={overviewHref} onClick={handleOverviewClick}>
+          {bill.summary}
+        </a>
         <div className="status-row">
           <span>{bill.status}</span>
           <span>{yesPercent}% Yes</span>
@@ -429,11 +441,8 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
         <div className="link-row">
           <a
             className="overview-link"
-            href={`#overview/${bill.id}`}
-            onClick={(event) => {
-              event.preventDefault();
-              onOpenOverview();
-            }}
+            href={overviewHref}
+            onClick={handleOverviewClick}
           >
             <FileText size={15} />
             AI overview
