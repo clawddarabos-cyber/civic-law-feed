@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell,
   Bookmark,
+  BadgeCheck,
   Check,
   CircleUserRound,
   ExternalLink,
@@ -135,6 +136,50 @@ const bills = [
 
 const filters = ['All', 'Federal', 'Florida', 'St. Johns County'];
 
+const politicianProfiles = [
+  {
+    id: 'fl-house-district-profile',
+    name: 'Florida House District Representative',
+    office: 'Florida House',
+    jurisdiction: 'Florida',
+    status: 'Unclaimed profile',
+    sourceName: 'Florida House Members',
+    sourceUrl: 'https://www.flhouse.gov/Sections/Representatives/representatives.aspx',
+    votes: {
+      'hb-418': 'yes',
+      'sb-92': 'no',
+      'hb-771': 'yes'
+    }
+  },
+  {
+    id: 'fl-senate-district-profile',
+    name: 'Florida Senate District Senator',
+    office: 'Florida Senate',
+    jurisdiction: 'Florida',
+    status: 'Unclaimed profile',
+    sourceName: 'Florida Senate Senators',
+    sourceUrl: 'https://www.flsenate.gov/Senators',
+    votes: {
+      'hb-418': 'yes',
+      'sb-92': 'yes',
+      'sb-144': 'no'
+    }
+  },
+  {
+    id: 'st-johns-county-profile',
+    name: 'St. Johns County Commissioner',
+    office: 'County Commission',
+    jurisdiction: 'St. Johns County',
+    status: 'Unclaimed profile',
+    sourceName: 'St. Johns County BCC',
+    sourceUrl: 'https://www.sjcfl.us/commissioners/',
+    votes: {
+      'sb-92': 'yes',
+      'sb-144': 'yes'
+    }
+  }
+];
+
 const defaultJurisdiction = {
   label: 'Saint Johns, Florida',
   state: 'Florida',
@@ -143,6 +188,7 @@ const defaultJurisdiction = {
 };
 
 function App() {
+  const [activeSection, setActiveSection] = useState('feed');
   const [activeFilter, setActiveFilter] = useState('All');
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(bills[0].id);
@@ -307,7 +353,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={activeOverview || activeSection !== 'feed' ? 'app-shell wide-main' : 'app-shell'}>
       <aside className="left-rail" aria-label="Primary navigation">
         <div className="brand">
           <div className="brand-mark"><ShieldCheck size={22} /></div>
@@ -317,8 +363,26 @@ function App() {
           </div>
         </div>
         <nav className="nav-stack">
-          <button className="nav-item active" aria-label="Feed"><Home size={19} /><span>Feed</span></button>
-          <button className="nav-item" aria-label="Friends"><Users size={19} /><span>Friends</span></button>
+          <button
+            className={activeSection === 'feed' ? 'nav-item active' : 'nav-item'}
+            aria-label="Feed"
+            onClick={() => {
+              closeOverview();
+              setActiveSection('feed');
+            }}
+          >
+            <Home size={19} /><span>Feed</span>
+          </button>
+          <button
+            className={activeSection === 'officials' ? 'nav-item active' : 'nav-item'}
+            aria-label="Officials"
+            onClick={() => {
+              closeOverview();
+              setActiveSection('officials');
+            }}
+          >
+            <Users size={19} /><span>Officials</span>
+          </button>
           <button className="nav-item" aria-label="Saved"><Bookmark size={19} /><span>Saved</span></button>
           <button className="nav-item" aria-label="Alerts"><Bell size={19} /><span>Alerts</span></button>
         </nav>
@@ -356,6 +420,12 @@ function App() {
             onBack={closeOverview}
             onCommentChange={(value) => setCommentDrafts((current) => ({ ...current, [activeOverview.id]: value }))}
             onCommentSubmit={() => addComment(activeOverview.id)}
+          />
+        ) : activeSection === 'officials' ? (
+          <PoliticianProfilesPage
+            profiles={politicianProfiles}
+            votes={votes}
+            onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
         ) : (
           <>
@@ -423,7 +493,7 @@ function App() {
         )}
       </main>
 
-      {!activeOverview && (
+      {!activeOverview && activeSection === 'feed' && (
         <BillDetail
           bill={selected}
           commentCount={getCommentCount(selected, localComments)}
@@ -659,6 +729,87 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
       </section>
     </article>
   );
+}
+
+function PoliticianProfilesPage({ profiles, votes, onClaim }) {
+  return (
+    <section className="profiles-page" aria-label="Florida official profiles">
+      <div className="profiles-header">
+        <div>
+          <h1>Florida Official Profiles</h1>
+          <p>Auto-created public profiles compare official votes with your votes on the same items.</p>
+        </div>
+        <span>Claim flow prototype</span>
+      </div>
+      <div className="profiles-grid">
+        {profiles.map((profile) => {
+          const comparison = compareVotes(profile, votes);
+          return (
+            <article className="profile-card" key={profile.id}>
+              <div className="profile-card-head">
+                <div className="profile-avatar">
+                  <Users size={22} />
+                </div>
+                <div>
+                  <h2>{profile.name}</h2>
+                  <p>{profile.office} · {profile.jurisdiction}</p>
+                </div>
+              </div>
+              <div className="profile-status-row">
+                <span><BadgeCheck size={15} /> {profile.status}</span>
+                <a href={profile.sourceUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink size={15} />
+                  {profile.sourceName}
+                </a>
+              </div>
+              <div className="alignment-box">
+                <strong>{comparison.label}</strong>
+                <span>{comparison.detail}</span>
+              </div>
+              <div className="vote-record">
+                {Object.entries(profile.votes).map(([billId, officialVote]) => {
+                  const bill = bills.find((item) => item.id === billId);
+                  const userVote = votes[billId];
+                  return (
+                    <div className="vote-record-row" key={billId}>
+                      <div>
+                        <strong>{bill?.title || billId}</strong>
+                        <span>{bill?.jurisdiction}</span>
+                      </div>
+                      <div className="vote-pair">
+                        <span className={officialVote === 'yes' ? 'friend-yes' : 'friend-no'}>Official {officialVote.toUpperCase()}</span>
+                        <span>{userVote ? `You ${userVote.toUpperCase()}` : 'You not voted'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <button className="claim-button" onClick={() => onClaim(profile)}>
+                Claim profile
+              </button>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function compareVotes(profile, votes) {
+  const officialVotes = Object.entries(profile.votes);
+  const comparableVotes = officialVotes.filter(([billId]) => votes[billId]);
+  if (!comparableVotes.length) {
+    return {
+      label: 'No comparison yet',
+      detail: 'Cast votes in the feed to compare your record with this profile.'
+    };
+  }
+
+  const matches = comparableVotes.filter(([billId, officialVote]) => votes[billId] === officialVote).length;
+  return {
+    label: `${matches}/${comparableVotes.length} aligned`,
+    detail: `${Math.round((matches / comparableVotes.length) * 100)}% match on shared votes.`
+  };
 }
 
 function InfoList({ title, items, tone }) {

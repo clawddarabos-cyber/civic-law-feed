@@ -37,6 +37,10 @@ button {
   min-height: 100vh;
 }
 
+.app-shell.wide-main {
+  grid-template-columns: 264px minmax(0, 1fr);
+}
+
 .left-rail,
 .detail-panel {
   position: sticky;
@@ -613,6 +617,170 @@ button {
   width: fit-content;
 }
 
+.profiles-page {
+  display: grid;
+  gap: 16px;
+}
+
+.profiles-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profiles-header h1 {
+  margin: 0;
+  color: #14221b;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.profiles-header p {
+  margin: 6px 0 0;
+  color: #657069;
+  line-height: 1.45;
+}
+
+.profiles-header > span,
+.profile-status-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #eef3eb;
+  color: #526058;
+  padding: 6px 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profiles-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #dce3d9;
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(37, 51, 43, 0.06);
+}
+
+.profile-card-head,
+.profile-status-row,
+.vote-record-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-card-head {
+  justify-content: flex-start;
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  background: #183f35;
+  color: #fff;
+}
+
+.profile-card h2 {
+  margin: 0;
+  color: #14221b;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.profile-card p {
+  margin: 4px 0 0;
+  color: #657069;
+}
+
+.profile-status-row {
+  flex-wrap: wrap;
+}
+
+.profile-status-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #245f4e;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.alignment-box {
+  border: 1px solid #d9e1d6;
+  border-radius: 8px;
+  background: #fbfcf8;
+  padding: 12px;
+}
+
+.alignment-box strong,
+.alignment-box span {
+  display: block;
+}
+
+.alignment-box span {
+  margin-top: 3px;
+  color: #657069;
+  font-size: 14px;
+}
+
+.vote-record {
+  display: grid;
+}
+
+.vote-record-row {
+  align-items: start;
+  border-top: 1px solid #edf1ea;
+  padding: 11px 0;
+}
+
+.vote-record-row:first-child {
+  border-top: 0;
+}
+
+.vote-record-row strong,
+.vote-record-row span {
+  display: block;
+}
+
+.vote-record-row span,
+.vote-pair span:last-child {
+  color: #657069;
+  font-size: 13px;
+}
+
+.vote-pair {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.claim-button {
+  width: fit-content;
+  border: 1px solid #183f35;
+  border-radius: 8px;
+  background: #183f35;
+  color: #fff;
+  padding: 10px 13px;
+  font-weight: 800;
+}
+
 .detail-vote-box {
   display: grid;
   gap: 13px;
@@ -779,6 +947,18 @@ button {
   .location-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .profiles-header,
+  .profile-card-head,
+  .profile-status-row,
+  .vote-record-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .vote-pair {
+    text-align: left;
   }
 
   .bill-card {
