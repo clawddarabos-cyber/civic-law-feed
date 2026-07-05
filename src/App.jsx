@@ -158,10 +158,10 @@ function App() {
           </div>
         </div>
         <nav className="nav-stack">
-          <button className="nav-item active"><Home size={19} /> Feed</button>
-          <button className="nav-item"><Users size={19} /> Friends</button>
-          <button className="nav-item"><Bookmark size={19} /> Saved</button>
-          <button className="nav-item"><Bell size={19} /> Alerts</button>
+          <button className="nav-item active" aria-label="Feed"><Home size={19} /><span>Feed</span></button>
+          <button className="nav-item" aria-label="Friends"><Users size={19} /><span>Friends</span></button>
+          <button className="nav-item" aria-label="Saved"><Bookmark size={19} /><span>Saved</span></button>
+          <button className="nav-item" aria-label="Alerts"><Bell size={19} /><span>Alerts</span></button>
         </nav>
         <div className="trust-panel">
           <ShieldCheck size={18} />
