@@ -4,29 +4,23 @@ Last updated: 2026-07-05
 
 ## Current Status
 
-This is a clickable React/Vite prototype for a civic social feed where people can browse active bills/laws, vote Yes or No, save items, search/filter topics, and inspect a detail panel with arguments and social context.
-
-The project was created as a fast prototype, then published publicly so it could be viewed at:
+This is a public React/Vite prototype for a location-aware civic social feed. Users can browse civic items, vote Yes/No, save and share posts, open AI overview pages, add local comments, allow location lookup, and compare their votes against starter Florida official profiles.
 
 - Live site: https://civics.johndarabos.com/
 - GitHub repo: https://github.com/clawddarabos-cyber/civic-law-feed
 - Local path: `/Users/adam/.openclaw/workspace/civic-law-feed`
 
-The live site is deployed through GitHub Pages with a Cloudflare DNS record pointing `civics.johndarabos.com` to `clawddarabos-cyber.github.io`. On 2026-07-05, the Cloudflare record was switched to proxied so the public site serves valid browser SSL through Cloudflare while GitHub Pages still reports no custom-domain certificate of its own.
+The live site is deployed through GitHub Pages. `civics.johndarabos.com` is proxied through Cloudflare, so browser-facing HTTPS works through Cloudflare even though GitHub Pages may still report native HTTPS enforcement as off for the custom domain.
 
-## Why It Exists
+## Product Direction
 
-The original product direction was a Facebook-style civic feed:
+The product direction is a civic network:
 
-- Users see active bills/laws in a familiar social feed.
-- Each bill has a plain-English summary, jurisdiction, status, image, and category.
-- Users can vote Yes or No.
-- Users can save/bookmark items.
-- Users can open a richer detail view with pros/cons, longer explanation, friend votes, and comment counts.
-
-On 2026-07-05, John said: "Ok. Let's pivot. Save everything about this project to a file for working on later."
-
-This file is the restart point.
+- Users see federal, state, and county-level laws/items based on location.
+- Each post has a plain-English summary, official source/validation links, votes, saves, shares, and comments.
+- Clicking a title, image, description, or AI overview link opens a dedicated post page.
+- Users can compare their votes against politicians' recorded votes.
+- Politicians get auto-created public profiles and can claim them, like a Google Business Profile for elected officials.
 
 ## Tech Stack
 
@@ -49,101 +43,114 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 
 ## Files
 
-- `src/App.jsx` contains the prototype data, state, feed UI, card components, voting, save/bookmark behavior, filtering, and detail panel.
+- `src/App.jsx` contains the prototype data, routing state, feed UI, AI overview pages, local comments, voting, save/share behavior, location lookup, and official profile comparison.
 - `src/main.jsx` mounts the React app and imports global CSS.
-- `src/styles.css` contains the full responsive visual design.
+- `src/styles.css` contains the responsive visual design.
 - `index.html` is the Vite entry.
 - `package.json` contains scripts and dependencies.
 
-## Current Git State
-
-Remote:
-
-```text
-origin https://github.com/clawddarabos-cyber/civic-law-feed.git
-```
-
-Recent commits:
-
-```text
-251335b Fix deployed React runtime import
-27daa76 Initial civic law feed prototype
-```
-
-The key production bug that was fixed: the deployed bundle initially crashed with `React is not defined`. The fix was adding the explicit React import in `src/App.jsx`.
-
-Current build verification on 2026-07-05:
-
-```text
-npm run build
-```
-
-Passed successfully.
-
-## Deployment Notes
-
-Deployment used GitHub Pages and Cloudflare DNS:
-
-- Public repo: `clawddarabos-cyber/civic-law-feed`
-- Custom domain: `civics.johndarabos.com`
-- DNS: `civics.johndarabos.com` points to `clawddarabos-cyber.github.io`
-- HTTP verified returning `200 OK` from GitHub Pages on 2026-07-05.
-- HTTPS verified through Cloudflare proxy on 2026-07-05.
-
-If work resumes, first check:
-
-```bash
-curl -I http://civics.johndarabos.com/
-curl -I https://civics.johndarabos.com/
-```
-
-GitHub Pages may still report `https_enforced: false` because it has not issued its own certificate. The browser-facing HTTPS path currently works via Cloudflare proxy.
-
-## Product Surface Implemented
+## Implemented Surface
 
 Current prototype includes:
 
-- Left navigation rail with Feed, Friends, Saved, Alerts.
-- Trust panel saying summaries are drafts until reviewed against official bill text.
-- Top bar for "Today's Votes."
-- Search box across title, summary, and jurisdiction.
-- Category filters: All, Environment, Economy, Education, Transportation.
-- Bill cards with image, metadata, summary, status, Yes percentage, voting buttons, save button, and share button.
-- Right-side detail panel with longer explanation, pros, cons, friend votes, and comment count.
-- Responsive layout in CSS.
+- Single top nav bar on mobile with Feed, Officials, Saved, Alerts, search, and profile/location icons.
+- Search icon opens the tucked search/filter panel.
+- Profile icon opens a location panel.
+- Browser geolocation permission flow.
+- U.S. Census Geocoder lookup from coordinates to state/county.
+- Saint Johns, Florida default jurisdiction.
+- Jurisdiction filters: All, Federal, Florida, St. Johns County.
+- Feed cards with images, summaries, source links, Yes/No voting, comment counts, save, and share.
+- Card image/title/description open the dedicated post page.
+- AI overview route at `#/overview/:id`.
+- Post page with AI-style overview, pros/cons, official source links, comments, and a local comment form.
+- Save button toggles bookmark state and shows toast feedback.
+- Share button uses native Web Share when available or copies the post URL to clipboard.
+- Officials section with starter Florida official profiles.
+- Official profile cards include source links, recorded votes, comparison against the user's votes, and a Claim Profile CTA.
 
-Seed bill data:
+## Data Sources and Caveats
 
-- Clean Water Infrastructure Renewal Act
-- Small Business Property Tax Relief
-- Student Data Privacy Standards
-- Public Transit Reliability Funding
+The app still uses prototype data in `src/App.jsx`. Official links are attached, but items and official profile records are not live-ingested yet.
+
+Current official source targets:
+
+- Federal: https://www.congress.gov/
+- Congress.gov API docs: https://www.loc.gov/apis/additional-apis/congress-dot-gov-api/
+- Florida House bills: https://www.flhouse.gov/sections/bills/bills.aspx
+- Florida Senate bills: https://www.flsenate.gov/session/bills
+- Florida House members: https://www.flhouse.gov/Sections/Representatives/representatives.aspx
+- Florida Senate members: https://www.flsenate.gov/Senators
+- St. Johns County BCC agendas: https://stjohnsclerk.com/board-records/agendas/
+- St. Johns County BCC calendar: https://www.sjcfl.us/bcc-calendar/
+- St. Johns County commissioners: https://www.sjcfl.us/commissioners/
+- Census geocoder: https://geocoding.geo.census.gov/geocoder/
+
+Important: the politician profiles are placeholder profile records. The next serious milestone is ingesting real Florida House/Senate member and roll-call data, then creating profiles from that.
+
+## Recent Commits
+
+```text
+6aac7ff Add Florida official profiles
+ef3c218 Wire save and share actions
+429ca31 Link post content to overview pages
+8d977f7 Add AI overview post comments
+5c5238c Add location-aware civic sources
+eb73943 Move civic actions into top nav
+db56ae8 Simplify civic feed header search
+5ee3ea5 Update civic SSL handoff
+```
+
+Deployment branch latest after the most recent work:
+
+```text
+687adb8 Deploy Florida official profiles
+```
+
+## Verification
+
+Latest verification on 2026-07-05:
+
+```bash
+npm run build
+curl -I https://civics.johndarabos.com/
+```
+
+The build passed and the live HTTPS page returned `200 OK`.
+
+## Deployment Notes
+
+Deployment is manual:
+
+1. Run `npm run build`.
+2. Add a temporary worktree for `origin/gh-pages`.
+3. `rsync` `dist/` into the worktree, preserving `CNAME`.
+4. Commit and push `HEAD:gh-pages`.
+5. Wait briefly for GitHub Pages/Cloudflare cache to update.
+
+Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds after deployment. Recheck the HTML asset names before assuming deploy failed.
 
 ## Known Limitations
 
-- All data is static mock data inside `src/App.jsx`.
-- Votes and saved state are local React state only; they reset on refresh.
+- Bills/laws are still static prototype records.
+- Official source links point to official portals, not item-specific source documents yet.
+- Votes, saves, comments, and claim actions are local React state only.
 - No authentication.
 - No backend.
-- No real bill APIs.
-- No comments implementation beyond placeholder/comment count.
-- Share button is visual only.
-- Friend votes are fake seed data.
-- Summary trust/review workflow is not implemented.
-- No official source links or bill text parsing.
-- GitHub Pages native HTTPS enforcement is still off; Cloudflare is handling public SSL for the custom domain.
+- No persistent database.
+- No real comments/moderation system.
+- No real official-profile claiming workflow.
+- No live roll-call ingestion.
+- No user identity or district-based representative matching beyond Census state/county lookup.
 
-## Good Next Directions
+## Best Next Steps
 
-Possible pivots:
-
-- Turn this into a real civic bill tracker using federal/state bill APIs.
-- Keep it as a product demo and improve design/interactions.
-- Use it as a seed for a broader civic social network.
-- Convert it into a backend-backed app with accounts, real votes, saved bills, comments, and notifications.
-- Shift from "voting on bills" to "understanding legislation with AI summaries and source citations."
-
-If continuing from the current prototype, the next pragmatic step is to add official bill source links and replace the mock `bills` array with a small structured data layer. After that, add persistence for votes/saves.
+1. Build a real data ingestion layer for Florida first.
+2. Generate official profiles from Florida House/Senate members.
+3. Ingest roll-call votes and map them to bill/item records.
+4. Make official profiles item-specific and source-backed.
+5. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
+6. Replace static prototype cards with official-source records for Florida and St. Johns County.
 
 ## Resume Checklist
 
@@ -151,6 +158,5 @@ If continuing from the current prototype, the next pragmatic step is to add offi
 2. Run `git status --short`.
 3. Run `npm install` if dependencies are missing.
 4. Run `npm run build`.
-5. Check `http://civics.johndarabos.com/`.
-6. Check whether HTTPS now works.
-7. Decide whether to continue this concept or use the prototype only as reference for the new pivot.
+5. Check `https://civics.johndarabos.com/`.
+6. Decide whether to continue with real Florida data ingestion or pivot to another feature.
