@@ -3,9 +3,7 @@ import {
   Bell,
   Bookmark,
   Check,
-  ChevronLeft,
   CircleUserRound,
-  FileText,
   Filter,
   Home,
   MessageSquare,
@@ -164,6 +162,17 @@ function App() {
           <button className="nav-item" aria-label="Saved"><Bookmark size={19} /><span>Saved</span></button>
           <button className="nav-item" aria-label="Alerts"><Bell size={19} /><span>Alerts</span></button>
         </nav>
+        <div className="top-actions">
+          <button
+            className={searchOpen ? 'profile-button active' : 'profile-button'}
+            aria-label={searchOpen ? 'Close search and filters' : 'Open search and filters'}
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen((open) => !open)}
+          >
+            {searchOpen ? <X size={22} /> : <Search size={22} />}
+          </button>
+          <button className="profile-button" aria-label="Profile"><CircleUserRound size={24} /></button>
+        </div>
         <div className="trust-panel">
           <ShieldCheck size={18} />
           <p>Summaries are labeled drafts until reviewed against the official bill text.</p>
@@ -171,22 +180,6 @@ function App() {
       </aside>
 
       <main className="feed-area">
-        <header className="topbar">
-          <button className="back-button" aria-label="Back"><ChevronLeft size={20} /></button>
-          <div className="topbar-spacer" aria-hidden="true" />
-          <div className="topbar-actions">
-            <button
-              className={searchOpen ? 'profile-button active' : 'profile-button'}
-              aria-label={searchOpen ? 'Close search and filters' : 'Open search and filters'}
-              aria-expanded={searchOpen}
-              onClick={() => setSearchOpen((open) => !open)}
-            >
-              {searchOpen ? <X size={22} /> : <Search size={22} />}
-            </button>
-            <button className="profile-button" aria-label="Profile"><CircleUserRound size={24} /></button>
-          </div>
-        </header>
-
         {searchOpen && (
           <section className="controls" aria-label="Feed controls">
             <label className="search-box">
