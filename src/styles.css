@@ -18,7 +18,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -356,6 +357,32 @@ button {
   text-decoration: underline;
 }
 
+.link-row {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.overview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: #245f4e;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.overview-link:hover {
+  text-decoration: underline;
+}
+
 .action-row,
 .detail-votes {
   display: flex;
@@ -461,6 +488,93 @@ button {
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
+}
+
+.overview-page {
+  display: grid;
+  gap: 16px;
+  max-width: 860px;
+}
+
+.overview-page h1 {
+  margin: 0;
+  color: #14221b;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.overview-back {
+  width: fit-content;
+  border: 1px solid #d7ded4;
+  border-radius: 8px;
+  background: #fff;
+  color: #26332d;
+  padding: 9px 12px;
+}
+
+.overview-image {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ai-overview-box,
+.comments-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #dce3d9;
+  border-radius: 8px;
+  background: #fff;
+  padding: 16px;
+}
+
+.ai-overview-box p,
+.comment-row p {
+  margin: 0;
+  color: #4c5851;
+  line-height: 1.55;
+}
+
+.comment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.comment-row {
+  border-top: 1px solid #edf1ea;
+  padding-top: 10px;
+}
+
+.comment-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.comment-row strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.comment-form {
+  display: grid;
+  gap: 10px;
+}
+
+.comment-form textarea {
+  min-height: 96px;
+  resize: vertical;
+  border: 1px solid #d7ded4;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2924;
+  padding: 11px;
+  outline: 0;
+}
+
+.comment-form .location-button {
+  width: fit-content;
 }
 
 .detail-vote-box {
@@ -642,5 +756,9 @@ button {
 
   .split-section {
     grid-template-columns: 1fr;
+  }
+
+  .overview-page h1 {
+    font-size: 28px;
   }
 }

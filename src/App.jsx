@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell,
   Bookmark,
   Check,
   CircleUserRound,
   ExternalLink,
+  FileText,
   Filter,
   Home,
   LocateFixed,
@@ -152,6 +153,18 @@ function App() {
   const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
   const [locationStatus, setLocationStatus] = useState('idle');
   const [locationMessage, setLocationMessage] = useState('Location is set to the Saint Johns demo jurisdiction.');
+  const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
+  const [localComments, setLocalComments] = useState({});
+  const [commentDrafts, setCommentDrafts] = useState({});
+
+  useEffect(() => {
+    function syncHashRoute() {
+      setActiveOverviewId(getOverviewIdFromHash());
+    }
+
+    window.addEventListener('hashchange', syncHashRoute);
+    return () => window.removeEventListener('hashchange', syncHashRoute);
+  }, []);
 
   const visibleBills = useMemo(() => {
     return bills.filter((bill) => {
@@ -163,6 +176,7 @@ function App() {
   }, [activeFilter, jurisdiction.levels, query]);
 
   const selected = bills.find((bill) => bill.id === selectedId) || visibleBills[0] || bills[0];
+  const activeOverview = bills.find((bill) => bill.id === activeOverviewId);
 
   function voteOnBill(id, vote) {
     setVotes((current) => ({ ...current, [id]: current[id] === vote ? undefined : vote }));
@@ -224,6 +238,35 @@ function App() {
     );
   }
 
+  function openOverview(id) {
+    setActiveOverviewId(id);
+    window.location.hash = `overview/${id}`;
+  }
+
+  function closeOverview() {
+    setActiveOverviewId(null);
+    if (window.location.hash.startsWith('#overview/')) {
+      window.history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  }
+
+  function addComment(id) {
+    const text = (commentDrafts[id] || '').trim();
+    if (!text) return;
+    setLocalComments((current) => ({
+      ...current,
+      [id]: [
+        ...(current[id] || []),
+        {
+          id: `${id}-${Date.now()}`,
+          author: 'You',
+          text
+        }
+      ]
+    }));
+    setCommentDrafts((current) => ({ ...current, [id]: '' }));
+  }
+
   return (
     <div className="app-shell">
       <aside className="left-rail" aria-label="Primary navigation">
@@ -265,7 +308,19 @@ function App() {
       </aside>
 
       <main className="feed-area">
-        {locationOpen && (
+        {activeOverview ? (
+          <OverviewPage
+            bill={activeOverview}
+            comments={localComments[activeOverview.id] || []}
+            commentDraft={commentDrafts[activeOverview.id] || ''}
+            commentCount={getCommentCount(activeOverview, localComments)}
+            onBack={closeOverview}
+            onCommentChange={(value) => setCommentDrafts((current) => ({ ...current, [activeOverview.id]: value }))}
+            onCommentSubmit={() => addComment(activeOverview.id)}
+          />
+        ) : (
+          <>
+            {locationOpen && (
           <section className="location-panel" aria-label="Location settings">
             <div className="location-copy">
               <MapPin size={18} />
@@ -279,9 +334,9 @@ function App() {
               {locationStatus === 'loading' ? 'Locating' : 'Use my location'}
             </button>
           </section>
-        )}
+            )}
 
-        {searchOpen && (
+            {searchOpen && (
           <section className="controls" aria-label="Feed controls">
             <label className="search-box">
               <Search size={18} />
@@ -306,36 +361,52 @@ function App() {
               ))}
             </div>
           </section>
-        )}
+            )}
 
-        <section className="feed-list" aria-label="Bill feed">
+            <section className="feed-list" aria-label="Bill feed">
           {visibleBills.map((bill) => (
             <BillCard
               key={bill.id}
               bill={bill}
+              commentCount={getCommentCount(bill, localComments)}
               userVote={votes[bill.id]}
               saved={saved.has(bill.id)}
               selected={bill.id === selected.id}
               onSelect={() => setSelectedId(bill.id)}
+              onOpenOverview={() => openOverview(bill.id)}
               onVote={(vote) => voteOnBill(bill.id, vote)}
               onSave={() => toggleSaved(bill.id)}
             />
           ))}
-        </section>
+            </section>
+          </>
+        )}
       </main>
 
-      <BillDetail
-        bill={selected}
-        userVote={votes[selected.id]}
-        saved={saved.has(selected.id)}
-        onVote={(vote) => voteOnBill(selected.id, vote)}
-        onSave={() => toggleSaved(selected.id)}
-      />
+      {!activeOverview && (
+        <BillDetail
+          bill={selected}
+          commentCount={getCommentCount(selected, localComments)}
+          userVote={votes[selected.id]}
+          saved={saved.has(selected.id)}
+          onVote={(vote) => voteOnBill(selected.id, vote)}
+          onSave={() => toggleSaved(selected.id)}
+        />
+      )}
     </div>
   );
 }
 
-function BillCard({ bill, userVote, saved, selected, onSelect, onVote, onSave }) {
+function getOverviewIdFromHash() {
+  const match = window.location.hash.match(/^#overview\/(.+)$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getCommentCount(bill, localComments) {
+  return bill.comments + (localComments[bill.id]?.length || 0);
+}
+
+function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onOpenOverview, onVote, onSave }) {
   const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
   const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
 
@@ -353,11 +424,25 @@ function BillCard({ bill, userVote, saved, selected, onSelect, onVote, onSave })
         <div className="status-row">
           <span>{bill.status}</span>
           <span>{yesPercent}% Yes</span>
+          <span>{commentCount} comments</span>
         </div>
-        <a className="source-link" href={bill.sourceUrl} target="_blank" rel="noreferrer">
-          <ExternalLink size={15} />
-          {bill.sourceName}
-        </a>
+        <div className="link-row">
+          <a
+            className="overview-link"
+            href={`#overview/${bill.id}`}
+            onClick={(event) => {
+              event.preventDefault();
+              onOpenOverview();
+            }}
+          >
+            <FileText size={15} />
+            AI overview
+          </a>
+          <a className="source-link" href={bill.sourceUrl} target="_blank" rel="noreferrer">
+            <ExternalLink size={15} />
+            {bill.sourceName}
+          </a>
+        </div>
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={17} />} label="Yes" onClick={() => onVote('yes')} />
           <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={17} />} label="No" onClick={() => onVote('no')} />
@@ -380,7 +465,7 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function BillDetail({ bill, userVote, saved, onVote, onSave }) {
+function BillDetail({ bill, commentCount, userVote, saved, onVote, onSave }) {
   return (
     <aside className="detail-panel" aria-label="Bill details">
       <div className="detail-hero">
@@ -439,12 +524,74 @@ function BillDetail({ bill, userVote, saved, onVote, onSave }) {
         <section className="comment-box">
           <div className="section-title">
             <MessageSquare size={18} />
-            <strong>{bill.comments} comments</strong>
+            <strong>{commentCount} comments</strong>
           </div>
           <p>Top comments would appear here after moderation and source-quality checks.</p>
         </section>
       </div>
     </aside>
+  );
+}
+
+function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCommentChange, onCommentSubmit }) {
+  return (
+    <article className="overview-page">
+      <button className="overview-back" onClick={onBack}>Back to feed</button>
+      <img src={bill.image} alt="" className="overview-image" />
+      <div className="meta-row">
+        <span>{bill.chamber}</span>
+        <span>{bill.jurisdiction}</span>
+        <span>{bill.status}</span>
+      </div>
+      <h1>{bill.title}</h1>
+      <section className="ai-overview-box">
+        <div className="section-title">
+          <FileText size={18} />
+          <strong>AI overview</strong>
+        </div>
+        <p>{bill.detail}</p>
+        <div className="split-section">
+          <InfoList title="Likely benefits" items={bill.pros} tone="yes" />
+          <InfoList title="Likely concerns" items={bill.cons} tone="no" />
+        </div>
+      </section>
+      <div className="source-box">
+        <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
+          <ExternalLink size={16} />
+          Official source
+        </a>
+        <a href={bill.officialTextUrl} target="_blank" rel="noreferrer">
+          <ExternalLink size={16} />
+          Text / validation
+        </a>
+      </div>
+      <section className="comments-panel">
+        <div className="section-title">
+          <MessageSquare size={18} />
+          <strong>{commentCount} comments</strong>
+        </div>
+        <div className="comment-list">
+          <div className="comment-row">
+            <strong>Moderator note</strong>
+            <p>Comments should discuss the proposal and cite official material when possible.</p>
+          </div>
+          {comments.map((comment) => (
+            <div className="comment-row" key={comment.id}>
+              <strong>{comment.author}</strong>
+              <p>{comment.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="comment-form">
+          <textarea
+            value={commentDraft}
+            placeholder="Add a comment"
+            onChange={(event) => onCommentChange(event.target.value)}
+          />
+          <button className="location-button" onClick={onCommentSubmit}>Post comment</button>
+        </div>
+      </section>
+    </article>
   );
 }
 
