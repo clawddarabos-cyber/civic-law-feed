@@ -149,7 +149,20 @@ const politicianProfiles = [
       'hb-418': 'yes',
       'sb-92': 'no',
       'hb-771': 'yes'
-    }
+    },
+    archiveSince: '2020',
+    archive: [
+      { year: 2026, topic: 'Environment', title: 'Water infrastructure grant package', vote: 'yes' },
+      { year: 2026, topic: 'Education', title: 'Student data vendor limits', vote: 'yes' },
+      { year: 2025, topic: 'Housing', title: 'Local zoning preemption study', vote: 'no' },
+      { year: 2025, topic: 'Transportation', title: 'Regional road safety appropriations', vote: 'yes' },
+      { year: 2024, topic: 'Taxes', title: 'Small business equipment exemption', vote: 'no' },
+      { year: 2024, topic: 'Public Safety', title: 'Emergency communications modernization', vote: 'yes' },
+      { year: 2023, topic: 'Health', title: 'Rural clinic reimbursement pilot', vote: 'yes' },
+      { year: 2022, topic: 'Environment', title: 'Stormwater reporting requirements', vote: 'yes' },
+      { year: 2021, topic: 'Education', title: 'School technology privacy rules', vote: 'yes' },
+      { year: 2020, topic: 'Budget', title: 'Local infrastructure relief package', vote: 'no' }
+    ]
   },
   {
     id: 'fl-senate-district-profile',
@@ -163,7 +176,20 @@ const politicianProfiles = [
       'hb-418': 'yes',
       'sb-92': 'yes',
       'sb-144': 'no'
-    }
+    },
+    archiveSince: '2020',
+    archive: [
+      { year: 2026, topic: 'Economy', title: 'Small business tax relief package', vote: 'yes' },
+      { year: 2026, topic: 'Environment', title: 'Clean water reporting bill', vote: 'yes' },
+      { year: 2025, topic: 'Transportation', title: 'Transit reliability funding formula', vote: 'no' },
+      { year: 2025, topic: 'Health', title: 'Behavioral health workforce grants', vote: 'yes' },
+      { year: 2024, topic: 'Education', title: 'Student privacy audit standards', vote: 'no' },
+      { year: 2024, topic: 'Housing', title: 'Workforce housing trust expansion', vote: 'yes' },
+      { year: 2023, topic: 'Budget', title: 'County infrastructure matching funds', vote: 'yes' },
+      { year: 2022, topic: 'Public Safety', title: 'Disaster response mutual aid update', vote: 'yes' },
+      { year: 2021, topic: 'Taxes', title: 'Homestead administration cleanup', vote: 'no' },
+      { year: 2020, topic: 'Environment', title: 'Coastal resiliency planning fund', vote: 'yes' }
+    ]
   },
   {
     id: 'st-johns-county-profile',
@@ -176,7 +202,20 @@ const politicianProfiles = [
     votes: {
       'sb-92': 'yes',
       'sb-144': 'yes'
-    }
+    },
+    archiveSince: '2020',
+    archive: [
+      { year: 2026, topic: 'Transportation', title: 'Public transit reliability agenda item', vote: 'yes' },
+      { year: 2026, topic: 'Economy', title: 'Small business property tax resolution', vote: 'yes' },
+      { year: 2025, topic: 'Growth', title: 'Comprehensive plan amendment hearing', vote: 'no' },
+      { year: 2025, topic: 'Water', title: 'Utility capacity expansion contract', vote: 'yes' },
+      { year: 2024, topic: 'Public Safety', title: 'Fire rescue station funding item', vote: 'yes' },
+      { year: 2024, topic: 'Transportation', title: 'County road resurfacing package', vote: 'yes' },
+      { year: 2023, topic: 'Budget', title: 'Tourism development allocation', vote: 'no' },
+      { year: 2022, topic: 'Environment', title: 'Conservation land acquisition item', vote: 'yes' },
+      { year: 2021, topic: 'Housing', title: 'Affordable housing advisory plan', vote: 'yes' },
+      { year: 2020, topic: 'Emergency', title: 'Pandemic relief grant administration', vote: 'yes' }
+    ]
   }
 ];
 
@@ -766,7 +805,12 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                 <strong>{comparison.label}</strong>
                 <span>{comparison.detail}</span>
               </div>
+              <div className="archive-summary">
+                <strong>{profile.archive.length + Object.keys(profile.votes).length} recorded votes</strong>
+                <span>Prototype archive since {profile.archiveSince}; store all available records, show recent first.</span>
+              </div>
               <div className="vote-record">
+                <div className="vote-record-label">Current comparison items</div>
                 {Object.entries(profile.votes).map(([billId, officialVote]) => {
                   const bill = bills.find((item) => item.id === billId);
                   const userVote = votes[billId];
@@ -783,6 +827,18 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                     </div>
                   );
                 })}
+                <div className="vote-record-label">Historical archive</div>
+                {profile.archive.map((record) => (
+                  <div className="vote-record-row archive-row" key={`${profile.id}-${record.year}-${record.title}`}>
+                    <div>
+                      <strong>{record.title}</strong>
+                      <span>{record.year} · {record.topic}</span>
+                    </div>
+                    <div className="vote-pair">
+                      <span className={record.vote === 'yes' ? 'friend-yes' : 'friend-no'}>{record.vote.toUpperCase()}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
               <button className="claim-button" onClick={() => onClaim(profile)}>
                 Claim profile
