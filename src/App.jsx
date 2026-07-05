@@ -4,8 +4,11 @@ import {
   Bookmark,
   Check,
   CircleUserRound,
+  ExternalLink,
   Filter,
   Home,
+  LocateFixed,
+  MapPin,
   MessageSquare,
   Search,
   Share2,
@@ -22,8 +25,12 @@ const bills = [
     title: 'Clean Water Infrastructure Renewal Act',
     chamber: 'House Bill 418',
     jurisdiction: 'Florida',
+    level: 'Florida',
     status: 'Voting closes in 2 days',
     category: 'Environment',
+    sourceName: 'Florida House Bills',
+    sourceUrl: 'https://www.flhouse.gov/sections/bills/bills.aspx',
+    officialTextUrl: 'https://www.flhouse.gov/sections/bills/bills.aspx',
     image:
       'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
     summary:
@@ -44,10 +51,14 @@ const bills = [
   {
     id: 'sb-92',
     title: 'Small Business Property Tax Relief',
-    chamber: 'Senate Bill 92',
-    jurisdiction: 'Georgia',
+    chamber: 'County ordinance agenda item',
+    jurisdiction: 'St. Johns County',
+    level: 'St. Johns County',
     status: 'Committee vote tomorrow',
     category: 'Economy',
+    sourceName: 'St. Johns County BCC Agendas',
+    sourceUrl: 'https://stjohnsclerk.com/board-records/agendas/',
+    officialTextUrl: 'https://stjohnsclerk.com/board-records/agendas/',
     image:
       'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
     summary:
@@ -67,10 +78,14 @@ const bills = [
   {
     id: 'hb-771',
     title: 'Student Data Privacy Standards',
-    chamber: 'House Bill 771',
+    chamber: 'Federal bill',
     jurisdiction: 'Federal',
+    level: 'Federal',
     status: 'Floor vote Friday',
     category: 'Education',
+    sourceName: 'Congress.gov',
+    sourceUrl: 'https://www.congress.gov/',
+    officialTextUrl: 'https://www.congress.gov/',
     image:
       'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80',
     summary:
@@ -91,10 +106,14 @@ const bills = [
   {
     id: 'sb-144',
     title: 'Public Transit Reliability Funding',
-    chamber: 'Senate Bill 144',
-    jurisdiction: 'New York',
+    chamber: 'Public hearing item',
+    jurisdiction: 'St. Johns County',
+    level: 'St. Johns County',
     status: 'Public comment open',
     category: 'Transportation',
+    sourceName: 'St. Johns County Calendar',
+    sourceUrl: 'https://www.sjcfl.us/bcc-calendar/',
+    officialTextUrl: 'https://www.sjcfl.us/bcc-calendar/',
     image:
       'https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80',
     summary:
@@ -113,7 +132,14 @@ const bills = [
   }
 ];
 
-const filters = ['All', 'Environment', 'Economy', 'Education', 'Transportation'];
+const filters = ['All', 'Federal', 'Florida', 'St. Johns County'];
+
+const defaultJurisdiction = {
+  label: 'Saint Johns, Florida',
+  state: 'Florida',
+  county: 'St. Johns County',
+  levels: ['Federal', 'Florida', 'St. Johns County']
+};
 
 function App() {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -122,14 +148,19 @@ function App() {
   const [votes, setVotes] = useState({});
   const [saved, setSaved] = useState(() => new Set(['hb-771']));
   const [searchOpen, setSearchOpen] = useState(false);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
+  const [locationStatus, setLocationStatus] = useState('idle');
+  const [locationMessage, setLocationMessage] = useState('Location is set to the Saint Johns demo jurisdiction.');
 
   const visibleBills = useMemo(() => {
     return bills.filter((bill) => {
-      const matchesFilter = activeFilter === 'All' || bill.category === activeFilter;
-      const needle = `${bill.title} ${bill.summary} ${bill.jurisdiction}`.toLowerCase();
-      return matchesFilter && needle.includes(query.toLowerCase());
+      const matchesFilter = activeFilter === 'All' || bill.level === activeFilter;
+      const matchesJurisdiction = jurisdiction.levels.includes(bill.level);
+      const needle = `${bill.title} ${bill.summary} ${bill.jurisdiction} ${bill.sourceName}`.toLowerCase();
+      return matchesFilter && matchesJurisdiction && needle.includes(query.toLowerCase());
     });
-  }, [activeFilter, query]);
+  }, [activeFilter, jurisdiction.levels, query]);
 
   const selected = bills.find((bill) => bill.id === selectedId) || visibleBills[0] || bills[0];
 
@@ -144,6 +175,53 @@ function App() {
       else next.add(id);
       return next;
     });
+  }
+
+  function requestLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus('error');
+      setLocationMessage('This browser does not support location sharing. Saint Johns remains selected.');
+      return;
+    }
+
+    setLocationStatus('loading');
+    setLocationMessage('Requesting location permission...');
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const params = new URLSearchParams({
+            x: String(coords.longitude),
+            y: String(coords.latitude),
+            benchmark: 'Public_AR_Current',
+            vintage: 'Current_Current',
+            format: 'json'
+          });
+          const response = await fetch(`https://geocoding.geo.census.gov/geocoder/geographies/coordinates?${params}`);
+          const data = await response.json();
+          const geographies = data?.result?.geographies || {};
+          const state = geographies.States?.[0]?.NAME || 'Florida';
+          const countyName = geographies.Counties?.[0]?.NAME || 'St. Johns County';
+          const county = countyName.endsWith('County') ? countyName : `${countyName} County`;
+          setJurisdiction({
+            label: `${county}, ${state}`,
+            state,
+            county,
+            levels: ['Federal', state, county]
+          });
+          setActiveFilter('All');
+          setLocationStatus('ready');
+          setLocationMessage(`Showing federal, ${state}, and ${county} items with official source links.`);
+        } catch {
+          setLocationStatus('error');
+          setLocationMessage('Location was allowed, but jurisdiction lookup failed. Saint Johns remains selected.');
+        }
+      },
+      () => {
+        setLocationStatus('error');
+        setLocationMessage('Location was not allowed. Saint Johns remains selected as the demo jurisdiction.');
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
   }
 
   return (
@@ -171,7 +249,14 @@ function App() {
           >
             {searchOpen ? <X size={22} /> : <Search size={22} />}
           </button>
-          <button className="profile-button" aria-label="Profile"><CircleUserRound size={24} /></button>
+          <button
+            className={locationOpen ? 'profile-button active' : 'profile-button'}
+            aria-label="Location and profile"
+            aria-expanded={locationOpen}
+            onClick={() => setLocationOpen((open) => !open)}
+          >
+            <CircleUserRound size={24} />
+          </button>
         </div>
         <div className="trust-panel">
           <ShieldCheck size={18} />
@@ -180,6 +265,22 @@ function App() {
       </aside>
 
       <main className="feed-area">
+        {locationOpen && (
+          <section className="location-panel" aria-label="Location settings">
+            <div className="location-copy">
+              <MapPin size={18} />
+              <div>
+                <strong>{jurisdiction.label}</strong>
+                <span>{locationMessage}</span>
+              </div>
+            </div>
+            <button className="location-button" onClick={requestLocation} disabled={locationStatus === 'loading'}>
+              <LocateFixed size={17} />
+              {locationStatus === 'loading' ? 'Locating' : 'Use my location'}
+            </button>
+          </section>
+        )}
+
         {searchOpen && (
           <section className="controls" aria-label="Feed controls">
             <label className="search-box">
@@ -253,6 +354,10 @@ function BillCard({ bill, userVote, saved, selected, onSelect, onVote, onSave })
           <span>{bill.status}</span>
           <span>{yesPercent}% Yes</span>
         </div>
+        <a className="source-link" href={bill.sourceUrl} target="_blank" rel="noreferrer">
+          <ExternalLink size={15} />
+          {bill.sourceName}
+        </a>
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={17} />} label="Yes" onClick={() => onVote('yes')} />
           <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={17} />} label="No" onClick={() => onVote('no')} />
@@ -291,9 +396,20 @@ function BillDetail({ bill, userVote, saved, onVote, onSave }) {
         <div className="meta-row">
           <span>{bill.chamber}</span>
           <span>{bill.category}</span>
+          <span>{bill.jurisdiction}</span>
         </div>
         <h2>{bill.title}</h2>
         <p className="detail-copy">{bill.detail}</p>
+        <div className="source-box">
+          <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
+            <ExternalLink size={16} />
+            Official source
+          </a>
+          <a href={bill.officialTextUrl} target="_blank" rel="noreferrer">
+            <ExternalLink size={16} />
+            Text / validation
+          </a>
+        </div>
         <div className="detail-vote-box">
           <div>
             <strong>Cast your vote</strong>

@@ -22,6 +22,10 @@ input {
   font: inherit;
 }
 
+a {
+  color: inherit;
+}
+
 button {
   cursor: pointer;
 }
@@ -164,6 +168,56 @@ button {
   padding: 12px;
 }
 
+.location-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #dce3d9;
+  border-radius: 8px;
+  background: #fbfcf8;
+  padding: 13px;
+}
+
+.location-copy {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.location-copy strong,
+.location-copy span {
+  display: block;
+}
+
+.location-copy span {
+  margin-top: 3px;
+  color: #657069;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.location-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-height: 39px;
+  border: 1px solid #183f35;
+  border-radius: 8px;
+  background: #183f35;
+  color: #fff;
+  padding: 0 12px;
+}
+
+.location-button:disabled {
+  opacity: 0.7;
+}
+
 .search-box {
   display: flex;
   align-items: center;
@@ -285,6 +339,23 @@ button {
   line-height: 1.45;
 }
 
+.source-link {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: #245f4e;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+}
+
 .action-row,
 .detail-votes {
   display: flex;
@@ -370,6 +441,26 @@ button {
   margin: 0;
   color: #4c5851;
   line-height: 1.55;
+}
+
+.source-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.source-box a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d7ded4;
+  border-radius: 8px;
+  background: #fff;
+  color: #245f4e;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .detail-vote-box {
@@ -533,6 +624,11 @@ button {
 
   .feed-area {
     padding: 18px 14px 28px;
+  }
+
+  .location-panel {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .bill-card {
