@@ -123,6 +123,7 @@ function App() {
   const [selectedId, setSelectedId] = useState(bills[0].id);
   const [votes, setVotes] = useState({});
   const [saved, setSaved] = useState(() => new Set(['hb-771']));
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const visibleBills = useMemo(() => {
     return bills.filter((bill) => {
@@ -172,36 +173,46 @@ function App() {
       <main className="feed-area">
         <header className="topbar">
           <button className="back-button" aria-label="Back"><ChevronLeft size={20} /></button>
-          <div>
-            <h1>Today’s Votes</h1>
-            <p>Active laws and bills your community is watching.</p>
+          <div className="topbar-spacer" aria-hidden="true" />
+          <div className="topbar-actions">
+            <button
+              className={searchOpen ? 'profile-button active' : 'profile-button'}
+              aria-label={searchOpen ? 'Close search and filters' : 'Open search and filters'}
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen((open) => !open)}
+            >
+              {searchOpen ? <X size={22} /> : <Search size={22} />}
+            </button>
+            <button className="profile-button" aria-label="Profile"><CircleUserRound size={24} /></button>
           </div>
-          <button className="profile-button" aria-label="Profile"><CircleUserRound size={24} /></button>
         </header>
 
-        <section className="controls" aria-label="Feed controls">
-          <label className="search-box">
-            <Search size={18} />
-            <input
-              type="search"
-              placeholder="Search laws, places, topics"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </label>
-          <div className="filter-row">
-            <Filter size={17} />
-            {filters.map((filter) => (
-              <button
-                key={filter}
-                className={filter === activeFilter ? 'chip active' : 'chip'}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </section>
+        {searchOpen && (
+          <section className="controls" aria-label="Feed controls">
+            <label className="search-box">
+              <Search size={18} />
+              <input
+                type="search"
+                placeholder="Search laws, places, topics"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                autoFocus
+              />
+            </label>
+            <div className="filter-row">
+              <Filter size={17} />
+              {filters.map((filter) => (
+                <button
+                  key={filter}
+                  className={filter === activeFilter ? 'chip active' : 'chip'}
+                  onClick={() => setActiveFilter(filter)}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="feed-list" aria-label="Bill feed">
           {visibleBills.map((bill) => (
