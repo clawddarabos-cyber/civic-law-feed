@@ -431,6 +431,8 @@ button {
 }
 
 .icon-action {
+  position: relative;
+  z-index: 4;
   width: 39px;
   height: 39px;
 }
@@ -440,6 +442,21 @@ button {
   border-color: #b58b2a;
   background: #fff4d9;
   color: #7a560e;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  z-index: 20;
+  transform: translateX(-50%);
+  border: 1px solid #183f35;
+  border-radius: 8px;
+  background: #183f35;
+  color: #fff;
+  padding: 10px 14px;
+  box-shadow: 0 12px 34px rgba(20, 34, 27, 0.22);
+  font-weight: 700;
 }
 
 .detail-panel {

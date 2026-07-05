@@ -156,6 +156,7 @@ function App() {
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
   const [localComments, setLocalComments] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     function syncHashRoute() {
@@ -185,10 +186,48 @@ function App() {
   function toggleSaved(id) {
     setSaved((current) => {
       const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+        showNotice('Removed from saved');
+      } else {
+        next.add(id);
+        showNotice('Saved');
+      }
       return next;
     });
+  }
+
+  function showNotice(message) {
+    setNotice(message);
+    window.clearTimeout(showNotice.timeoutId);
+    showNotice.timeoutId = window.setTimeout(() => setNotice(''), 1800);
+  }
+
+  async function shareBill(bill) {
+    const url = `${window.location.origin}${window.location.pathname}#overview/${bill.id}`;
+    const shareData = {
+      title: bill.title,
+      text: bill.summary,
+      url
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        showNotice('Shared');
+        return;
+      }
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        showNotice('Link copied');
+        return;
+      }
+      window.prompt('Copy link', url);
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        showNotice('Share failed');
+      }
+    }
   }
 
   function requestLocation() {
@@ -376,6 +415,7 @@ function App() {
               onOpenOverview={() => openOverview(bill.id)}
               onVote={(vote) => voteOnBill(bill.id, vote)}
               onSave={() => toggleSaved(bill.id)}
+              onShare={() => shareBill(bill)}
             />
           ))}
             </section>
@@ -393,6 +433,7 @@ function App() {
           onSave={() => toggleSaved(selected.id)}
         />
       )}
+      {notice && <div className="toast" role="status">{notice}</div>}
     </div>
   );
 }
@@ -406,7 +447,7 @@ function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
-function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onOpenOverview, onVote, onSave }) {
+function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onOpenOverview, onVote, onSave, onShare }) {
   const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
   const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
   const overviewHref = `#overview/${bill.id}`;
@@ -455,10 +496,26 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={17} />} label="Yes" onClick={() => onVote('yes')} />
           <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={17} />} label="No" onClick={() => onVote('no')} />
-          <button className={saved ? 'icon-action saved' : 'icon-action'} onClick={onSave} aria-label="Save bill">
+          <button
+            className={saved ? 'icon-action saved' : 'icon-action'}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSave();
+            }}
+            aria-label={saved ? 'Unsave bill' : 'Save bill'}
+          >
             <Bookmark size={17} />
           </button>
-          <button className="icon-action" aria-label="Share bill"><Share2 size={17} /></button>
+          <button
+            className="icon-action"
+            onClick={(event) => {
+              event.stopPropagation();
+              onShare();
+            }}
+            aria-label="Share bill"
+          >
+            <Share2 size={17} />
+          </button>
         </div>
       </div>
     </article>
