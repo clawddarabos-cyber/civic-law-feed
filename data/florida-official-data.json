@@ -1,0 +1,791 @@
+{
+  "generatedAt": "2026-07-06T01:19:20.499Z",
+  "window": {
+    "mvpStartYear": 2020,
+    "note": "Store all available official records; default MVP views to 2020-present."
+  },
+  "sources": {
+    "senateMembers": "https://www.flsenate.gov/Senators",
+    "senateBills": "https://www.flsenate.gov/Session/Bills/2026",
+    "houseMembers": "https://www.flhouse.gov/Sections/Representatives/representatives.aspx"
+  },
+  "sourceStatus": {
+    "senateMembers": {
+      "ok": true,
+      "status": 200
+    },
+    "senateBills": {
+      "ok": true,
+      "status": 200
+    },
+    "houseMembers": {
+      "ok": true,
+      "status": 200,
+      "note": "Fetched successfully"
+    }
+  },
+  "officials": [
+    {
+      "id": "fl-senate-27",
+      "name": "Albritton, Ben",
+      "chamber": "Florida Senate",
+      "district": 27,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S27",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-25",
+      "name": "Arrington, Kristen Aston",
+      "chamber": "Florida Senate",
+      "district": 25,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S25",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-39",
+      "name": "Avila, Bryan",
+      "chamber": "Florida Senate",
+      "district": 39,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S39",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-26",
+      "name": "Berman, Lori",
+      "chamber": "Florida Senate",
+      "district": 26,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S26",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-24",
+      "name": "Bernard, Mack",
+      "chamber": "Florida Senate",
+      "district": 24,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S24",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-20",
+      "name": "Boyd, Jim",
+      "chamber": "Florida Senate",
+      "district": 20,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S20",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-15",
+      "name": "Bracy Davis, LaVon",
+      "chamber": "Florida Senate",
+      "district": 15,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S15",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-6",
+      "name": "Bradley, Jennifer",
+      "chamber": "Florida Senate",
+      "district": 6,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S6",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-10",
+      "name": "Brodeur, Jason",
+      "chamber": "Florida Senate",
+      "district": 10,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S10",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-23",
+      "name": "Burgess, Danny",
+      "chamber": "Florida Senate",
+      "district": 23,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S23",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-12",
+      "name": "Burton, Colleen",
+      "chamber": "Florida Senate",
+      "district": 12,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S12",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-38",
+      "name": "Calatayud, Alexis",
+      "chamber": "Florida Senate",
+      "district": 38,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S38",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-5",
+      "name": "Davis, Tracie",
+      "chamber": "Florida Senate",
+      "district": 5,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S5",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-18",
+      "name": "DiCeglie, Nick",
+      "chamber": "Florida Senate",
+      "district": 18,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S18",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-1",
+      "name": "Gaetz, Don",
+      "chamber": "Florida Senate",
+      "district": 1,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S1",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-36",
+      "name": "Garcia, Ileana",
+      "chamber": "Florida Senate",
+      "district": 36,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S36",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-29",
+      "name": "Grall, Erin",
+      "chamber": "Florida Senate",
+      "district": 29,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S29",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-22",
+      "name": "Gruters, Joe",
+      "chamber": "Florida Senate",
+      "district": 22,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S22",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-31",
+      "name": "Harrell, Gayle",
+      "chamber": "Florida Senate",
+      "district": 31,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S31",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-21",
+      "name": "Hooper, Ed",
+      "chamber": "Florida Senate",
+      "district": 21,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S21",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-34",
+      "name": "Jones, Shevrin D. \"Shev\"",
+      "chamber": "Florida Senate",
+      "district": 34,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S34",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-7",
+      "name": "Leek, Thomas J. \"Tom\"",
+      "chamber": "Florida Senate",
+      "district": 7,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S7",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-33",
+      "name": "Martin, Jonathan",
+      "chamber": "Florida Senate",
+      "district": 33,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S33",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-11",
+      "name": "Massullo, Ralph E., Jr.",
+      "chamber": "Florida Senate",
+      "district": 11,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S11",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-19",
+      "name": "Mayfield, Debbie",
+      "chamber": "Florida Senate",
+      "district": 19,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S19",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-9",
+      "name": "McClain, Stan",
+      "chamber": "Florida Senate",
+      "district": 9,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S9",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-14",
+      "name": "Nathan, Brian",
+      "chamber": "Florida Senate",
+      "district": 14,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S14",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-32",
+      "name": "Osgood, Rosalind",
+      "chamber": "Florida Senate",
+      "district": 32,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S32",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-28",
+      "name": "Passidomo, Kathleen",
+      "chamber": "Florida Senate",
+      "district": 28,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S28",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-37",
+      "name": "Pizzo, Jason W. B.",
+      "chamber": "Florida Senate",
+      "district": 37,
+      "party": "No Party Affiliation",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S37",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-30",
+      "name": "Polsky, Tina Scott",
+      "chamber": "Florida Senate",
+      "district": 30,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S30",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-40",
+      "name": "Rodriguez, Ana Maria",
+      "chamber": "Florida Senate",
+      "district": 40,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S40",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-16",
+      "name": "Rouson, Darryl Ervin",
+      "chamber": "Florida Senate",
+      "district": 16,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S16",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-35",
+      "name": "Sharief, Barbara",
+      "chamber": "Florida Senate",
+      "district": 35,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S35",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-3",
+      "name": "Simon, Corey",
+      "chamber": "Florida Senate",
+      "district": 3,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S3",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-17",
+      "name": "Smith, Carlos Guillermo",
+      "chamber": "Florida Senate",
+      "district": 17,
+      "party": "Democrat",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S17",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-13",
+      "name": "Truenow, Keith L.",
+      "chamber": "Florida Senate",
+      "district": 13,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S13",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-2",
+      "name": "Trumbull, Jay",
+      "chamber": "Florida Senate",
+      "district": 2,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S2",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-8",
+      "name": "Wright, Tom A.",
+      "chamber": "Florida Senate",
+      "district": 8,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S8",
+      "claimStatus": "unclaimed"
+    },
+    {
+      "id": "fl-senate-4",
+      "name": "Yarborough, Clay",
+      "chamber": "Florida Senate",
+      "district": 4,
+      "party": "Republican",
+      "profileUrl": "https://www.flsenate.gov/Senators/2024-2026/S4",
+      "claimStatus": "unclaimed"
+    }
+  ],
+  "bills": [
+    {
+      "id": "fl-2026-sb-2",
+      "number": "SB 2",
+      "title": "Relief of the Estate of Danielle Maudsley by the Department of Highway Safety and Motor Vehicles",
+      "filedBy": "Jones",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Appropriations",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2"
+    },
+    {
+      "id": "fl-2026-sb-4",
+      "number": "SB 4",
+      "title": "Relief of C.C. by the Department of Children and Families",
+      "filedBy": "Rodriguez",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/4"
+    },
+    {
+      "id": "fl-2026-sb-6",
+      "number": "SB 6",
+      "title": "Relief of L.E. by the Department of Children and Families",
+      "filedBy": "Calatayud",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/5/2026 S Laid on Table, refer to HB 6507 -SJ 582",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6"
+    },
+    {
+      "id": "fl-2026-sb-8",
+      "number": "SB 8",
+      "title": "Relief of Patricia Ermini by the Lee County Sheriff’s Office",
+      "filedBy": "Rodriguez",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/8"
+    },
+    {
+      "id": "fl-2026-sb-10",
+      "number": "SB 10",
+      "title": "Relief of Maury Hernandez by the Department of Corrections",
+      "filedBy": "Rodriguez",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/10"
+    },
+    {
+      "id": "fl-2026-sb-12",
+      "number": "SB 12",
+      "title": "Relief of Maximus Giannikos by the City of Clearwater",
+      "filedBy": "DiCeglie",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/12"
+    },
+    {
+      "id": "fl-2026-sb-14",
+      "number": "SB 14",
+      "title": "Relief of Jose Correa by Miami-Dade County",
+      "filedBy": "Rodriguez",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "7/1/2026 Chapter No. 2026-186",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14"
+    },
+    {
+      "id": "fl-2026-sb-16",
+      "number": "SB 16",
+      "title": "Relief of Heriberto A. Sanchez-Mayen by the City of St. Petersburg",
+      "filedBy": "Rouson",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "2/11/2026 S Laid on Table, refer to HB 6517 -SJ 291",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16"
+    },
+    {
+      "id": "fl-2026-sb-18",
+      "number": "SB 18",
+      "title": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "filedBy": "Martin",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Rules",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18"
+    },
+    {
+      "id": "fl-2026-sb-20",
+      "number": "SB 20",
+      "title": "Relief of H.H. by the Department of Children and Families",
+      "filedBy": "Gruters",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/20"
+    },
+    {
+      "id": "fl-2026-sb-22",
+      "number": "SB 22",
+      "title": "Relief of L.P. by the Department of Children and Families",
+      "filedBy": "Gruters",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Special Master on Claim Bills",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/22"
+    },
+    {
+      "id": "fl-2026-sb-24",
+      "number": "SB 24",
+      "title": "Relief of Lourdes Latour and Edward Latour by Miami-Dade County",
+      "filedBy": "Gruters",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "2/11/2026 S Laid on Table, refer to HB 6515 -SJ 292",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24"
+    },
+    {
+      "id": "fl-2026-sb-26",
+      "number": "SB 26",
+      "title": "Relief of the Estate of Mark LaGatta by the Department of Transportation",
+      "filedBy": "McClain",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/5/2026 S Laid on Table, refer to CS/CS/HB 6509 -SJ 583",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26"
+    },
+    {
+      "id": "fl-2026-sb-28",
+      "number": "SB 28",
+      "title": "Relief of Reginald Jackson by the City of Lakeland",
+      "filedBy": "Rouson",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Rules",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28"
+    },
+    {
+      "id": "fl-2026-sb-30",
+      "number": "SB 30",
+      "title": "Rate Filings for Property Insurers",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Banking and Insurance",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/30"
+    },
+    {
+      "id": "fl-2026-sb-32",
+      "number": "SB 32",
+      "title": "Injunctions for Protection",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 H Died in Messages",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32"
+    },
+    {
+      "id": "fl-2026-sb-34",
+      "number": "SB 34",
+      "title": "Historic Cemeteries Program",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Governmental Oversight and Accountability",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/34"
+    },
+    {
+      "id": "fl-2026-sb-36",
+      "number": "SB 36",
+      "title": "Use of Professional Nursing Titles",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Rules",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36"
+    },
+    {
+      "id": "fl-2026-sb-38",
+      "number": "SB 38",
+      "title": "Parity for Nonnursing Services Under Long-term Managed Care Plans",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Health Policy",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/38"
+    },
+    {
+      "id": "fl-2026-sb-40",
+      "number": "SB 40",
+      "title": "Medicaid Providers",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Appropriations Committee on Health and Human Services",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/40"
+    },
+    {
+      "id": "fl-2026-sb-42",
+      "number": "SB 42",
+      "title": "Specific Medical Diagnoses in Child Protective Investigations",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/5/2026 S Laid on Table, refer to CS/CS/HB 47 -SJ 583",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/42"
+    },
+    {
+      "id": "fl-2026-sb-44",
+      "number": "SB 44",
+      "title": "Electronic Payment of Public Records Fees",
+      "filedBy": "Rouson",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Governmental Oversight and Accountability",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/44"
+    },
+    {
+      "id": "fl-2026-sb-46",
+      "number": "SB 46",
+      "title": "Nonparticipating and Out-of-network Nurse Registries and Home Health Agencies",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "10/29/2025 S Withdrawn prior to introduction",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/46"
+    },
+    {
+      "id": "fl-2026-sb-48",
+      "number": "SB 48",
+      "title": "Housing",
+      "filedBy": "Gaetz",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 H Died in Messages",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/48"
+    },
+    {
+      "id": "fl-2026-sb-50",
+      "number": "SB 50",
+      "title": "Veterans Affairs",
+      "filedBy": "Gaetz",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "2/26/2026 S Laid on Table, refer to CS/CS/HB 199 -SJ 447",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/50"
+    },
+    {
+      "id": "fl-2026-sb-52",
+      "number": "SB 52",
+      "title": "Security Services at Places of Worship",
+      "filedBy": "Gaetz",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "4/24/2026 Chapter No. 2026-46",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/52"
+    },
+    {
+      "id": "fl-2026-sb-54",
+      "number": "SB 54",
+      "title": "Use of Substances Affecting Cognitive Function",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 H Died in Messages",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/54"
+    },
+    {
+      "id": "fl-2026-sb-56",
+      "number": "SB 56",
+      "title": "Residential Impacts from Mining Activities",
+      "filedBy": "Sharief",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Banking and Insurance",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/56"
+    },
+    {
+      "id": "fl-2026-sb-58",
+      "number": "SB 58",
+      "title": "Animal Cremation",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Judiciary",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/58"
+    },
+    {
+      "id": "fl-2026-sb-60",
+      "number": "SB 60",
+      "title": "Criminal Conflict and Civil Regional Counsel Membership in the Senior Management Service Class",
+      "filedBy": "McClain",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Appropriations Committee on Criminal and Civil Justice",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/60"
+    },
+    {
+      "id": "fl-2026-sb-62",
+      "number": "SB 62",
+      "title": "Candidate Qualification",
+      "filedBy": "Arrington",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "2/26/2026 S Laid on Table, refer to CS/HB 91 -SJ 454",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/62"
+    },
+    {
+      "id": "fl-2026-sb-64",
+      "number": "SB 64",
+      "title": "Medical Review Committees",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Judiciary",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/64"
+    },
+    {
+      "id": "fl-2026-sb-66",
+      "number": "SB 66",
+      "title": "Self-storage Spaces",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "9/24/2025 S Withdrawn prior to introduction",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/66"
+    },
+    {
+      "id": "fl-2026-sb-68",
+      "number": "SB 68",
+      "title": "Health Care Patient Protection",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/11/2026 S Laid on Table, refer to CS/HB 355 -SJ 752",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/68"
+    },
+    {
+      "id": "fl-2026-sb-70",
+      "number": "SB 70",
+      "title": "Step-therapy Protocols",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Health Policy",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/70"
+    },
+    {
+      "id": "fl-2026-sb-72",
+      "number": "SB 72",
+      "title": "Individual Education Plans",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Education Pre-K - 12",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/72"
+    },
+    {
+      "id": "fl-2026-sb-74",
+      "number": "SB 74",
+      "title": "Social Work Licensure Interstate Compact",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Health Policy",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/74"
+    },
+    {
+      "id": "fl-2026-sb-76",
+      "number": "SB 76",
+      "title": "Public Records and Meetings/Social Work Licensure Interstate Compact",
+      "filedBy": "Harrell",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Health Policy",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/76"
+    },
+    {
+      "id": "fl-2026-sb-78",
+      "number": "SB 78",
+      "title": "Home Hardening Products",
+      "filedBy": "Osgood",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Finance and Tax",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/78"
+    },
+    {
+      "id": "fl-2026-sb-80",
+      "number": "SB 80",
+      "title": "Safe Storage of Firearms and Ammunition in Motor Vehicles and Vessels",
+      "filedBy": "Berman",
+      "chamber": "Florida Senate",
+      "session": "2026",
+      "lastAction": "3/13/2026 S Died in Criminal Justice",
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/80"
+    }
+  ]
+}

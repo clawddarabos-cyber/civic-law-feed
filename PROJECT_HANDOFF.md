@@ -68,6 +68,7 @@ Current prototype includes:
 - Share button uses native Web Share when available or copies the post URL to clipboard.
 - Officials section with starter Florida official profiles.
 - Official profile cards include source links, recorded votes, comparison against the user's votes, and a Claim Profile CTA.
+- Florida data importer script that pulls official Florida Senate members and a first page of 2026 Senate bills into `data/florida-official-data.json`.
 
 ## Data Sources and Caveats
 
@@ -88,9 +89,18 @@ Current official source targets:
 
 Important: the politician profiles are placeholder profile records. The next serious milestone is ingesting real Florida House/Senate member and roll-call data, then creating profiles from that.
 
+Current data spike:
+
+- `npm run import:florida`
+- Script: `scripts/import-florida-official-data.mjs`
+- Output: `data/florida-official-data.json`
+- Last run imported 40 Florida Senate officials and 40 Florida Senate bills from official Senate pages.
+- Florida House source is still tracked as an official source target, but member parsing has not been implemented yet.
+
 ## Recent Commits
 
 ```text
+fc147a4 Add official vote archive depth
 6aac7ff Add Florida official profiles
 ef3c218 Wire save and share actions
 429ca31 Link post content to overview pages
@@ -146,11 +156,12 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 ## Best Next Steps
 
 1. Build a real data ingestion layer for Florida first.
-2. Generate official profiles from Florida House/Senate members.
-3. Ingest roll-call votes and map them to bill/item records.
-4. Make official profiles item-specific and source-backed.
-5. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
-6. Replace static prototype cards with official-source records for Florida and St. Johns County.
+2. Replace prototype profile cards with generated records from `data/florida-official-data.json`.
+3. Add Florida House member ingestion.
+4. Ingest roll-call votes and map them to bill/item records.
+5. Make official profiles item-specific and source-backed.
+6. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
+7. Replace static prototype cards with official-source records for Florida and St. Johns County.
 
 ## Resume Checklist
 

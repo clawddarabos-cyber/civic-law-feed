@@ -662,6 +662,36 @@ button {
   gap: 14px;
 }
 
+.data-spike-panel {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #d9e1d6;
+  border-radius: 8px;
+  background: #fbfcf8;
+  padding: 13px;
+}
+
+.data-spike-panel strong,
+.data-spike-panel span {
+  display: block;
+}
+
+.data-spike-panel span {
+  color: #657069;
+  line-height: 1.45;
+}
+
+.data-spike-panel a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: #245f4e;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .profile-card {
   display: grid;
   gap: 14px;

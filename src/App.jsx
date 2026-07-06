@@ -20,6 +20,7 @@ import {
   Users,
   X
 } from 'lucide-react';
+import floridaOfficialData from '../data/florida-official-data.json';
 
 const bills = [
   {
@@ -463,6 +464,7 @@ function App() {
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
             profiles={politicianProfiles}
+            officialData={floridaOfficialData}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
@@ -770,7 +772,7 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
   );
 }
 
-function PoliticianProfilesPage({ profiles, votes, onClaim }) {
+function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
   return (
     <section className="profiles-page" aria-label="Florida official profiles">
       <div className="profiles-header">
@@ -779,6 +781,14 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
           <p>Auto-created public profiles compare official votes with your votes on the same items.</p>
         </div>
         <span>Claim flow prototype</span>
+      </div>
+      <div className="data-spike-panel">
+        <strong>Florida data spike</strong>
+        <span>{officialData.officials.length} Senate officials and {officialData.bills.length} Senate bills imported from official Florida Senate pages.</span>
+        <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
+          <ExternalLink size={15} />
+          Senate source
+        </a>
       </div>
       <div className="profiles-grid">
         {profiles.map((profile) => {
