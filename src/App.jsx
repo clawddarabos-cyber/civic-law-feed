@@ -715,11 +715,20 @@ function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
       </div>
       <div className="data-spike-panel">
         <strong>Florida data spike</strong>
-        <span>{officialData.officials.length} Senate officials and {officialData.bills.length} Senate bills imported from official Florida Senate pages.</span>
+        <span>{officialData.officials.length} Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} vote-history records imported from official Florida Senate pages.</span>
         <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Senate source
         </a>
+        <div className="rollcall-sample">
+          {officialData.rollCalls.slice(0, 4).map((rollCall) => (
+            <a href={rollCall.sourceUrl} target="_blank" rel="noreferrer" key={rollCall.id}>
+              <span>{rollCall.billNumber}</span>
+              <span>{rollCall.date || 'No date'}</span>
+              <strong>{rollCall.yeas}-{rollCall.nays}</strong>
+            </a>
+          ))}
+        </div>
       </div>
       <div className="profiles-grid">
         {profiles.map((profile) => {

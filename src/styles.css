@@ -692,6 +692,25 @@ button {
   text-decoration: none;
 }
 
+.rollcall-sample {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.rollcall-sample a {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  border-top: 1px solid #edf1ea;
+  color: #4f5b54;
+  padding-top: 6px;
+  font-weight: 700;
+}
+
+.rollcall-sample strong {
+  color: #245f4e;
+}
+
 .profile-card {
   display: grid;
   gap: 14px;

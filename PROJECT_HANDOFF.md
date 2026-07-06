@@ -94,7 +94,8 @@ Current data spike:
 - `npm run import:florida`
 - Script: `scripts/import-florida-official-data.mjs`
 - Output: `data/florida-official-data.json`
-- Last run imported 40 Florida Senate officials and 40 Florida Senate bills from official Senate pages.
+- Last run imported 40 Florida Senate officials, 40 Florida Senate bills, and 28 vote-history records from official Senate pages.
+- Vote-history records currently include roll-call summary counts and source PDF links. Per-senator PDF parsing is not implemented yet.
 - Florida House source is still tracked as an official source target, but member parsing has not been implemented yet.
 
 ## Recent Commits

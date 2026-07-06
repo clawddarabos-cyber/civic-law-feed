@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-06T01:19:20.499Z",
+  "generatedAt": "2026-07-06T01:30:44.621Z",
   "window": {
     "mvpStartYear": 2020,
     "note": "Store all available official records; default MVP views to 2020-present."
@@ -786,6 +786,316 @@
       "session": "2026",
       "lastAction": "3/13/2026 S Died in Criminal Justice",
       "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/80"
+    }
+  ],
+  "rollCalls": [
+    {
+      "id": "fl-2026-sb-2-vote-1",
+      "billId": "fl-2026-sb-2",
+      "billNumber": "SB 2",
+      "billTitle": "Relief of the Estate of Danielle Maudsley by the Department of Highway Safety and Motor Vehicles",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 11,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-03%200100PM~S00002%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-2-vote-2",
+      "billId": "fl-2026-sb-2",
+      "billNumber": "SB 2",
+      "billTitle": "Relief of the Estate of Danielle Maudsley by the Department of Highway Safety and Motor Vehicles",
+      "chamber": "Committee",
+      "date": "2/12/2026",
+      "yeas": 13,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-12%200230PM~S00002%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-6-vote-1",
+      "billId": "fl-2026-sb-6",
+      "billNumber": "SB 6",
+      "billTitle": "Relief of L.E. by the Department of Children and Families",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 11,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-03%200100PM~S00006%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-6-vote-2",
+      "billId": "fl-2026-sb-6",
+      "billNumber": "SB 6",
+      "billTitle": "Relief of L.E. by the Department of Children and Families",
+      "chamber": "Committee",
+      "date": "2/12/2026",
+      "yeas": 9,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-12%200230PM~S00006%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-6-vote-3",
+      "billId": "fl-2026-sb-6",
+      "billNumber": "SB 6",
+      "billTitle": "Relief of L.E. by the Department of Children and Families",
+      "chamber": "Committee",
+      "date": "3/2/2026",
+      "yeas": 17,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-03-02%201200PM~S00006%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-14-vote-1",
+      "billId": "fl-2026-sb-14",
+      "billNumber": "SB 14",
+      "billTitle": "Relief of Jose Correa by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "1/12/2026",
+      "yeas": 9,
+      "nays": 1,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-12%200400PM~S00014%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-14-vote-2",
+      "billId": "fl-2026-sb-14",
+      "billNumber": "SB 14",
+      "billTitle": "Relief of Jose Correa by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "1/20/2026",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-20%200100PM~S00014%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-14-vote-3",
+      "billId": "fl-2026-sb-14",
+      "billNumber": "SB 14",
+      "billTitle": "Relief of Jose Correa by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 24,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-02-03%200900AM~S00014%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-16-vote-1",
+      "billId": "fl-2026-sb-16",
+      "billNumber": "SB 16",
+      "billTitle": "Relief of Heriberto A. Sanchez-Mayen by the City of St. Petersburg",
+      "chamber": "Committee",
+      "date": "1/12/2026",
+      "yeas": 9,
+      "nays": 1,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-12%200400PM~S00016%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-16-vote-2",
+      "billId": "fl-2026-sb-16",
+      "billNumber": "SB 16",
+      "billTitle": "Relief of Heriberto A. Sanchez-Mayen by the City of St. Petersburg",
+      "chamber": "Committee",
+      "date": "1/20/2026",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-20%200100PM~S00016%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-16-vote-3",
+      "billId": "fl-2026-sb-16",
+      "billNumber": "SB 16",
+      "billTitle": "Relief of Heriberto A. Sanchez-Mayen by the City of St. Petersburg",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 23,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-02-03%200900AM~S00016%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-18-vote-1",
+      "billId": "fl-2026-sb-18",
+      "billNumber": "SB 18",
+      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 10,
+      "nays": 1,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-03%200100PM~S00018%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-18-vote-2",
+      "billId": "fl-2026-sb-18",
+      "billNumber": "SB 18",
+      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "chamber": "Committee",
+      "date": "2/10/2026",
+      "yeas": 6,
+      "nays": 2,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-10%200300PM~S00018%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-24-vote-1",
+      "billId": "fl-2026-sb-24",
+      "billNumber": "SB 24",
+      "billTitle": "Relief of Lourdes Latour and Edward Latour by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "1/12/2026",
+      "yeas": 9,
+      "nays": 1,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-12%200400PM~S00024%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-24-vote-2",
+      "billId": "fl-2026-sb-24",
+      "billNumber": "SB 24",
+      "billTitle": "Relief of Lourdes Latour and Edward Latour by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "1/20/2026",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-20%200100PM~S00024%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-24-vote-3",
+      "billId": "fl-2026-sb-24",
+      "billNumber": "SB 24",
+      "billTitle": "Relief of Lourdes Latour and Edward Latour by Miami-Dade County",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 24,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-02-03%200900AM~S00024%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-26-vote-1",
+      "billId": "fl-2026-sb-26",
+      "billNumber": "SB 26",
+      "billTitle": "Relief of the Estate of Mark LaGatta by the Department of Transportation",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 11,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-03%200100PM~S00026%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-26-vote-2",
+      "billId": "fl-2026-sb-26",
+      "billNumber": "SB 26",
+      "billTitle": "Relief of the Estate of Mark LaGatta by the Department of Transportation",
+      "chamber": "Committee",
+      "date": "2/12/2026",
+      "yeas": 13,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-12%200230PM~S00026%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-26-vote-3",
+      "billId": "fl-2026-sb-26",
+      "billNumber": "SB 26",
+      "billTitle": "Relief of the Estate of Mark LaGatta by the Department of Transportation",
+      "chamber": "Committee",
+      "date": "3/2/2026",
+      "yeas": 17,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-03-02%201200PM~S00026%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-28-vote-1",
+      "billId": "fl-2026-sb-28",
+      "billNumber": "SB 28",
+      "billTitle": "Relief of Reginald Jackson by the City of Lakeland",
+      "chamber": "Committee",
+      "date": "2/3/2026",
+      "yeas": 11,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-03%200100PM~S00028%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-28-vote-2",
+      "billId": "fl-2026-sb-28",
+      "billNumber": "SB 28",
+      "billTitle": "Relief of Reginald Jackson by the City of Lakeland",
+      "chamber": "Committee",
+      "date": "2/10/2026",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-10%200300PM~S00028%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-32-vote-1",
+      "billId": "fl-2026-sb-32",
+      "billNumber": "SB 32",
+      "billTitle": "Injunctions for Protection",
+      "chamber": "Committee",
+      "date": "11/18/2025",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2025-11-18%201000AM~S00032%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-32-vote-2",
+      "billId": "fl-2026-sb-32",
+      "billNumber": "SB 32",
+      "billTitle": "Injunctions for Protection",
+      "chamber": "Committee",
+      "date": "1/21/2026",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-01-21%200130PM~S00032%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-32-vote-3",
+      "billId": "fl-2026-sb-32",
+      "billNumber": "SB 32",
+      "billTitle": "Injunctions for Protection",
+      "chamber": "Committee",
+      "date": "2/12/2026",
+      "yeas": 19,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-02-12%200900AM~S00032%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-34-vote-1",
+      "billId": "fl-2026-sb-34",
+      "billNumber": "SB 34",
+      "billTitle": "Historic Cemeteries Program",
+      "chamber": "Committee",
+      "date": "11/4/2025",
+      "yeas": 7,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/34/Vote/2025-11-04%200330PM~S00034%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-36-vote-1",
+      "billId": "fl-2026-sb-36",
+      "billNumber": "SB 36",
+      "billTitle": "Use of Professional Nursing Titles",
+      "chamber": "Committee",
+      "date": "2/2/2026",
+      "yeas": 9,
+      "nays": 2,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-02%200330PM~S00036%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-36-vote-2",
+      "billId": "fl-2026-sb-36",
+      "billNumber": "SB 36",
+      "billTitle": "Use of Professional Nursing Titles",
+      "chamber": "Committee",
+      "date": "2/12/2026",
+      "yeas": 8,
+      "nays": 1,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-12%200230PM~S00036%20Vote%20Record.PDF"
+    },
+    {
+      "id": "fl-2026-sb-40-vote-1",
+      "billId": "fl-2026-sb-40",
+      "billNumber": "SB 40",
+      "billTitle": "Medicaid Providers",
+      "chamber": "Committee",
+      "date": "11/18/2025",
+      "yeas": 8,
+      "nays": 0,
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/40/Vote/2025-11-18%201000AM~S00040%20Vote%20Record.PDF"
     }
   ]
 }

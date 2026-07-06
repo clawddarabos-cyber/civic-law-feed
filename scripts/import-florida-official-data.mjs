@@ -68,6 +68,40 @@ function parseSenateBills(html) {
   });
 }
 
+function parseVoteHistory(html, bill) {
+  const rows = [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].filter((row) => row[1].includes('Vote Record.PDF'));
+  return rows.map((row, index) => {
+    const rowHtml = row[1];
+    const link = rowHtml.match(/<a href="([^"]+Vote[^"]+\.PDF)" target="_blank">(\d+)\s+Yeas\s+-\s+(\d+)\s+Nays<\/a>/);
+    if (!link) return null;
+    const [, href, yeas, nays] = link;
+    const context = cleanText(rowHtml);
+    const date = context.match(/(\d{1,2}\/\d{1,2}\/\d{4})/)?.[1] || '';
+    const chamber = context.includes('Vote History - Floor') ? 'Floor' : 'Committee';
+    return {
+      id: `${bill.id}-vote-${index + 1}`,
+      billId: bill.id,
+      billNumber: bill.number,
+      billTitle: bill.title,
+      chamber,
+      date,
+      yeas: Number(yeas),
+      nays: Number(nays),
+      sourceUrl: new URL(href, bill.sourceUrl).toString()
+    };
+  }).filter(Boolean);
+}
+
+async function importVoteHistory(bills) {
+  const rollCalls = [];
+  for (const bill of bills.slice(0, 20)) {
+    const response = await fetchText(bill.sourceUrl);
+    if (!response.ok) continue;
+    rollCalls.push(...parseVoteHistory(response.body, bill));
+  }
+  return rollCalls;
+}
+
 const senateMembersResponse = await fetchText(sources.senateMembers);
 const senateBillsResponse = await fetchText(sources.senateBills);
 const houseMembersResponse = await fetchText(sources.houseMembers);
@@ -89,13 +123,16 @@ const data = {
     }
   },
   officials: senateMembersResponse.ok ? parseSenators(senateMembersResponse.body) : [],
-  bills: senateBillsResponse.ok ? parseSenateBills(senateBillsResponse.body) : []
+  bills: senateBillsResponse.ok ? parseSenateBills(senateBillsResponse.body) : [],
+  rollCalls: []
 };
+
+data.rollCalls = await importVoteHistory(data.bills);
 
 await mkdir('data', { recursive: true });
 await writeFile('data/florida-official-data.json', `${JSON.stringify(data, null, 2)}\n`);
 
-console.log(`Imported ${data.officials.length} Florida Senate officials and ${data.bills.length} Senate bills.`);
+console.log(`Imported ${data.officials.length} Florida Senate officials, ${data.bills.length} Senate bills, and ${data.rollCalls.length} vote-history records.`);
 if (!data.sourceStatus.houseMembers.ok) {
   console.log(data.sourceStatus.houseMembers.note);
 }
