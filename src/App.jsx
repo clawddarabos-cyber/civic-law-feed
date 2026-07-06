@@ -137,88 +137,19 @@ const bills = [
 
 const filters = ['All', 'Federal', 'Florida', 'St. Johns County'];
 
-const politicianProfiles = [
-  {
-    id: 'fl-house-district-profile',
-    name: 'Florida House District Representative',
-    office: 'Florida House',
-    jurisdiction: 'Florida',
-    status: 'Unclaimed profile',
-    sourceName: 'Florida House Members',
-    sourceUrl: 'https://www.flhouse.gov/Sections/Representatives/representatives.aspx',
-    votes: {
-      'hb-418': 'yes',
-      'sb-92': 'no',
-      'hb-771': 'yes'
-    },
-    archiveSince: '2020',
-    archive: [
-      { year: 2026, topic: 'Environment', title: 'Water infrastructure grant package', vote: 'yes' },
-      { year: 2026, topic: 'Education', title: 'Student data vendor limits', vote: 'yes' },
-      { year: 2025, topic: 'Housing', title: 'Local zoning preemption study', vote: 'no' },
-      { year: 2025, topic: 'Transportation', title: 'Regional road safety appropriations', vote: 'yes' },
-      { year: 2024, topic: 'Taxes', title: 'Small business equipment exemption', vote: 'no' },
-      { year: 2024, topic: 'Public Safety', title: 'Emergency communications modernization', vote: 'yes' },
-      { year: 2023, topic: 'Health', title: 'Rural clinic reimbursement pilot', vote: 'yes' },
-      { year: 2022, topic: 'Environment', title: 'Stormwater reporting requirements', vote: 'yes' },
-      { year: 2021, topic: 'Education', title: 'School technology privacy rules', vote: 'yes' },
-      { year: 2020, topic: 'Budget', title: 'Local infrastructure relief package', vote: 'no' }
-    ]
-  },
-  {
-    id: 'fl-senate-district-profile',
-    name: 'Florida Senate District Senator',
-    office: 'Florida Senate',
-    jurisdiction: 'Florida',
-    status: 'Unclaimed profile',
-    sourceName: 'Florida Senate Senators',
-    sourceUrl: 'https://www.flsenate.gov/Senators',
-    votes: {
-      'hb-418': 'yes',
-      'sb-92': 'yes',
-      'sb-144': 'no'
-    },
-    archiveSince: '2020',
-    archive: [
-      { year: 2026, topic: 'Economy', title: 'Small business tax relief package', vote: 'yes' },
-      { year: 2026, topic: 'Environment', title: 'Clean water reporting bill', vote: 'yes' },
-      { year: 2025, topic: 'Transportation', title: 'Transit reliability funding formula', vote: 'no' },
-      { year: 2025, topic: 'Health', title: 'Behavioral health workforce grants', vote: 'yes' },
-      { year: 2024, topic: 'Education', title: 'Student privacy audit standards', vote: 'no' },
-      { year: 2024, topic: 'Housing', title: 'Workforce housing trust expansion', vote: 'yes' },
-      { year: 2023, topic: 'Budget', title: 'County infrastructure matching funds', vote: 'yes' },
-      { year: 2022, topic: 'Public Safety', title: 'Disaster response mutual aid update', vote: 'yes' },
-      { year: 2021, topic: 'Taxes', title: 'Homestead administration cleanup', vote: 'no' },
-      { year: 2020, topic: 'Environment', title: 'Coastal resiliency planning fund', vote: 'yes' }
-    ]
-  },
-  {
-    id: 'st-johns-county-profile',
-    name: 'St. Johns County Commissioner',
-    office: 'County Commission',
-    jurisdiction: 'St. Johns County',
-    status: 'Unclaimed profile',
-    sourceName: 'St. Johns County BCC',
-    sourceUrl: 'https://www.sjcfl.us/commissioners/',
-    votes: {
-      'sb-92': 'yes',
-      'sb-144': 'yes'
-    },
-    archiveSince: '2020',
-    archive: [
-      { year: 2026, topic: 'Transportation', title: 'Public transit reliability agenda item', vote: 'yes' },
-      { year: 2026, topic: 'Economy', title: 'Small business property tax resolution', vote: 'yes' },
-      { year: 2025, topic: 'Growth', title: 'Comprehensive plan amendment hearing', vote: 'no' },
-      { year: 2025, topic: 'Water', title: 'Utility capacity expansion contract', vote: 'yes' },
-      { year: 2024, topic: 'Public Safety', title: 'Fire rescue station funding item', vote: 'yes' },
-      { year: 2024, topic: 'Transportation', title: 'County road resurfacing package', vote: 'yes' },
-      { year: 2023, topic: 'Budget', title: 'Tourism development allocation', vote: 'no' },
-      { year: 2022, topic: 'Environment', title: 'Conservation land acquisition item', vote: 'yes' },
-      { year: 2021, topic: 'Housing', title: 'Affordable housing advisory plan', vote: 'yes' },
-      { year: 2020, topic: 'Emergency', title: 'Pandemic relief grant administration', vote: 'yes' }
-    ]
-  }
-];
+const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => ({
+  id: official.id,
+  name: official.name,
+  office: `${official.chamber} District ${official.district}`,
+  jurisdiction: 'Florida',
+  party: official.party,
+  status: official.claimStatus === 'unclaimed' ? 'Unclaimed profile' : 'Claimed profile',
+  sourceName: 'Florida Senate profile',
+  sourceUrl: official.profileUrl,
+  votes: {},
+  archiveSince: String(floridaOfficialData.window.mvpStartYear),
+  archive: []
+}));
 
 const defaultJurisdiction = {
   label: 'Saint Johns, Florida',
@@ -463,7 +394,7 @@ function App() {
           />
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
-            profiles={politicianProfiles}
+            profiles={floridaOfficialProfiles}
             officialData={floridaOfficialData}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
@@ -801,7 +732,7 @@ function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
                 </div>
                 <div>
                   <h2>{profile.name}</h2>
-                  <p>{profile.office} · {profile.jurisdiction}</p>
+                  <p>{profile.office} · {profile.party || profile.jurisdiction}</p>
                 </div>
               </div>
               <div className="profile-status-row">
@@ -821,6 +752,14 @@ function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
               </div>
               <div className="vote-record">
                 <div className="vote-record-label">Current comparison items</div>
+                {!Object.keys(profile.votes).length && (
+                  <div className="vote-record-row">
+                    <div>
+                      <strong>Roll-call import pending</strong>
+                      <span>Profile generated from official member data; vote records will attach here next.</span>
+                    </div>
+                  </div>
+                )}
                 {Object.entries(profile.votes).map(([billId, officialVote]) => {
                   const bill = bills.find((item) => item.id === billId);
                   const userVote = votes[billId];
@@ -838,6 +777,14 @@ function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
                   );
                 })}
                 <div className="vote-record-label">Historical archive</div>
+                {!profile.archive.length && (
+                  <div className="vote-record-row archive-row">
+                    <div>
+                      <strong>Historical votes not imported yet</strong>
+                      <span>Archive window starts at {profile.archiveSince}; roll-call extraction is the next data step.</span>
+                    </div>
+                  </div>
+                )}
                 {profile.archive.map((record) => (
                   <div className="vote-record-row archive-row" key={`${profile.id}-${record.year}-${record.title}`}>
                     <div>
