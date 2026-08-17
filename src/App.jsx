@@ -3,6 +3,7 @@ import {
   Bell,
   Bookmark,
   BadgeCheck,
+  BarChart3,
   Check,
   CircleUserRound,
   ExternalLink,
@@ -12,6 +13,9 @@ import {
   LocateFixed,
   MapPin,
   MessageSquare,
+  MoreHorizontal,
+  PenLine,
+  Repeat2,
   Search,
   Share2,
   ShieldCheck,
@@ -353,12 +357,12 @@ function App() {
   }
 
   return (
-    <div className={activeOverview || activeSection !== 'feed' ? 'app-shell wide-main' : 'app-shell'}>
+    <div className="app-shell">
       <aside className="left-rail" aria-label="Primary navigation">
         <div className="brand">
-          <div className="brand-mark"><ShieldCheck size={22} /></div>
+          <div className="brand-mark"><ShieldCheck size={24} /></div>
           <div>
-            <strong>Civic Feed</strong>
+            <strong>Civics</strong>
             <span>Public beta</span>
           </div>
         </div>
@@ -371,8 +375,19 @@ function App() {
               setActiveSection('feed');
             }}
           >
-            <Home size={19} /><span>Feed</span>
+            <Home size={24} /><span>Home</span>
           </button>
+          <button
+            className={searchOpen ? 'nav-item active' : 'nav-item'}
+            aria-label={searchOpen ? 'Close explore' : 'Explore'}
+            aria-expanded={searchOpen}
+            onClick={() => setSearchOpen((open) => !open)}
+          >
+            <Search size={24} /><span>Explore</span>
+          </button>
+          <button className="nav-item" aria-label="Notifications"><Bell size={24} /><span>Notifications</span></button>
+          <button className="nav-item" aria-label="Follow"><Users size={24} /><span>Follow</span></button>
+          <button className="nav-item" aria-label="Chat"><MessageSquare size={24} /><span>Chat</span></button>
           <button
             className={activeSection === 'officials' ? 'nav-item active' : 'nav-item'}
             aria-label="Officials"
@@ -381,20 +396,13 @@ function App() {
               setActiveSection('officials');
             }}
           >
-            <Users size={19} /><span>Officials</span>
+            <BadgeCheck size={24} /><span>Officials</span>
           </button>
-          <button className="nav-item" aria-label="Saved"><Bookmark size={19} /><span>Saved</span></button>
-          <button className="nav-item" aria-label="Alerts"><Bell size={19} /><span>Alerts</span></button>
+          <button className="nav-item" aria-label="Saved"><Bookmark size={24} /><span>Saved</span></button>
+          <button className="nav-item" aria-label="More"><MoreHorizontal size={24} /><span>More</span></button>
         </nav>
+        <button className="post-button"><PenLine size={18} /><span>Post</span></button>
         <div className="top-actions">
-          <button
-            className={searchOpen ? 'profile-button active' : 'profile-button'}
-            aria-label={searchOpen ? 'Close search and filters' : 'Open search and filters'}
-            aria-expanded={searchOpen}
-            onClick={() => setSearchOpen((open) => !open)}
-          >
-            {searchOpen ? <X size={22} /> : <Search size={22} />}
-          </button>
           <button
             className={locationOpen ? 'profile-button active' : 'profile-button'}
             aria-label="Location and profile"
@@ -403,10 +411,10 @@ function App() {
           >
             <CircleUserRound size={24} />
           </button>
-        </div>
-        <div className="trust-panel">
-          <ShieldCheck size={18} />
-          <p>Plain-English summaries link back to official sources and are not legal advice.</p>
+          <div className="rail-account">
+            <strong>Nationwide demo</strong>
+            <span>@civic_feed</span>
+          </div>
         </div>
       </aside>
 
@@ -431,6 +439,24 @@ function App() {
           />
         ) : (
           <>
+            <header className="timeline-header">
+              <div>
+                <strong>Home</strong>
+                <span>{jurisdiction.label}</span>
+              </div>
+              <button
+                className={locationOpen ? 'round-action active' : 'round-action'}
+                aria-label="Location and profile"
+                aria-expanded={locationOpen}
+                onClick={() => setLocationOpen((open) => !open)}
+              >
+                <MapPin size={19} />
+              </button>
+            </header>
+            <div className="timeline-tabs" role="tablist" aria-label="Timeline mode">
+              <button className="active">For you</button>
+              <button>Following</button>
+            </div>
             {locationOpen && (
           <section className="location-panel" aria-label="Location settings">
             <div className="location-copy">
@@ -474,6 +500,18 @@ function App() {
           </section>
             )}
 
+            <section className="composer" aria-label="New civic post">
+              <div className="avatar">CF</div>
+              <div>
+                <strong>What should your officials see?</strong>
+                <span>Draft comments, votes, and questions from official source material.</span>
+                <div className="composer-actions">
+                  <button><FileText size={17} /> Cite source</button>
+                  <button><PenLine size={17} /> Post</button>
+                </div>
+              </div>
+            </section>
+
             <section className="feed-list" aria-label="Bill feed">
           {visibleBills.map((bill) => (
             <BillCard
@@ -496,7 +534,7 @@ function App() {
       </main>
 
       {!activeOverview && activeSection === 'feed' && (
-        <BillDetail
+        <RightRail
           bill={selected}
           commentCount={getCommentCount(selected, localComments)}
           userVote={votes[selected.id]}
@@ -532,10 +570,14 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
   return (
     <article className={selected ? 'bill-card selected' : 'bill-card'}>
       <button className="card-hit-area" onClick={onSelect} aria-label={`Open ${bill.title}`} />
-      <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
-        <img src={bill.image} alt="" className="bill-image" />
-      </a>
+      <div className="avatar">{bill.level.slice(0, 2).toUpperCase()}</div>
       <div className="bill-content">
+        <div className="post-author-row">
+          <strong>{bill.sourceName}</strong>
+          <BadgeCheck size={16} />
+          <span>@{bill.level.toLowerCase()}source · {bill.status}</span>
+          <MoreHorizontal size={18} />
+        </div>
         <div className="meta-row">
           <span>{bill.chamber}</span>
           <span>{bill.jurisdiction}</span>
@@ -545,6 +587,9 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
         </a>
         <a className="summary-link" href={overviewHref} onClick={handleOverviewClick}>
           {bill.summary}
+        </a>
+        <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
+          <img src={bill.image} alt="" className="bill-image" />
         </a>
         <div className="status-row">
           <span>{bill.status}</span>
@@ -566,8 +611,14 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
           </a>
         </div>
         <div className="action-row">
-          <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={17} />} label="Yes" onClick={() => onVote('yes')} />
-          <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={17} />} label="No" onClick={() => onVote('no')} />
+          <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(bill.yes + (userVote === 'yes' ? 1 : 0))} onClick={() => onVote('yes')} />
+          <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={18} />} label={formatCount(bill.no + (userVote === 'no' ? 1 : 0))} onClick={() => onVote('no')} />
+          <button className="icon-action" aria-label="Repost civic item">
+            <Repeat2 size={18} />
+          </button>
+          <button className="icon-action" aria-label="View activity">
+            <BarChart3 size={18} />
+          </button>
           <button
             className={saved ? 'icon-action saved' : 'icon-action'}
             onClick={(event) => {
@@ -594,6 +645,12 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
   );
 }
 
+function formatCount(value) {
+  if (value >= 1000000) return `${Math.round(value / 100000) / 10}M`;
+  if (value >= 1000) return `${Math.round(value / 100) / 10}K`;
+  return String(value);
+}
+
 function VoteButton({ active, icon, label, onClick }) {
   return (
     <button className={active ? 'vote-button active' : 'vote-button'} onClick={onClick}>
@@ -603,19 +660,33 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function BillDetail({ bill, commentCount, userVote, saved, onVote, onSave }) {
+function RightRail({ bill, commentCount, userVote, saved, onVote, onSave }) {
   return (
-    <aside className="detail-panel" aria-label="Bill details">
-      <div className="detail-hero">
-        <img src={bill.image} alt="" />
-        <div className="detail-actions">
+    <aside className="detail-panel" aria-label="Timeline context">
+      <label className="rail-search">
+        <Search size={18} />
+        <input type="search" placeholder="Search" />
+      </label>
+      <section className="right-card">
+        <div className="right-card-header">
+          <strong>Today’s Civic News</strong>
+          <X size={17} />
+        </div>
+        {bills.slice(0, 3).map((item) => (
+          <a className="trend-link" href={`#overview/${item.id}`} key={item.id}>
+            <span>{item.level} · {item.jurisdiction}</span>
+            <strong>{item.title}</strong>
+            <small>{item.status} · {formatCount(item.comments)} comments</small>
+          </a>
+        ))}
+      </section>
+      <section className="right-card">
+        <div className="right-card-header">
+          <strong>Selected Item</strong>
           <button className={saved ? 'round-action active' : 'round-action'} onClick={onSave} aria-label="Save">
             <Bookmark size={18} />
           </button>
-          <button className="round-action" aria-label="Close detail"><X size={18} /></button>
         </div>
-      </div>
-      <div className="detail-body">
         <div className="meta-row">
           <span>{bill.chamber}</span>
           <span>{bill.category}</span>
@@ -666,7 +737,7 @@ function BillDetail({ bill, commentCount, userVote, saved, onVote, onSave }) {
           </div>
           <p>Top comments would appear here after moderation and source-quality checks.</p>
         </section>
-      </div>
+      </section>
     </aside>
   );
 }
