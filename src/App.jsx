@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  AtSign,
   Bell,
   Bookmark,
   BadgeCheck,
   BarChart3,
+  CalendarDays,
   Check,
+  ChevronRight,
   CircleUserRound,
   ExternalLink,
   FileText,
@@ -17,8 +20,11 @@ import {
   PenLine,
   Repeat2,
   Search,
+  Send,
+  Settings,
   Share2,
   ShieldCheck,
+  SlidersHorizontal,
   ThumbsDown,
   ThumbsUp,
   Users,
@@ -141,6 +147,32 @@ const bills = [
 
 const filters = ['All', 'Federal', 'State', 'County'];
 
+const topicSuggestions = ['Water quality', 'Small business', 'Student privacy', 'Public transit', 'Rulemaking', 'Local agendas'];
+
+const chatThreads = [
+  {
+    id: 'water-watch',
+    title: 'Water infrastructure watch',
+    handle: '@waterquality',
+    excerpt: '3 new official documents were added to the water quality tracker.',
+    count: 12
+  },
+  {
+    id: 'county-agendas',
+    title: 'County agenda room',
+    handle: '@localagendas',
+    excerpt: 'Compare tomorrow’s committee agenda with saved transit items.',
+    count: 7
+  },
+  {
+    id: 'school-privacy',
+    title: 'Student privacy notes',
+    handle: '@edpolicy',
+    excerpt: 'Parents are asking for a plain-English vendor-data checklist.',
+    count: 19
+  }
+];
+
 const officialSourceRegistry = [
   {
     level: 'Federal',
@@ -193,11 +225,17 @@ const defaultJurisdiction = {
 
 function App() {
   const [activeSection, setActiveSection] = useState('feed');
+  const [activeTab, setActiveTab] = useState('forYou');
   const [activeFilter, setActiveFilter] = useState('All');
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(bills[0].id);
   const [votes, setVotes] = useState({});
   const [saved, setSaved] = useState(() => new Set(['hb-771']));
+  const [followed, setFollowed] = useState(() => new Set(['Federal', 'Congress.gov']));
+  const [reposted, setReposted] = useState(() => new Set());
+  const [userPosts, setUserPosts] = useState([]);
+  const [composerDraft, setComposerDraft] = useState('');
+  const [chatDraft, setChatDraft] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
   const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
@@ -226,6 +264,16 @@ function App() {
     });
   }, [activeFilter, jurisdiction.levels, query]);
 
+  const followingBills = useMemo(() => {
+    return visibleBills.filter((bill) => (
+      followed.has(bill.id) ||
+      followed.has(bill.level) ||
+      followed.has(bill.sourceName) ||
+      saved.has(bill.id)
+    ));
+  }, [followed, saved, visibleBills]);
+
+  const timelineBills = activeTab === 'following' ? followingBills : visibleBills;
   const selected = bills.find((bill) => bill.id === selectedId) || visibleBills[0] || bills[0];
   const activeOverview = bills.find((bill) => bill.id === activeOverviewId);
 
@@ -245,6 +293,58 @@ function App() {
       }
       return next;
     });
+  }
+
+  function toggleFollow(key, label = key) {
+    setFollowed((current) => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+        showNotice(`Unfollowed ${label}`);
+      } else {
+        next.add(key);
+        showNotice(`Following ${label}`);
+      }
+      return next;
+    });
+  }
+
+  function toggleRepost(id) {
+    setReposted((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+        showNotice('Repost removed');
+      } else {
+        next.add(id);
+        showNotice('Reposted to your followers');
+      }
+      return next;
+    });
+  }
+
+  function createPost() {
+    const text = composerDraft.trim();
+    if (!text) {
+      showNotice('Write something first');
+      return;
+    }
+    setUserPosts((current) => [
+      {
+        id: `post-${Date.now()}`,
+        text,
+        created: 'Just now'
+      },
+      ...current
+    ]);
+    setComposerDraft('');
+    showNotice('Posted');
+  }
+
+  function openSection(section) {
+    closeOverview();
+    setActiveSection(section);
+    if (section === 'explore') setSearchOpen(true);
   }
 
   function showNotice(message) {
@@ -370,38 +470,31 @@ function App() {
           <button
             className={activeSection === 'feed' ? 'nav-item active' : 'nav-item'}
             aria-label="Feed"
-            onClick={() => {
-              closeOverview();
-              setActiveSection('feed');
-            }}
+            onClick={() => openSection('feed')}
           >
             <Home size={24} /><span>Home</span>
           </button>
           <button
-            className={searchOpen ? 'nav-item active' : 'nav-item'}
-            aria-label={searchOpen ? 'Close explore' : 'Explore'}
-            aria-expanded={searchOpen}
-            onClick={() => setSearchOpen((open) => !open)}
+            className={activeSection === 'explore' ? 'nav-item active' : 'nav-item'}
+            aria-label="Explore"
+            onClick={() => openSection('explore')}
           >
             <Search size={24} /><span>Explore</span>
           </button>
-          <button className="nav-item" aria-label="Notifications"><Bell size={24} /><span>Notifications</span></button>
-          <button className="nav-item" aria-label="Follow"><Users size={24} /><span>Follow</span></button>
-          <button className="nav-item" aria-label="Chat"><MessageSquare size={24} /><span>Chat</span></button>
+          <button className={activeSection === 'notifications' ? 'nav-item active' : 'nav-item'} aria-label="Notifications" onClick={() => openSection('notifications')}><Bell size={24} /><span>Notifications</span></button>
+          <button className={activeSection === 'follow' ? 'nav-item active' : 'nav-item'} aria-label="Follow" onClick={() => openSection('follow')}><Users size={24} /><span>Follow</span></button>
+          <button className={activeSection === 'chat' ? 'nav-item active' : 'nav-item'} aria-label="Chat" onClick={() => openSection('chat')}><MessageSquare size={24} /><span>Chat</span></button>
           <button
             className={activeSection === 'officials' ? 'nav-item active' : 'nav-item'}
             aria-label="Officials"
-            onClick={() => {
-              closeOverview();
-              setActiveSection('officials');
-            }}
+            onClick={() => openSection('officials')}
           >
             <BadgeCheck size={24} /><span>Officials</span>
           </button>
-          <button className="nav-item" aria-label="Saved"><Bookmark size={24} /><span>Saved</span></button>
-          <button className="nav-item" aria-label="More"><MoreHorizontal size={24} /><span>More</span></button>
+          <button className={activeSection === 'saved' ? 'nav-item active' : 'nav-item'} aria-label="Saved" onClick={() => openSection('saved')}><Bookmark size={24} /><span>Saved</span></button>
+          <button className={activeSection === 'more' ? 'nav-item active' : 'nav-item'} aria-label="More" onClick={() => openSection('more')}><MoreHorizontal size={24} /><span>More</span></button>
         </nav>
-        <button className="post-button"><PenLine size={18} /><span>Post</span></button>
+        <button className="post-button" onClick={() => openSection('feed')}><PenLine size={18} /><span>Post</span></button>
         <div className="top-actions">
           <button
             className={locationOpen ? 'profile-button active' : 'profile-button'}
@@ -437,6 +530,58 @@ function App() {
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
+        ) : activeSection === 'explore' ? (
+          <ExplorePage
+            query={query}
+            onQueryChange={setQuery}
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            visibleBills={visibleBills}
+            followed={followed}
+            onFollow={toggleFollow}
+            onOpenOverview={openOverview}
+          />
+        ) : activeSection === 'notifications' ? (
+          <NotificationsPage
+            bills={bills}
+            saved={saved}
+            followed={followed}
+            onSave={toggleSaved}
+            onFollow={toggleFollow}
+            onOpenOverview={openOverview}
+          />
+        ) : activeSection === 'follow' ? (
+          <FollowPage
+            bills={bills}
+            followed={followed}
+            saved={saved}
+            onFollow={toggleFollow}
+            onOpenOverview={openOverview}
+          />
+        ) : activeSection === 'chat' ? (
+          <ChatPage
+            draft={chatDraft}
+            onDraftChange={setChatDraft}
+            onSend={() => {
+              if (!chatDraft.trim()) {
+                showNotice('Write a message first');
+                return;
+              }
+              setChatDraft('');
+              showNotice('Message posted to demo thread');
+            }}
+          />
+        ) : activeSection === 'saved' ? (
+          <SavedPage
+            bills={bills.filter((bill) => saved.has(bill.id))}
+            onOpenOverview={openOverview}
+            onSave={toggleSaved}
+          />
+        ) : activeSection === 'more' ? (
+          <MorePage
+            sourceRegistry={officialSourceRegistry}
+            onAction={showNotice}
+          />
         ) : (
           <>
             <header className="timeline-header">
@@ -454,8 +599,8 @@ function App() {
               </button>
             </header>
             <div className="timeline-tabs" role="tablist" aria-label="Timeline mode">
-              <button className="active">For you</button>
-              <button>Following</button>
+              <button className={activeTab === 'forYou' ? 'active' : ''} onClick={() => setActiveTab('forYou')}>For you</button>
+              <button className={activeTab === 'following' ? 'active' : ''} onClick={() => setActiveTab('following')}>Following</button>
             </div>
             {locationOpen && (
           <section className="location-panel" aria-label="Location settings">
@@ -503,37 +648,57 @@ function App() {
             <section className="composer" aria-label="New civic post">
               <div className="avatar">CF</div>
               <div>
-                <strong>What should your officials see?</strong>
+                <textarea
+                  value={composerDraft}
+                  placeholder="What should your officials see?"
+                  onChange={(event) => setComposerDraft(event.target.value)}
+                />
                 <span>Draft comments, votes, and questions from official source material.</span>
                 <div className="composer-actions">
-                  <button><FileText size={17} /> Cite source</button>
-                  <button><PenLine size={17} /> Post</button>
+                  <button onClick={() => setSearchOpen(true)}><FileText size={17} /> Cite source</button>
+                  <button onClick={createPost}><PenLine size={17} /> Post</button>
                 </div>
               </div>
             </section>
 
             <section className="feed-list" aria-label="Bill feed">
-          {visibleBills.map((bill) => (
+          {userPosts.map((post) => (
+            <UserPostCard key={post.id} post={post} onShare={() => showNotice('Post link copied')} />
+          ))}
+          {timelineBills.map((bill) => (
             <BillCard
               key={bill.id}
               bill={bill}
               commentCount={getCommentCount(bill, localComments)}
               userVote={votes[bill.id]}
               saved={saved.has(bill.id)}
+              followed={followed.has(bill.id) || followed.has(bill.sourceName)}
+              reposted={reposted.has(bill.id)}
               selected={bill.id === selected.id}
               onSelect={() => setSelectedId(bill.id)}
               onOpenOverview={() => openOverview(bill.id)}
               onVote={(vote) => voteOnBill(bill.id, vote)}
               onSave={() => toggleSaved(bill.id)}
+              onFollow={() => toggleFollow(bill.sourceName)}
+              onRepost={() => toggleRepost(bill.id)}
               onShare={() => shareBill(bill)}
+              onActivity={() => showNotice(`${formatCount(bill.yes + bill.no)} total votes tracked`)}
             />
           ))}
+          {!timelineBills.length && (
+            <EmptyState
+              title="No posts in this feed yet"
+              body="Follow a source, level, or saved bill to populate this timeline."
+              action="Explore sources"
+              onAction={() => openSection('explore')}
+            />
+          )}
             </section>
           </>
         )}
       </main>
 
-      {!activeOverview && activeSection === 'feed' && (
+      {!activeOverview && (
         <RightRail
           bill={selected}
           commentCount={getCommentCount(selected, localComments)}
@@ -541,6 +706,9 @@ function App() {
           saved={saved.has(selected.id)}
           onVote={(vote) => voteOnBill(selected.id, vote)}
           onSave={() => toggleSaved(selected.id)}
+          query={query}
+          onQueryChange={setQuery}
+          onOpenExplore={() => openSection('explore')}
         />
       )}
       {notice && <div className="toast" role="status">{notice}</div>}
@@ -557,7 +725,7 @@ function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
-function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onOpenOverview, onVote, onSave, onShare }) {
+function BillCard({ bill, commentCount, userVote, saved, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onFollow, onRepost, onShare, onActivity }) {
   const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
   const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
   const overviewHref = `#overview/${bill.id}`;
@@ -576,7 +744,9 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
           <strong>{bill.sourceName}</strong>
           <BadgeCheck size={16} />
           <span>@{bill.level.toLowerCase()}source · {bill.status}</span>
-          <MoreHorizontal size={18} />
+          <button className="inline-icon" onClick={onFollow} aria-label={followed ? `Unfollow ${bill.sourceName}` : `Follow ${bill.sourceName}`}>
+            {followed ? <Check size={18} /> : <AtSign size={18} />}
+          </button>
         </div>
         <div className="meta-row">
           <span>{bill.chamber}</span>
@@ -613,10 +783,10 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(bill.yes + (userVote === 'yes' ? 1 : 0))} onClick={() => onVote('yes')} />
           <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={18} />} label={formatCount(bill.no + (userVote === 'no' ? 1 : 0))} onClick={() => onVote('no')} />
-          <button className="icon-action" aria-label="Repost civic item">
+          <button className={reposted ? 'icon-action reposted' : 'icon-action'} onClick={onRepost} aria-label={reposted ? 'Remove repost' : 'Repost civic item'}>
             <Repeat2 size={18} />
           </button>
-          <button className="icon-action" aria-label="View activity">
+          <button className="icon-action" onClick={onActivity} aria-label="View activity">
             <BarChart3 size={18} />
           </button>
           <button
@@ -660,17 +830,23 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function RightRail({ bill, commentCount, userVote, saved, onVote, onSave }) {
+function RightRail({ bill, commentCount, userVote, saved, onVote, onSave, query, onQueryChange, onOpenExplore }) {
   return (
     <aside className="detail-panel" aria-label="Timeline context">
       <label className="rail-search">
         <Search size={18} />
-        <input type="search" placeholder="Search" />
+        <input
+          type="search"
+          placeholder="Search"
+          value={query}
+          onFocus={onOpenExplore}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
       </label>
       <section className="right-card">
         <div className="right-card-header">
           <strong>Today’s Civic News</strong>
-          <X size={17} />
+          <CalendarDays size={17} />
         </div>
         {bills.slice(0, 3).map((item) => (
           <a className="trend-link" href={`#overview/${item.id}`} key={item.id}>
@@ -740,6 +916,282 @@ function RightRail({ bill, commentCount, userVote, saved, onVote, onSave }) {
       </section>
     </aside>
   );
+}
+
+function UserPostCard({ post, onShare }) {
+  return (
+    <article className="bill-card user-post">
+      <div className="avatar">YOU</div>
+      <div className="bill-content">
+        <div className="post-author-row">
+          <strong>You</strong>
+          <span>@civic_feed · {post.created}</span>
+          <button className="inline-icon" aria-label="More post options">
+            <MoreHorizontal size={18} />
+          </button>
+        </div>
+        <p>{post.text}</p>
+        <div className="source-note">
+          <ShieldCheck size={16} />
+          Demo post. Backend moderation and account identity come next.
+        </div>
+        <div className="action-row">
+          <button className="icon-action" aria-label="Reply"><MessageSquare size={18} /></button>
+          <button className="icon-action" aria-label="Repost"><Repeat2 size={18} /></button>
+          <button className="icon-action" aria-label="Activity"><BarChart3 size={18} /></button>
+          <button className="icon-action" onClick={onShare} aria-label="Share"><Share2 size={18} /></button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ExplorePage({ query, onQueryChange, activeFilter, onFilterChange, visibleBills, followed, onFollow, onOpenOverview }) {
+  return (
+    <section className="view-page" aria-label="Explore civic updates">
+      <PageHeader title="Explore" subtitle="Search official-source civic items, topics, and source accounts." />
+      <div className="controls standalone">
+        <label className="search-box">
+          <Search size={18} />
+          <input
+            type="search"
+            placeholder="Search laws, places, topics"
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            autoFocus
+          />
+        </label>
+        <div className="filter-row">
+          <Filter size={17} />
+          {filters.map((filter) => (
+            <button key={filter} className={filter === activeFilter ? 'chip active' : 'chip'} onClick={() => onFilterChange(filter)}>
+              {filter}
+            </button>
+          ))}
+        </div>
+      </div>
+      <section className="quick-grid" aria-label="Topics">
+        {topicSuggestions.map((topic) => (
+          <button key={topic} onClick={() => onQueryChange(topic)}>
+            <HashIcon />
+            <span>{topic}</span>
+          </button>
+        ))}
+      </section>
+      <section className="result-list" aria-label="Search results">
+        {visibleBills.map((bill) => (
+          <article className="compact-row" key={bill.id}>
+            <div>
+              <span>{bill.level} · {bill.jurisdiction}</span>
+              <strong>{bill.title}</strong>
+              <p>{bill.summary}</p>
+            </div>
+            <div className="row-actions">
+              <button className={followed.has(bill.sourceName) ? 'small-pill active' : 'small-pill'} onClick={() => onFollow(bill.sourceName)}>
+                {followed.has(bill.sourceName) ? 'Following' : 'Follow'}
+              </button>
+              <button className="round-action" onClick={() => onOpenOverview(bill.id)} aria-label={`Open ${bill.title}`}>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </article>
+        ))}
+      </section>
+    </section>
+  );
+}
+
+function NotificationsPage({ bills, saved, followed, onSave, onFollow, onOpenOverview }) {
+  const notifications = bills.map((bill, index) => ({
+    id: `notification-${bill.id}`,
+    bill,
+    label: index % 2 === 0 ? 'Status update' : 'Official source update',
+    text: `${bill.status}: ${bill.title}`
+  }));
+
+  return (
+    <section className="view-page" aria-label="Notifications">
+      <PageHeader title="Notifications" subtitle="Bill movement, source updates, and activity from followed items." />
+      <div className="result-list">
+        {notifications.map(({ id, bill, label, text }) => (
+          <article className="compact-row" key={id}>
+            <div className="notification-icon"><Bell size={18} /></div>
+            <div>
+              <span>{label} · {bill.jurisdiction}</span>
+              <strong>{text}</strong>
+              <p>{bill.sourceName} is linked as the official source.</p>
+            </div>
+            <div className="row-actions">
+              <button className={saved.has(bill.id) ? 'small-pill active' : 'small-pill'} onClick={() => onSave(bill.id)}>
+                {saved.has(bill.id) ? 'Saved' : 'Save'}
+              </button>
+              <button className={followed.has(bill.sourceName) ? 'small-pill active' : 'small-pill'} onClick={() => onFollow(bill.sourceName)}>
+                {followed.has(bill.sourceName) ? 'Following' : 'Follow'}
+              </button>
+              <button className="round-action" onClick={() => onOpenOverview(bill.id)} aria-label={`Open ${bill.title}`}>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FollowPage({ bills, followed, saved, onFollow, onOpenOverview }) {
+  const followTargets = [
+    ...filters.filter((filter) => filter !== 'All').map((filter) => ({ key: filter, label: `${filter} updates`, detail: `Include ${filter.toLowerCase()} items in Following.` })),
+    ...Array.from(new Set(bills.map((bill) => bill.sourceName))).map((source) => ({ key: source, label: source, detail: 'Official source account.' }))
+  ];
+  const followedBills = bills.filter((bill) => followed.has(bill.level) || followed.has(bill.sourceName) || saved.has(bill.id));
+
+  return (
+    <section className="view-page" aria-label="Follow">
+      <PageHeader title="Follow" subtitle="Choose the sources, levels, and saved items that shape your Following feed." />
+      <div className="quick-grid follow-grid">
+        {followTargets.map((target) => (
+          <button className={followed.has(target.key) ? 'active' : ''} key={target.key} onClick={() => onFollow(target.key, target.label)}>
+            <AtSign size={18} />
+            <span>{target.label}</span>
+            <small>{target.detail}</small>
+          </button>
+        ))}
+      </div>
+      <section className="result-list">
+        {followedBills.map((bill) => (
+          <article className="compact-row" key={bill.id}>
+            <div>
+              <span>{bill.level} · {bill.sourceName}</span>
+              <strong>{bill.title}</strong>
+              <p>{bill.status}</p>
+            </div>
+            <button className="round-action" onClick={() => onOpenOverview(bill.id)} aria-label={`Open ${bill.title}`}>
+              <ChevronRight size={18} />
+            </button>
+          </article>
+        ))}
+        {!followedBills.length && <EmptyState title="No followed items yet" body="Follow a level or official source to build this feed." />}
+      </section>
+    </section>
+  );
+}
+
+function ChatPage({ draft, onDraftChange, onSend }) {
+  return (
+    <section className="view-page" aria-label="Chat">
+      <PageHeader title="Chat" subtitle="Demo discussion rooms tied to bills, official sources, and watched topics." />
+      <div className="result-list">
+        {chatThreads.map((thread) => (
+          <article className="compact-row" key={thread.id}>
+            <div className="notification-icon"><MessageSquare size={18} /></div>
+            <div>
+              <span>{thread.handle} · {thread.count} updates</span>
+              <strong>{thread.title}</strong>
+              <p>{thread.excerpt}</p>
+            </div>
+            <button className="round-action" aria-label={`Open ${thread.title}`}><ChevronRight size={18} /></button>
+          </article>
+        ))}
+      </div>
+      <div className="chat-composer">
+        <textarea value={draft} onChange={(event) => onDraftChange(event.target.value)} placeholder="Post a message to the selected civic room" />
+        <button className="location-button" onClick={onSend}><Send size={17} /> Send</button>
+      </div>
+    </section>
+  );
+}
+
+function SavedPage({ bills, onOpenOverview, onSave }) {
+  return (
+    <section className="view-page" aria-label="Saved">
+      <PageHeader title="Saved" subtitle="Bills, source accounts, and searches you want to revisit." />
+      <div className="result-list">
+        {bills.map((bill) => (
+          <article className="compact-row" key={bill.id}>
+            <div>
+              <span>{bill.level} · {bill.jurisdiction}</span>
+              <strong>{bill.title}</strong>
+              <p>{bill.summary}</p>
+            </div>
+            <div className="row-actions">
+              <button className="small-pill active" onClick={() => onSave(bill.id)}>Saved</button>
+              <button className="round-action" onClick={() => onOpenOverview(bill.id)} aria-label={`Open ${bill.title}`}>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </article>
+        ))}
+        {!bills.length && <EmptyState title="Nothing saved yet" body="Use the bookmark action on any civic item to save it here." />}
+      </div>
+    </section>
+  );
+}
+
+function MorePage({ sourceRegistry, onAction }) {
+  return (
+    <section className="view-page" aria-label="More">
+      <PageHeader title="More" subtitle="Settings, source policy, and feedback controls for the demo." />
+      <div className="settings-list">
+        {[
+          ['Settings', 'Theme, notification, location, and account preferences.', Settings],
+          ['Source policy', 'Official government sources first; every summary links back to source material.', ShieldCheck],
+          ['Feedback', 'Collect product notes before the backend account system is connected.', MessageSquare],
+          ['Data freshness', 'Future ingestion jobs will surface freshness checks here.', SlidersHorizontal]
+        ].map(([title, detail, Icon]) => (
+          <button className="settings-row" key={title} onClick={() => onAction(`${title} opened`)}>
+            <Icon size={20} />
+            <span><strong>{title}</strong><small>{detail}</small></span>
+            <ChevronRight size={18} />
+          </button>
+        ))}
+      </div>
+      <div className="source-registry-panel">
+        <div>
+          <strong>Trusted source coverage</strong>
+          <span>Federal, state, and local official-source registries remain visible until live ingestion is complete.</span>
+        </div>
+        <div className="source-registry-grid">
+          {sourceRegistry.map((group) => (
+            <div className="source-registry-group" key={group.level}>
+              <strong>{group.level}</strong>
+              {group.sources.slice(0, 3).map((source) => (
+                <a href={source.url} target="_blank" rel="noreferrer" key={`${group.level}-${source.name}`}>
+                  <ExternalLink size={14} />
+                  {source.name}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PageHeader({ title, subtitle }) {
+  return (
+    <header className="timeline-header page-header">
+      <div>
+        <strong>{title}</strong>
+        <span>{subtitle}</span>
+      </div>
+    </header>
+  );
+}
+
+function EmptyState({ title, body, action, onAction }) {
+  return (
+    <div className="empty-state">
+      <strong>{title}</strong>
+      <span>{body}</span>
+      {action && <button className="location-button" onClick={onAction}>{action}</button>}
+    </div>
+  );
+}
+
+function HashIcon() {
+  return <span className="hash-icon">#</span>;
 }
 
 function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCommentChange, onCommentSubmit }) {
