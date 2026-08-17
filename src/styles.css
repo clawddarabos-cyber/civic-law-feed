@@ -1072,6 +1072,29 @@ button {
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
+.settings-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid #eff3f4;
+  padding-top: 14px;
+}
+
+.settings-footer button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #536471;
+  padding: 7px 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.settings-footer button:hover {
+  background: #eff3f4;
+  color: #0f1419;
+}
+
 .empty-state {
   display: grid;
   justify-items: start;
@@ -1329,6 +1352,7 @@ button {
   .quick-grid button,
   .compact-row,
   .settings-row,
+  .settings-footer button,
   .chat-composer,
   .comment-form textarea,
   .source-box a {
@@ -1428,6 +1452,7 @@ button {
   .compact-row span,
   .compact-row p,
   .settings-row small,
+  .settings-footer button,
   .quick-grid small,
   .source-note {
     color: #71767b;
@@ -1442,7 +1467,8 @@ button {
   .compact-row:hover,
   .quick-grid button:hover,
   .quick-grid button.active,
-  .settings-row:hover {
+  .settings-row:hover,
+  .settings-footer button:hover {
     background: #080808;
   }
 

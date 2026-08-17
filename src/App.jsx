@@ -463,7 +463,7 @@ function App() {
           <div className="brand-mark"><ShieldCheck size={24} /></div>
           <div>
             <strong>Civics</strong>
-            <span>Public beta</span>
+            <span>Official feed</span>
           </div>
         </div>
         <nav className="nav-stack">
@@ -525,8 +525,6 @@ function App() {
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
             profiles={floridaOfficialProfiles}
-            officialData={floridaOfficialData}
-            sourceRegistry={officialSourceRegistry}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
@@ -580,6 +578,8 @@ function App() {
         ) : activeSection === 'more' ? (
           <MorePage
             sourceRegistry={officialSourceRegistry}
+            officialData={floridaOfficialData}
+            jurisdiction={jurisdiction}
             onAction={showNotice}
           />
         ) : (
@@ -1128,23 +1128,37 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, onAction }) {
+function MorePage({ sourceRegistry, officialData, jurisdiction, onAction }) {
+  const settingsSections = [
+    ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
+    ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
+    ['Notifications', 'Bill status changes, official votes, replies, and source updates.', Bell],
+    ['Privacy', 'Saved items, public votes, profile visibility, and comment identity.', ShieldCheck],
+    ['Source policy', 'Official government sources first; every summary links back to source material.', FileText],
+    ['Legal disclaimer', 'Plain-English summaries explain source material and are not legal advice.', BadgeCheck],
+    ['Feedback', 'Report a stale source, bad summary, missing jurisdiction, or moderation issue.', MessageSquare],
+    ['Data freshness', 'Importer status, validation checks, and last-seen official records.', SlidersHorizontal]
+  ];
+
   return (
     <section className="view-page" aria-label="More">
-      <PageHeader title="More" subtitle="Settings, source policy, and feedback controls for the demo." />
+      <PageHeader title="More" subtitle="Settings, source policy, privacy, and product support." />
       <div className="settings-list">
-        {[
-          ['Settings', 'Theme, notification, location, and account preferences.', Settings],
-          ['Source policy', 'Official government sources first; every summary links back to source material.', ShieldCheck],
-          ['Feedback', 'Collect product notes before the backend account system is connected.', MessageSquare],
-          ['Data freshness', 'Future ingestion jobs will surface freshness checks here.', SlidersHorizontal]
-        ].map(([title, detail, Icon]) => (
+        {settingsSections.map(([title, detail, Icon]) => (
           <button className="settings-row" key={title} onClick={() => onAction(`${title} opened`)}>
             <Icon size={20} />
             <span><strong>{title}</strong><small>{detail}</small></span>
             <ChevronRight size={18} />
           </button>
         ))}
+      </div>
+      <div className="data-spike-panel">
+        <strong>Current coverage snapshot</strong>
+        <span>{officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records are seeded from official Florida Senate pages while nationwide connectors are added.</span>
+        <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
+          <ExternalLink size={15} />
+          Florida Senate source
+        </a>
       </div>
       <div className="source-registry-panel">
         <div>
@@ -1165,6 +1179,12 @@ function MorePage({ sourceRegistry, onAction }) {
           ))}
         </div>
       </div>
+      <nav className="settings-footer" aria-label="Support links">
+        <button onClick={() => onAction('Source policy opened')}>Official sources</button>
+        <button onClick={() => onAction('Privacy opened')}>Privacy</button>
+        <button onClick={() => onAction('Legal disclaimer opened')}>Terms</button>
+        <button onClick={() => onAction('Feedback opened')}>Feedback</button>
+      </nav>
     </section>
   );
 }
@@ -1256,7 +1276,7 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
   );
 }
 
-function PoliticianProfilesPage({ profiles, officialData, sourceRegistry, votes, onClaim }) {
+function PoliticianProfilesPage({ profiles, votes, onClaim }) {
   return (
     <section className="profiles-page" aria-label="Nationwide official profiles">
       <div className="profiles-header">
@@ -1264,43 +1284,7 @@ function PoliticianProfilesPage({ profiles, officialData, sourceRegistry, votes,
           <h1>Nationwide Official Profiles</h1>
           <p>Auto-created public profiles compare official votes with your votes on federal, state, and local items.</p>
         </div>
-        <span>Claim flow prototype</span>
-      </div>
-      <div className="source-registry-panel">
-        <div>
-          <strong>Official-source coverage plan</strong>
-          <span>Ingestion is nationwide by design: federal sources first, then each state legislature, then county and municipal agenda systems by user location.</span>
-        </div>
-        <div className="source-registry-grid">
-          {sourceRegistry.map((group) => (
-            <div className="source-registry-group" key={group.level}>
-              <strong>{group.level}</strong>
-              {group.sources.map((source) => (
-                <a href={source.url} target="_blank" rel="noreferrer" key={`${group.level}-${source.name}`}>
-                  <ExternalLink size={14} />
-                  {source.name}
-                </a>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="data-spike-panel">
-        <strong>First state import: Florida</strong>
-        <span>{officialData.officials.length} Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} vote-history records imported from official Florida Senate pages. This remains the seed dataset while nationwide connectors are added.</span>
-        <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
-          <ExternalLink size={15} />
-          Senate source
-        </a>
-        <div className="rollcall-sample">
-          {officialData.rollCalls.slice(0, 4).map((rollCall) => (
-            <a href={rollCall.sourceUrl} target="_blank" rel="noreferrer" key={rollCall.id}>
-              <span>{rollCall.billNumber}</span>
-              <span>{rollCall.date || 'No date'}</span>
-              <strong>{rollCall.yeas}-{rollCall.nays}</strong>
-            </a>
-          ))}
-        </div>
+        <span>Official profiles</span>
       </div>
       <div className="profiles-grid">
         {profiles.map((profile) => {
