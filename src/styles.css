@@ -962,7 +962,20 @@ button {
 }
 
 .follow-grid button {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  border-radius: 16px;
+}
+
+.follow-target-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.follow-target-copy strong {
+  color: #0f1419;
+  line-height: 1.2;
 }
 
 .hash-icon {
@@ -1395,7 +1408,9 @@ button {
   .vote-record-label,
   .source-box a,
   .comment-form textarea,
-  .bill-image {
+  .bill-image,
+  .quick-grid button,
+  .settings-row {
     border-color: #2f3336;
   }
 
@@ -1423,6 +1438,11 @@ button {
   .search-box input,
   .rail-search input,
   .overview-back {
+    color: #e7e9ea;
+  }
+
+  .quick-grid button,
+  .follow-target-copy strong {
     color: #e7e9ea;
   }
 
@@ -1626,8 +1646,18 @@ button {
 
   .source-registry-grid,
   .split-section,
-  .quick-grid {
+  .quick-grid:not(.follow-grid) {
     grid-template-columns: 1fr;
+  }
+
+  .follow-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .follow-grid button {
+    min-height: 86px;
+    padding: 16px;
   }
 
   .compact-row,

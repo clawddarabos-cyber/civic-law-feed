@@ -1053,8 +1053,10 @@ function FollowPage({ bills, followed, saved, onFollow, onOpenOverview }) {
         {followTargets.map((target) => (
           <button className={followed.has(target.key) ? 'active' : ''} key={target.key} onClick={() => onFollow(target.key, target.label)}>
             <AtSign size={18} />
-            <span>{target.label}</span>
-            <small>{target.detail}</small>
+            <span className="follow-target-copy">
+              <strong>{target.label}</strong>
+              <small>{target.detail}</small>
+            </span>
           </button>
         ))}
       </div>
