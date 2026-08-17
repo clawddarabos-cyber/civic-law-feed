@@ -28,7 +28,7 @@ const bills = [
     title: 'Clean Water Infrastructure Renewal Act',
     chamber: 'House Bill 418',
     jurisdiction: 'Florida',
-    level: 'Florida',
+    level: 'State',
     status: 'Voting closes in 2 days',
     category: 'Environment',
     sourceName: 'Florida House Bills',
@@ -56,7 +56,7 @@ const bills = [
     title: 'Small Business Property Tax Relief',
     chamber: 'County ordinance agenda item',
     jurisdiction: 'St. Johns County',
-    level: 'St. Johns County',
+    level: 'County',
     status: 'Committee vote tomorrow',
     category: 'Economy',
     sourceName: 'St. Johns County BCC Agendas',
@@ -111,7 +111,7 @@ const bills = [
     title: 'Public Transit Reliability Funding',
     chamber: 'Public hearing item',
     jurisdiction: 'St. Johns County',
-    level: 'St. Johns County',
+    level: 'County',
     status: 'Public comment open',
     category: 'Transportation',
     sourceName: 'St. Johns County Calendar',
@@ -135,7 +135,36 @@ const bills = [
   }
 ];
 
-const filters = ['All', 'Federal', 'Florida', 'St. Johns County'];
+const filters = ['All', 'Federal', 'State', 'County'];
+
+const officialSourceRegistry = [
+  {
+    level: 'Federal',
+    sources: [
+      { name: 'Congress.gov', url: 'https://www.congress.gov/' },
+      { name: 'GovInfo', url: 'https://www.govinfo.gov/' },
+      { name: 'Federal Register', url: 'https://www.federalregister.gov/' },
+      { name: 'Regulations.gov', url: 'https://www.regulations.gov/' },
+      { name: 'eCFR', url: 'https://www.ecfr.gov/' }
+    ]
+  },
+  {
+    level: 'State',
+    sources: [
+      { name: 'Official state legislature sites', url: 'https://www.usa.gov/state-governments' },
+      { name: 'State bill text, amendments, journals, and roll calls', url: 'https://www.usa.gov/state-governments' },
+      { name: 'State executive agency rulemaking portals', url: 'https://www.usa.gov/state-governments' }
+    ]
+  },
+  {
+    level: 'Local',
+    sources: [
+      { name: 'County and city commission agendas', url: 'https://www.usa.gov/local-governments' },
+      { name: 'Clerk, recorder, and board minutes portals', url: 'https://www.usa.gov/local-governments' },
+      { name: 'Local official directories and election offices', url: 'https://www.usa.gov/local-governments' }
+    ]
+  }
+];
 
 const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => ({
   id: official.id,
@@ -152,10 +181,10 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
 }));
 
 const defaultJurisdiction = {
-  label: 'Saint Johns, Florida',
-  state: 'Florida',
-  county: 'St. Johns County',
-  levels: ['Federal', 'Florida', 'St. Johns County']
+  label: 'Nationwide demo',
+  state: 'All states',
+  county: 'All counties',
+  levels: ['Federal', 'State', 'County']
 };
 
 function App() {
@@ -169,7 +198,7 @@ function App() {
   const [locationOpen, setLocationOpen] = useState(false);
   const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
   const [locationStatus, setLocationStatus] = useState('idle');
-  const [locationMessage, setLocationMessage] = useState('Location is set to the Saint Johns demo jurisdiction.');
+  const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
   const [localComments, setLocalComments] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
@@ -250,7 +279,7 @@ function App() {
   function requestLocation() {
     if (!navigator.geolocation) {
       setLocationStatus('error');
-      setLocationMessage('This browser does not support location sharing. Saint Johns remains selected.');
+      setLocationMessage('This browser does not support location sharing. Nationwide demo remains selected.');
       return;
     }
 
@@ -276,19 +305,19 @@ function App() {
             label: `${county}, ${state}`,
             state,
             county,
-            levels: ['Federal', state, county]
+            levels: ['Federal', 'State', 'County']
           });
           setActiveFilter('All');
           setLocationStatus('ready');
-          setLocationMessage(`Showing federal, ${state}, and ${county} items with official source links.`);
+          setLocationMessage(`Showing federal, ${state}, and ${county} items with official government source links.`);
         } catch {
           setLocationStatus('error');
-          setLocationMessage('Location was allowed, but jurisdiction lookup failed. Saint Johns remains selected.');
+          setLocationMessage('Location was allowed, but jurisdiction lookup failed. Nationwide demo remains selected.');
         }
       },
       () => {
         setLocationStatus('error');
-        setLocationMessage('Location was not allowed. Saint Johns remains selected as the demo jurisdiction.');
+        setLocationMessage('Location was not allowed. Nationwide demo remains selected.');
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
@@ -377,7 +406,7 @@ function App() {
         </div>
         <div className="trust-panel">
           <ShieldCheck size={18} />
-          <p>Summaries are labeled drafts until reviewed against the official bill text.</p>
+          <p>Plain-English summaries link back to official sources and are not legal advice.</p>
         </div>
       </aside>
 
@@ -396,6 +425,7 @@ function App() {
           <PoliticianProfilesPage
             profiles={floridaOfficialProfiles}
             officialData={floridaOfficialData}
+            sourceRegistry={officialSourceRegistry}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
@@ -502,7 +532,7 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
   return (
     <article className={selected ? 'bill-card selected' : 'bill-card'}>
       <button className="card-hit-area" onClick={onSelect} aria-label={`Open ${bill.title}`} />
-      <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open AI overview for ${bill.title}`}>
+      <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
         <img src={bill.image} alt="" className="bill-image" />
       </a>
       <div className="bill-content">
@@ -528,7 +558,7 @@ function BillCard({ bill, commentCount, userVote, saved, selected, onSelect, onO
             onClick={handleOverviewClick}
           >
             <FileText size={15} />
-            AI overview
+            Plain-English summary
           </a>
           <a className="source-link" href={bill.sourceUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={15} />
@@ -655,7 +685,7 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
       <section className="ai-overview-box">
         <div className="section-title">
           <FileText size={18} />
-          <strong>AI overview</strong>
+          <strong>Plain-English summary</strong>
         </div>
         <p>{bill.detail}</p>
         <div className="split-section">
@@ -703,19 +733,38 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
   );
 }
 
-function PoliticianProfilesPage({ profiles, officialData, votes, onClaim }) {
+function PoliticianProfilesPage({ profiles, officialData, sourceRegistry, votes, onClaim }) {
   return (
-    <section className="profiles-page" aria-label="Florida official profiles">
+    <section className="profiles-page" aria-label="Nationwide official profiles">
       <div className="profiles-header">
         <div>
-          <h1>Florida Official Profiles</h1>
-          <p>Auto-created public profiles compare official votes with your votes on the same items.</p>
+          <h1>Nationwide Official Profiles</h1>
+          <p>Auto-created public profiles compare official votes with your votes on federal, state, and local items.</p>
         </div>
         <span>Claim flow prototype</span>
       </div>
+      <div className="source-registry-panel">
+        <div>
+          <strong>Official-source coverage plan</strong>
+          <span>Ingestion is nationwide by design: federal sources first, then each state legislature, then county and municipal agenda systems by user location.</span>
+        </div>
+        <div className="source-registry-grid">
+          {sourceRegistry.map((group) => (
+            <div className="source-registry-group" key={group.level}>
+              <strong>{group.level}</strong>
+              {group.sources.map((source) => (
+                <a href={source.url} target="_blank" rel="noreferrer" key={`${group.level}-${source.name}`}>
+                  <ExternalLink size={14} />
+                  {source.name}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="data-spike-panel">
-        <strong>Florida data spike</strong>
-        <span>{officialData.officials.length} Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} vote-history records imported from official Florida Senate pages.</span>
+        <strong>First state import: Florida</strong>
+        <span>{officialData.officials.length} Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} vote-history records imported from official Florida Senate pages. This remains the seed dataset while nationwide connectors are added.</span>
         <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Senate source

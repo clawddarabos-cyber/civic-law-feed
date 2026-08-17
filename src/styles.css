@@ -662,26 +662,52 @@ button {
   gap: 14px;
 }
 
+.source-registry-panel,
 .data-spike-panel {
   display: grid;
-  gap: 5px;
+  gap: 12px;
   border: 1px solid #d9e1d6;
   border-radius: 8px;
   background: #fbfcf8;
   padding: 13px;
 }
 
+.source-registry-panel > div:first-child {
+  display: grid;
+  gap: 5px;
+}
+
 .data-spike-panel strong,
-.data-spike-panel span {
+.data-spike-panel span,
+.source-registry-panel strong,
+.source-registry-panel span {
   display: block;
 }
 
-.data-spike-panel span {
+.data-spike-panel span,
+.source-registry-panel span {
   color: #657069;
   line-height: 1.45;
 }
 
-.data-spike-panel a {
+.source-registry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.source-registry-group {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  border: 1px solid #edf1ea;
+  border-radius: 8px;
+  background: #fff;
+  padding: 11px;
+}
+
+.data-spike-panel a,
+.source-registry-group a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1038,6 +1064,10 @@ button {
   .vote-record-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .source-registry-grid {
+    grid-template-columns: 1fr;
   }
 
   .vote-pair {

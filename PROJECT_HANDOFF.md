@@ -1,10 +1,10 @@
 # Civic Law Feed Project Handoff
 
-Last updated: 2026-07-05
+Last updated: 2026-08-17
 
 ## Current Status
 
-This is a public React/Vite prototype for a location-aware civic social feed. Users can browse civic items, vote Yes/No, save and share posts, open AI overview pages, add local comments, allow location lookup, and compare their votes against starter Florida official profiles.
+This is a public React/Vite prototype for a nationwide, location-aware civic briefing feed. Users can browse civic items, vote Yes/No, save and share posts, open Plain-English summary pages, add local comments, allow location lookup, and compare their votes against starter official profiles.
 
 - Live site: https://civics.johndarabos.com/
 - GitHub repo: https://github.com/clawddarabos-cyber/civic-law-feed
@@ -14,13 +14,19 @@ The live site is deployed through GitHub Pages. `civics.johndarabos.com` is prox
 
 ## Product Direction
 
-The product direction is a civic network:
+The product direction is a nationwide civic briefing and source-backed sentiment tool:
 
-- Users see federal, state, and county-level laws/items based on location.
+- Users see federal, state, county, and eventually municipal laws/items based on location.
 - Each post has a plain-English summary, official source/validation links, votes, saves, shares, and comments.
-- Clicking a title, image, description, or AI overview link opens a dedicated post page.
+- Clicking a title, image, description, or Plain-English summary link opens a dedicated post page.
 - Users can compare their votes against politicians' recorded votes.
 - Politicians get auto-created public profiles and can claim them, like a Google Business Profile for elected officials.
+- MVP is nationwide from day one. Florida remains the first seeded state import, not the product boundary.
+- Federal coverage is required from the start.
+- Use official government sources only for claims and source links.
+- Label generated explanations as "Plain-English summary"; do not call them "AI overview" in product copy unless reviewed/approved later.
+- Include official profiles in MVP.
+- Disclaimer tone should be light: source-backed civic info, not legal advice.
 
 ## Tech Stack
 
@@ -43,7 +49,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 
 ## Files
 
-- `src/App.jsx` contains the prototype data, routing state, feed UI, AI overview pages, local comments, voting, save/share behavior, location lookup, and official profile comparison.
+- `src/App.jsx` contains the prototype data, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share behavior, location lookup, source coverage registry, and official profile comparison.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
 - `index.html` is the Vite entry.
@@ -58,15 +64,15 @@ Current prototype includes:
 - Profile icon opens a location panel.
 - Browser geolocation permission flow.
 - U.S. Census Geocoder lookup from coordinates to state/county.
-- Saint Johns, Florida default jurisdiction.
-- Jurisdiction filters: All, Federal, Florida, St. Johns County.
+- Nationwide demo default jurisdiction.
+- Jurisdiction filters: All, Federal, State, County.
 - Feed cards with images, summaries, source links, Yes/No voting, comment counts, save, and share.
 - Card image/title/description open the dedicated post page.
-- AI overview route at `#/overview/:id`.
-- Post page with AI-style overview, pros/cons, official source links, comments, and a local comment form.
+- Plain-English summary route at `#/overview/:id`.
+- Post page with Plain-English summary, pros/cons, official source links, comments, and a local comment form.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
-- Officials section with starter Florida official profiles.
+- Officials section framed as nationwide official profiles, currently seeded by Florida Senate official data.
 - Official profile cards include source links, recorded votes, comparison against the user's votes, and a Claim Profile CTA.
 - Florida data importer script that pulls official Florida Senate members and a first page of 2026 Senate bills into `data/florida-official-data.json`.
 
@@ -74,10 +80,16 @@ Current prototype includes:
 
 The app still uses prototype data in `src/App.jsx`. Official links are attached, but items and official profile records are not live-ingested yet.
 
-Current official source targets:
+Current official source targets and coverage plan:
 
 - Federal: https://www.congress.gov/
 - Congress.gov API docs: https://www.loc.gov/apis/additional-apis/congress-dot-gov-api/
+- GovInfo: https://www.govinfo.gov/
+- Federal Register: https://www.federalregister.gov/
+- Regulations.gov: https://www.regulations.gov/
+- eCFR: https://www.ecfr.gov/
+- USA.gov state government directory: https://www.usa.gov/state-governments
+- USA.gov local government directory: https://www.usa.gov/local-governments
 - Florida House bills: https://www.flhouse.gov/sections/bills/bills.aspx
 - Florida Senate bills: https://www.flsenate.gov/session/bills
 - Florida House members: https://www.flhouse.gov/Sections/Representatives/representatives.aspx
@@ -87,7 +99,7 @@ Current official source targets:
 - St. Johns County commissioners: https://www.sjcfl.us/commissioners/
 - Census geocoder: https://geocoding.geo.census.gov/geocoder/
 
-Important: the politician profiles are placeholder profile records. The next serious milestone is ingesting real Florida House/Senate member and roll-call data, then creating profiles from that.
+Important: most politician profiles are still placeholder-style records generated from imported official member data. The next serious milestone is a nationwide connector registry, starting with federal roll-call/member ingestion and then repeatable state/local connectors.
 
 Current data spike:
 
@@ -156,13 +168,13 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 
 ## Best Next Steps
 
-1. Build a real data ingestion layer for Florida first.
-2. Replace prototype profile cards with generated records from `data/florida-official-data.json`.
-3. Add Florida House member ingestion.
-4. Ingest roll-call votes and map them to bill/item records.
-5. Make official profiles item-specific and source-backed.
+1. Build the federal ingestion connector first: Congress.gov bills, members, committees, actions, and roll calls where available.
+2. Define a repeatable state/local source connector schema for legislature, executive rulemaking, county/city agendas, clerks, minutes, and official directories.
+3. Keep Florida as the first state import and add Florida House member/roll-call ingestion.
+4. Replace prototype feed cards with official-source records for federal, state, and local items.
+5. Make official profiles item-specific, source-backed, and nationwide.
 6. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
-7. Replace static prototype cards with official-source records for Florida and St. Johns County.
+7. Add district matching after geolocation so users see their federal, state, county, and municipal officials.
 
 ## Resume Checklist
 
@@ -171,4 +183,4 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 3. Run `npm install` if dependencies are missing.
 4. Run `npm run build`.
 5. Check `https://civics.johndarabos.com/`.
-6. Decide whether to continue with real Florida data ingestion or pivot to another feature.
+6. Continue with nationwide ingestion: federal first, Florida as the first state connector, then local agenda connectors.
