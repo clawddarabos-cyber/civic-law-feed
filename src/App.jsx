@@ -30,9 +30,10 @@ import {
   Users,
   X
 } from 'lucide-react';
+import federalCivicItems from '../data/federal-civic-items.json';
 import floridaOfficialData from '../data/florida-official-data.json';
 
-const bills = [
+const prototypeBills = [
   {
     id: 'hb-418',
     title: 'Clean Water Infrastructure Renewal Act',
@@ -160,6 +161,8 @@ const bills = [
     comments: 402
   }
 ];
+
+const bills = [...federalCivicItems.items, ...prototypeBills];
 
 const filters = ['All', 'Federal', 'State', 'County'];
 
@@ -614,6 +617,7 @@ function App() {
         ) : activeSection === 'more' ? (
           <MorePage
             sourceRegistry={officialSourceRegistry}
+            federalData={federalCivicItems}
             officialData={floridaOfficialData}
             jurisdiction={jurisdiction}
             onAction={showNotice}
@@ -773,8 +777,10 @@ function getCommentCount(bill, localComments) {
 }
 
 function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onReminder, onFollow, onRepost, onShare, onActivity }) {
-  const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
-  const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
+  const yesCount = bill.yes + (userVote === 'yes' ? 1 : 0);
+  const noCount = bill.no + (userVote === 'no' ? 1 : 0);
+  const total = yesCount + noCount;
+  const yesPercent = total ? Math.round((yesCount / total) * 100) : 0;
   const overviewHref = `#overview/${bill.id}`;
 
   function handleOverviewClick(event) {
@@ -810,7 +816,7 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
         </a>
         <div className="status-row">
           <span>{bill.status}</span>
-          <span>{yesPercent}% Yes</span>
+          <span>{total ? `${yesPercent}% Yes` : 'Be first to vote'}</span>
           <span>{commentCount} comments</span>
         </div>
         <div className="source-check-row">
@@ -841,8 +847,8 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
           </button>
         </div>
         <div className="action-row">
-          <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(bill.yes + (userVote === 'yes' ? 1 : 0))} onClick={() => onVote('yes')} />
-          <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={18} />} label={formatCount(bill.no + (userVote === 'no' ? 1 : 0))} onClick={() => onVote('no')} />
+          <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(yesCount)} onClick={() => onVote('yes')} />
+          <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={18} />} label={formatCount(noCount)} onClick={() => onVote('no')} />
           <button className={reposted ? 'icon-action reposted' : 'icon-action'} onClick={onRepost} aria-label={reposted ? 'Remove repost' : 'Repost civic item'}>
             <Repeat2 size={18} />
           </button>
@@ -1200,7 +1206,7 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, officialData, jurisdiction, onAction }) {
+function MorePage({ sourceRegistry, federalData, officialData, jurisdiction, onAction }) {
   const settingsSections = [
     ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
@@ -1226,7 +1232,11 @@ function MorePage({ sourceRegistry, officialData, jurisdiction, onAction }) {
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>
-        <span>{officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records are seeded from official Florida Senate pages while nationwide connectors are added.</span>
+        <span>{federalData.count} current federal bills are imported from Congress.gov, alongside {officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records from official Florida Senate pages.</span>
+        <a href={federalData.source} target="_blank" rel="noreferrer">
+          <ExternalLink size={15} />
+          Congress.gov API source
+        </a>
         <a href={officialData.sources.senateMembers} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Florida Senate source

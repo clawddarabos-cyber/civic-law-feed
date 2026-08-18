@@ -49,7 +49,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 
 ## Files
 
-- `src/App.jsx` contains the prototype data, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share behavior, location lookup, source coverage registry, and official profile comparison.
+- `src/App.jsx` contains the prototype data, imported federal records, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share/reminder behavior, location lookup, source coverage registry, and official profile comparison.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
 - `index.html` is the Vite entry.
@@ -78,7 +78,7 @@ Current prototype includes:
 
 ## Data Sources and Caveats
 
-The app still uses prototype data in `src/App.jsx`. Official links are attached, but items and official profile records are not live-ingested yet.
+The app now renders a small static import of current federal bills from the official Congress.gov API ahead of the prototype records in `src/App.jsx`. State/local feed items and official profile records are still mostly prototype or seed data.
 
 Current official source targets and coverage plan:
 
@@ -104,8 +104,12 @@ Important: most politician profiles are still placeholder-style records generate
 Current data spike:
 
 - `npm run import:florida`
+- `npm run import:federal`
 - Script: `scripts/import-florida-official-data.mjs`
+- Script: `scripts/import-federal-civic-items.mjs`
 - Output: `data/florida-official-data.json`
+- Output: `data/federal-civic-items.json`
+- Last federal import pulled 6 current 119th Congress bills from Congress.gov v3. The importer uses `CONGRESS_GOV_API_KEY` when present and falls back to `DEMO_KEY` for small prototype imports.
 - Last run imported 40 Florida Senate officials, 40 Florida Senate bills, and 28 vote-history records from official Senate pages.
 - Vote-history records currently include roll-call summary counts and source PDF links. Per-senator PDF parsing is not implemented yet.
 - Florida House source is still tracked as an official source target, but member parsing has not been implemented yet.

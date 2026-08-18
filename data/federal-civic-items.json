@@ -1,0 +1,266 @@
+{
+  "generatedAt": "2026-08-18T20:54:25.442Z",
+  "source": "https://api.congress.gov/",
+  "congress": 119,
+  "count": 6,
+  "items": [
+    {
+      "id": "congress-119-s-5269",
+      "title": "Pay PCPs Act of 2026",
+      "chamber": "Senate Bill 5269",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Finance.",
+      "deadline": "Latest action 2026-08-05",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5269",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5269",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Finance.",
+      "detail": "Read twice and referred to the Committee on Finance.",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5269?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5269",
+        "introducedDate": "2026-08-05",
+        "latestActionDate": "2026-08-05",
+        "updateDate": "2026-08-18"
+      }
+    },
+    {
+      "id": "congress-119-s-5267",
+      "title": "Accountable Produce is Medicine Act of 2026",
+      "chamber": "Senate Bill 5267",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Finance.",
+      "deadline": "Latest action 2026-08-05",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5267",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5267",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Finance.",
+      "detail": "Read twice and referred to the Committee on Finance.",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5267?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5267",
+        "introducedDate": "2026-08-05",
+        "latestActionDate": "2026-08-05",
+        "updateDate": "2026-08-18"
+      }
+    },
+    {
+      "id": "congress-119-s-5259",
+      "title": "End Housing Welfare for Illegal Aliens Act",
+      "chamber": "Senate Bill 5259",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Banking, Housing, and Urban Affairs.",
+      "deadline": "Latest action 2026-08-05",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5259",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5259",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Banking, Housing, and Urban Affairs.",
+      "detail": "Read twice and referred to the Committee on Banking, Housing, and Urban Affairs.",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5259?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5259",
+        "introducedDate": "2026-08-05",
+        "latestActionDate": "2026-08-05",
+        "updateDate": "2026-08-18"
+      }
+    },
+    {
+      "id": "congress-119-s-5263",
+      "title": "Workforce Recovery and Resilience Act",
+      "chamber": "Senate Bill 5263",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Health, Education, Labor, and Pensions.",
+      "deadline": "Latest action 2026-08-05",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5263",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5263",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Health, Education, Labor, and Pensions.",
+      "detail": "Read twice and referred to the Committee on Health, Education, Labor, and Pensions.",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5263?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5263",
+        "introducedDate": "2026-08-05",
+        "latestActionDate": "2026-08-05",
+        "updateDate": "2026-08-18"
+      }
+    },
+    {
+      "id": "congress-119-s-5309",
+      "title": "COWS Act of 2026",
+      "chamber": "Senate Bill 5309",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Agriculture, Nutrition, and Forestry. (Sponsor introductory remarks on measure: CR S4520)",
+      "deadline": "Latest action 2026-08-06",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5309",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5309",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Agriculture, Nutrition, and Forestry. (Sponsor introductory remarks on measure: CR S4520)",
+      "detail": "Read twice and referred to the Committee on Agriculture, Nutrition, and Forestry. (Sponsor introductory remarks on measure: CR S4520)",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5309?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5309",
+        "introducedDate": "2026-08-06",
+        "latestActionDate": "2026-08-06",
+        "updateDate": "2026-08-18"
+      }
+    },
+    {
+      "id": "congress-119-s-5261",
+      "title": "FIRE Cancer Act of 2026",
+      "chamber": "Senate Bill 5261",
+      "jurisdiction": "Federal",
+      "level": "Federal",
+      "status": "Read twice and referred to the Committee on Homeland Security and Governmental Affairs.",
+      "deadline": "Latest action 2026-08-05",
+      "lastUpdated": "Updated 2026-08-18",
+      "sourceStatus": "Congress.gov record checked",
+      "nextAction": "Open the official record for text, sponsors, actions, and summaries",
+      "category": "Federal legislation",
+      "sourceName": "Congress.gov",
+      "sourceUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5261",
+      "officialTextUrl": "https://www.congress.gov/bill/119th-congress/senate-bill/5261",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80",
+      "summary": "Read twice and referred to the Committee on Homeland Security and Governmental Affairs.",
+      "detail": "Read twice and referred to the Committee on Homeland Security and Governmental Affairs.",
+      "pros": [
+        "Review the official text and CRS summary",
+        "Check sponsors, committees, and latest actions",
+        "Compare changes before voting or commenting"
+      ],
+      "cons": [
+        "Public impact depends on final text",
+        "Committee and amendment activity may change the bill",
+        "Fiscal and implementation details may require deeper review"
+      ],
+      "yes": 0,
+      "no": 0,
+      "friendVotes": [],
+      "comments": 0,
+      "imported": {
+        "source": "Congress.gov API",
+        "apiUrl": "https://api.congress.gov/v3/bill/119/s/5261?format=json",
+        "congress": 119,
+        "type": "S",
+        "number": "5261",
+        "introducedDate": "2026-08-05",
+        "latestActionDate": "2026-08-05",
+        "updateDate": "2026-08-18"
+      }
+    }
+  ]
+}
