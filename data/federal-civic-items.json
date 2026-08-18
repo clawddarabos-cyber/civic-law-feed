@@ -36,6 +36,30 @@
       "no": 0,
       "friendVotes": [],
       "comments": 0,
+      "sponsors": [
+        {
+          "name": "Sen. Whitehouse, Sheldon [D-RI]",
+          "party": "D",
+          "state": "RI",
+          "bioguideId": "W000802",
+          "url": "https://api.congress.gov/v3/member/W000802?format=json"
+        }
+      ],
+      "committees": [
+        {
+          "name": "Senate Finance Committee",
+          "chamber": "Senate",
+          "type": "Standing",
+          "activities": []
+        }
+      ],
+      "actions": [
+        {
+          "date": "2026-08-05",
+          "text": "Read twice and referred to the Committee on Finance.",
+          "type": "IntroReferral"
+        }
+      ],
       "imported": {
         "source": "Congress.gov API",
         "apiUrl": "https://api.congress.gov/v3/bill/119/s/5269?format=json",
@@ -44,7 +68,8 @@
         "number": "5269",
         "introducedDate": "2026-08-05",
         "latestActionDate": "2026-08-05",
-        "updateDate": "2026-08-18"
+        "updateDate": "2026-08-18",
+        "detailLoaded": true
       }
     },
     {

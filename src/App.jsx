@@ -776,6 +776,22 @@ function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
+function FederalContext({ bill }) {
+  const sponsor = bill.sponsors?.[0];
+  const committee = bill.committees?.[0];
+  const action = bill.actions?.[0];
+
+  if (!sponsor && !committee && !action) return null;
+
+  return (
+    <div className="federal-context-row">
+      {sponsor && <span><Users size={14} /> {sponsor.name}</span>}
+      {committee && <span><BadgeCheck size={14} /> {committee.name}</span>}
+      {action && <span><FileText size={14} /> {action.date}</span>}
+    </div>
+  );
+}
+
 function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onReminder, onFollow, onRepost, onShare, onActivity }) {
   const yesCount = bill.yes + (userVote === 'yes' ? 1 : 0);
   const noCount = bill.no + (userVote === 'no' ? 1 : 0);
@@ -824,6 +840,7 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
           <span><CalendarDays size={14} /> {bill.deadline}</span>
           <span>{bill.lastUpdated}</span>
         </div>
+        <FederalContext bill={bill} />
         <div className="next-action-box">
           <strong>Next step</strong>
           <span>{bill.nextAction}</span>
@@ -946,6 +963,7 @@ function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, o
             {reminderSet ? 'Reminder set' : 'Remind me'}
           </button>
         </div>
+        <FederalContext bill={bill} />
         <div className="source-box">
           <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
@@ -1311,6 +1329,7 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
         <span><CalendarDays size={14} /> {bill.deadline}</span>
         <span>{bill.lastUpdated}</span>
       </div>
+      <FederalContext bill={bill} />
       <h1>{bill.title}</h1>
       <section className="ai-overview-box">
         <div className="section-title">

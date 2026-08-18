@@ -109,7 +109,7 @@ Current data spike:
 - Script: `scripts/import-federal-civic-items.mjs`
 - Output: `data/florida-official-data.json`
 - Output: `data/federal-civic-items.json`
-- Last federal import pulled 6 current 119th Congress bills from Congress.gov v3. The importer uses `CONGRESS_GOV_API_KEY` when present and falls back to `DEMO_KEY` for small prototype imports.
+- Last federal import pulled 6 current 119th Congress bills from Congress.gov v3. The importer now supports sponsor, committee, action, and summary detail imports. It uses `CONGRESS_GOV_API_KEY` when present and falls back to `DEMO_KEY`, but the public demo key rate-limits quickly, so regular detail imports need a real key.
 - Last run imported 40 Florida Senate officials, 40 Florida Senate bills, and 28 vote-history records from official Senate pages.
 - Vote-history records currently include roll-call summary counts and source PDF links. Per-senator PDF parsing is not implemented yet.
 - Florida House source is still tracked as an official source target, but member parsing has not been implemented yet.

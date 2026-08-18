@@ -4,6 +4,7 @@ const API_ROOT = 'https://api.congress.gov/v3';
 const CONGRESS = process.env.CONGRESS_NUMBER || '119';
 const API_KEY = process.env.CONGRESS_GOV_API_KEY || 'DEMO_KEY';
 const LIMIT = Number(process.env.FEDERAL_IMPORT_LIMIT || 6);
+const REQUEST_DELAY_MS = Number(process.env.FEDERAL_IMPORT_DELAY_MS || 900);
 
 function apiUrl(path, params = {}) {
   const url = new URL(`${API_ROOT}${path}`);
@@ -23,6 +24,18 @@ async function fetchJson(path, params) {
     throw new Error(`Congress.gov request failed: ${response.status} ${response.statusText}`);
   }
   return response.json();
+}
+
+async function optionalFetchJson(path, params) {
+  try {
+    return await fetchJson(path, params);
+  } catch {
+    return null;
+  }
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function billTypePath(type) {
@@ -64,11 +77,50 @@ async function summaryForBill(bill) {
   return sentenceFromHtml(summary);
 }
 
-function normalizeBill(bill, summary) {
+async function contextForBill(bill) {
+  const type = bill.type.toLowerCase();
+  const basePath = `/bill/${bill.congress}/${type}/${bill.number}`;
+  const detailData = await optionalFetchJson(basePath);
+  await wait(REQUEST_DELAY_MS);
+  const actionsData = await optionalFetchJson(`${basePath}/actions`, { limit: 5 });
+  await wait(REQUEST_DELAY_MS);
+  const committeesData = await optionalFetchJson(`${basePath}/committees`, { limit: 5 });
+
+  const detailBill = detailData?.bill || {};
+  const actions = (actionsData?.actions || []).map((action) => ({
+    date: action.actionDate,
+    text: sentenceFromHtml(action.text),
+    type: action.type
+  }));
+  const committees = (committeesData?.committees || []).map((committee) => ({
+    name: committee.name,
+    chamber: committee.chamber,
+    type: committee.type,
+    activities: committee.activities || []
+  }));
+  const sponsors = (detailBill.sponsors || bill.sponsors || []).map((sponsor) => ({
+    name: sponsor.fullName || [sponsor.firstName, sponsor.lastName].filter(Boolean).join(' '),
+    party: sponsor.party,
+    state: sponsor.state,
+    bioguideId: sponsor.bioguideId,
+    url: sponsor.url
+  }));
+
+  return {
+    bill: { ...bill, ...detailBill },
+    sponsors,
+    committees,
+    actions
+  };
+}
+
+function normalizeBill(bill, summary, context) {
   const sourceUrl = humanBillUrl(bill);
   const latestAction = bill.latestAction?.text || 'Latest official action is available on Congress.gov.';
   const latestActionDate = bill.latestAction?.actionDate || bill.updateDate || bill.introducedDate;
   const shortSummary = summary || latestAction;
+  const primarySponsor = context.sponsors[0]?.name || 'Sponsor listed on Congress.gov';
+  const primaryCommittee = context.committees[0]?.name || 'Committee referral listed on Congress.gov';
 
   return {
     id: `congress-${bill.congress}-${bill.type.toLowerCase()}-${bill.number}`,
@@ -80,7 +132,7 @@ function normalizeBill(bill, summary) {
     deadline: latestActionDate ? `Latest action ${latestActionDate}` : 'Latest action available',
     lastUpdated: bill.updateDate ? `Updated ${bill.updateDate}` : 'Updated by Congress.gov',
     sourceStatus: 'Congress.gov record checked',
-    nextAction: 'Open the official record for text, sponsors, actions, and summaries',
+    nextAction: `Review ${primarySponsor} and ${primaryCommittee}`,
     category: bill.policyArea?.name || 'Federal legislation',
     sourceName: 'Congress.gov',
     sourceUrl,
@@ -102,6 +154,9 @@ function normalizeBill(bill, summary) {
     no: 0,
     friendVotes: [],
     comments: 0,
+    sponsors: context.sponsors,
+    committees: context.committees,
+    actions: context.actions,
     imported: {
       source: 'Congress.gov API',
       apiUrl: bill.url,
@@ -110,7 +165,8 @@ function normalizeBill(bill, summary) {
       number: bill.number,
       introducedDate: bill.introducedDate,
       latestActionDate,
-      updateDate: bill.updateDate
+      updateDate: bill.updateDate,
+      detailLoaded: Boolean(context.sponsors.length || context.committees.length || context.actions.length)
     }
   };
 }
@@ -123,13 +179,16 @@ async function main() {
 
   const items = [];
   for (const bill of data.bills || []) {
+    const context = await contextForBill(bill);
+    await wait(REQUEST_DELAY_MS);
     let summary = '';
     try {
-      summary = await summaryForBill(bill);
+      summary = await summaryForBill(context.bill);
     } catch {
       summary = '';
     }
-    items.push(normalizeBill(bill, summary));
+    items.push(normalizeBill(context.bill, summary, context));
+    await wait(REQUEST_DELAY_MS);
   }
 
   const output = {

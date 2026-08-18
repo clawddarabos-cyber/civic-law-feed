@@ -530,13 +530,22 @@ button {
   gap: 7px;
 }
 
-.source-check-row span {
+.source-check-row span,
+.federal-context-row span {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   border-radius: 999px;
   background: #f7f9f9;
   padding: 5px 8px;
+}
+
+.federal-context-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  color: #536471;
+  font-size: 13px;
 }
 
 .next-action-box {
@@ -1544,6 +1553,7 @@ button {
   .meta-row span,
   .status-row span,
   .source-check-row span,
+  .federal-context-row span,
   .profiles-header > span,
   .profile-status-row span,
   .notification-icon {
