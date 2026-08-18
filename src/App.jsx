@@ -40,6 +40,10 @@ const bills = [
     jurisdiction: 'Florida',
     level: 'State',
     status: 'Voting closes in 2 days',
+    deadline: 'Comment or vote by Aug 20',
+    lastUpdated: 'Updated 2h ago',
+    sourceStatus: 'Official source checked',
+    nextAction: 'Review water-quality reporting rules',
     category: 'Environment',
     sourceName: 'Florida House Bills',
     sourceUrl: 'https://www.flhouse.gov/sections/bills/bills.aspx',
@@ -68,6 +72,10 @@ const bills = [
     jurisdiction: 'St. Johns County',
     level: 'County',
     status: 'Committee vote tomorrow',
+    deadline: 'Committee vote Aug 19',
+    lastUpdated: 'Updated 4h ago',
+    sourceStatus: 'Agenda source checked',
+    nextAction: 'Check exemption eligibility language',
     category: 'Economy',
     sourceName: 'St. Johns County BCC Agendas',
     sourceUrl: 'https://stjohnsclerk.com/board-records/agendas/',
@@ -95,6 +103,10 @@ const bills = [
     jurisdiction: 'Federal',
     level: 'Federal',
     status: 'Floor vote Friday',
+    deadline: 'Floor vote Aug 21',
+    lastUpdated: 'Updated today',
+    sourceStatus: 'Federal source checked',
+    nextAction: 'Compare vendor privacy requirements',
     category: 'Education',
     sourceName: 'Congress.gov',
     sourceUrl: 'https://www.congress.gov/',
@@ -123,6 +135,10 @@ const bills = [
     jurisdiction: 'St. Johns County',
     level: 'County',
     status: 'Public comment open',
+    deadline: 'Public comment open now',
+    lastUpdated: 'Updated yesterday',
+    sourceStatus: 'Calendar source checked',
+    nextAction: 'Review hearing time and comment rules',
     category: 'Transportation',
     sourceName: 'St. Johns County Calendar',
     sourceUrl: 'https://www.sjcfl.us/bcc-calendar/',
@@ -232,6 +248,7 @@ function App() {
   const [votes, setVotes] = useState({});
   const [saved, setSaved] = useState(() => new Set(['hb-771']));
   const [followed, setFollowed] = useState(() => new Set(['Federal', 'Congress.gov']));
+  const [reminders, setReminders] = useState(() => new Set(['sb-144']));
   const [reposted, setReposted] = useState(() => new Set());
   const [userPosts, setUserPosts] = useState([]);
   const [composerDraft, setComposerDraft] = useState('');
@@ -274,6 +291,11 @@ function App() {
   }, [followed, saved, visibleBills]);
 
   const timelineBills = activeTab === 'following' ? followingBills : visibleBills;
+  const hasFeedFilters = query.trim() || activeFilter !== 'All';
+  const timelineEmptyTitle = hasFeedFilters ? 'No matching civic items' : 'No posts in this feed yet';
+  const timelineEmptyBody = hasFeedFilters
+    ? 'Try a broader search or switch the level filter back to All.'
+    : 'Follow a source, level, or saved bill to populate this timeline.';
   const selected = bills.find((bill) => bill.id === selectedId) || visibleBills[0] || bills[0];
   const activeOverview = bills.find((bill) => bill.id === activeOverviewId);
 
@@ -318,6 +340,20 @@ function App() {
       } else {
         next.add(id);
         showNotice('Reposted to your followers');
+      }
+      return next;
+    });
+  }
+
+  function toggleReminder(id) {
+    setReminders((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+        showNotice('Reminder removed');
+      } else {
+        next.add(id);
+        showNotice('Reminder set');
       }
       return next;
     });
@@ -672,6 +708,7 @@ function App() {
               commentCount={getCommentCount(bill, localComments)}
               userVote={votes[bill.id]}
               saved={saved.has(bill.id)}
+              reminderSet={reminders.has(bill.id)}
               followed={followed.has(bill.id) || followed.has(bill.sourceName)}
               reposted={reposted.has(bill.id)}
               selected={bill.id === selected.id}
@@ -679,6 +716,7 @@ function App() {
               onOpenOverview={() => openOverview(bill.id)}
               onVote={(vote) => voteOnBill(bill.id, vote)}
               onSave={() => toggleSaved(bill.id)}
+              onReminder={() => toggleReminder(bill.id)}
               onFollow={() => toggleFollow(bill.sourceName)}
               onRepost={() => toggleRepost(bill.id)}
               onShare={() => shareBill(bill)}
@@ -687,10 +725,17 @@ function App() {
           ))}
           {!timelineBills.length && (
             <EmptyState
-              title="No posts in this feed yet"
-              body="Follow a source, level, or saved bill to populate this timeline."
-              action="Explore sources"
-              onAction={() => openSection('explore')}
+              title={timelineEmptyTitle}
+              body={timelineEmptyBody}
+              action={hasFeedFilters ? 'Clear filters' : 'Explore sources'}
+              onAction={() => {
+                if (hasFeedFilters) {
+                  setQuery('');
+                  setActiveFilter('All');
+                } else {
+                  openSection('explore');
+                }
+              }}
             />
           )}
             </section>
@@ -706,6 +751,8 @@ function App() {
           saved={saved.has(selected.id)}
           onVote={(vote) => voteOnBill(selected.id, vote)}
           onSave={() => toggleSaved(selected.id)}
+          reminderSet={reminders.has(selected.id)}
+          onReminder={() => toggleReminder(selected.id)}
           query={query}
           onQueryChange={setQuery}
           onOpenExplore={() => openSection('explore')}
@@ -725,7 +772,7 @@ function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
-function BillCard({ bill, commentCount, userVote, saved, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onFollow, onRepost, onShare, onActivity }) {
+function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onReminder, onFollow, onRepost, onShare, onActivity }) {
   const total = bill.yes + bill.no + (userVote === 'yes' ? 1 : 0) + (userVote === 'no' ? 1 : 0);
   const yesPercent = Math.round(((bill.yes + (userVote === 'yes' ? 1 : 0)) / total) * 100);
   const overviewHref = `#overview/${bill.id}`;
@@ -766,6 +813,15 @@ function BillCard({ bill, commentCount, userVote, saved, followed, reposted, sel
           <span>{yesPercent}% Yes</span>
           <span>{commentCount} comments</span>
         </div>
+        <div className="source-check-row">
+          <span><ShieldCheck size={14} /> {bill.sourceStatus}</span>
+          <span><CalendarDays size={14} /> {bill.deadline}</span>
+          <span>{bill.lastUpdated}</span>
+        </div>
+        <div className="next-action-box">
+          <strong>Next step</strong>
+          <span>{bill.nextAction}</span>
+        </div>
         <div className="link-row">
           <a
             className="overview-link"
@@ -779,6 +835,10 @@ function BillCard({ bill, commentCount, userVote, saved, followed, reposted, sel
             <ExternalLink size={15} />
             {bill.sourceName}
           </a>
+          <button className={reminderSet ? 'small-pill active' : 'small-pill'} onClick={onReminder}>
+            <CalendarDays size={15} />
+            {reminderSet ? 'Reminder set' : 'Remind me'}
+          </button>
         </div>
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(bill.yes + (userVote === 'yes' ? 1 : 0))} onClick={() => onVote('yes')} />
@@ -830,7 +890,7 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function RightRail({ bill, commentCount, userVote, saved, onVote, onSave, query, onQueryChange, onOpenExplore }) {
+function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, onSave, onReminder, query, onQueryChange, onOpenExplore }) {
   return (
     <aside className="detail-panel" aria-label="Timeline context">
       <label className="rail-search">
@@ -870,6 +930,16 @@ function RightRail({ bill, commentCount, userVote, saved, onVote, onSave, query,
         </div>
         <h2>{bill.title}</h2>
         <p className="detail-copy">{bill.detail}</p>
+        <div className="right-action-stack">
+          <button className="small-pill active" onClick={onOpenExplore}>
+            <Search size={15} />
+            Find related
+          </button>
+          <button className={reminderSet ? 'small-pill active' : 'small-pill'} onClick={onReminder}>
+            <CalendarDays size={15} />
+            {reminderSet ? 'Reminder set' : 'Remind me'}
+          </button>
+        </div>
         <div className="source-box">
           <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
@@ -1225,6 +1295,11 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
         <span>{bill.chamber}</span>
         <span>{bill.jurisdiction}</span>
         <span>{bill.status}</span>
+      </div>
+      <div className="source-check-row overview-source-row">
+        <span><ShieldCheck size={14} /> {bill.sourceStatus}</span>
+        <span><CalendarDays size={14} /> {bill.deadline}</span>
+        <span>{bill.lastUpdated}</span>
       </div>
       <h1>{bill.title}</h1>
       <section className="ai-overview-box">

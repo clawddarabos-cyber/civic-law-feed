@@ -510,7 +510,8 @@ button {
 }
 
 .meta-row,
-.status-row {
+.status-row,
+.source-check-row {
   flex-wrap: wrap;
   color: #536471;
   font-size: 13px;
@@ -521,6 +522,40 @@ button {
   border-radius: 999px;
   background: #eff3f4;
   padding: 4px 8px;
+}
+
+.source-check-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.source-check-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: #f7f9f9;
+  padding: 5px 8px;
+}
+
+.next-action-box {
+  display: grid;
+  gap: 3px;
+  border-left: 3px solid #1d9bf0;
+  background: #f7f9f9;
+  padding: 9px 11px;
+}
+
+.next-action-box strong {
+  color: #0f1419;
+  font-size: 13px;
+}
+
+.next-action-box span {
+  color: #536471;
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .bill-content h2,
@@ -1043,6 +1078,10 @@ button {
 }
 
 .small-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 1px solid #cfd9de;
   border-radius: 999px;
   background: #fff;
@@ -1074,6 +1113,12 @@ button {
   border-radius: 16px;
   background: #fff;
   padding: 14px;
+}
+
+.right-action-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .chat-composer textarea {
@@ -1365,6 +1410,7 @@ button {
   .quick-grid button,
   .compact-row,
   .settings-row,
+  .next-action-box,
   .settings-footer button,
   .chat-composer,
   .comment-form textarea,
@@ -1474,6 +1520,7 @@ button {
   .settings-row small,
   .settings-footer button,
   .quick-grid small,
+  .next-action-box span,
   .source-note {
     color: #71767b;
   }
@@ -1496,10 +1543,19 @@ button {
   .rail-search,
   .meta-row span,
   .status-row span,
+  .source-check-row span,
   .profiles-header > span,
   .profile-status-row span,
   .notification-icon {
     background: #202327;
+  }
+
+  .next-action-box {
+    border-left-color: #1d9bf0;
+  }
+
+  .next-action-box strong {
+    color: #e7e9ea;
   }
 
   .chip {
