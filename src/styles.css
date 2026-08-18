@@ -252,6 +252,8 @@ button {
 .composer,
 .bill-card,
 .comments-panel,
+.source-metadata-panel,
+.report-panel,
 .ai-overview-box,
 .profile-card,
 .source-registry-panel,
@@ -821,6 +823,8 @@ button {
 .detail-copy,
 .comment-box p,
 .ai-overview-box p,
+.source-metadata-panel p,
+.report-panel p,
 .comment-row p {
   margin: 0;
   line-height: 1.55;
@@ -1205,6 +1209,8 @@ button {
 
 .ai-overview-box,
 .comments-panel,
+.source-metadata-panel,
+.report-panel,
 .profile-card,
 .source-registry-panel,
 .data-spike-panel {
@@ -1213,6 +1219,42 @@ button {
   border: 1px solid #eff3f4;
   border-radius: 16px;
   padding: 16px;
+}
+
+.metadata-grid,
+.report-list {
+  display: grid;
+  gap: 8px;
+}
+
+.metadata-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metadata-row,
+.report-row {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #eff3f4;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.metadata-row span,
+.report-row span,
+.source-metadata-panel p,
+.report-panel p {
+  color: #536471;
+}
+
+.metadata-row strong,
+.report-row strong {
+  color: #0f1419;
+  line-height: 1.3;
+}
+
+.report-row p {
+  margin: 0;
 }
 
 .comment-list {
@@ -1410,6 +1452,10 @@ button {
   .right-card,
   .ai-overview-box,
   .comments-panel,
+  .source-metadata-panel,
+  .report-panel,
+  .metadata-row,
+  .report-row,
   .profile-card,
   .source-registry-panel,
   .data-spike-panel,
@@ -1449,6 +1495,10 @@ button {
   .right-card,
   .ai-overview-box,
   .comments-panel,
+  .source-metadata-panel,
+  .report-panel,
+  .metadata-row,
+  .report-row,
   .profile-card,
   .source-registry-panel,
   .data-spike-panel,
@@ -1498,6 +1548,8 @@ button {
   .comment-form textarea,
   .search-box input,
   .rail-search input,
+  .metadata-row strong,
+  .report-row strong,
   .overview-back {
     color: #e7e9ea;
   }
@@ -1537,6 +1589,10 @@ button {
   .settings-footer button,
   .quick-grid small,
   .next-action-box span,
+  .source-metadata-panel p,
+  .report-panel p,
+  .metadata-row span,
+  .report-row span,
   .source-note {
     color: #71767b;
   }
@@ -1718,6 +1774,7 @@ button {
   }
 
   .source-registry-grid,
+  .metadata-grid,
   .split-section,
   .quick-grid:not(.follow-grid) {
     grid-template-columns: 1fr;

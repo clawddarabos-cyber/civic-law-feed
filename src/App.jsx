@@ -265,7 +265,8 @@ const storageKeys = {
   reminders: 'civic-feed:reminders',
   reposted: 'civic-feed:reposted',
   userPosts: 'civic-feed:user-posts',
-  localComments: 'civic-feed:local-comments'
+  localComments: 'civic-feed:local-comments',
+  sourceReports: 'civic-feed:source-reports'
 };
 
 function readStoredValue(key, fallback) {
@@ -335,6 +336,8 @@ function App() {
   const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
   const [localComments, setLocalComments] = useStoredState(storageKeys.localComments, {});
+  const [sourceReports, setSourceReports] = useStoredState(storageKeys.sourceReports, {});
+  const [sourceReportDrafts, setSourceReportDrafts] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [notice, setNotice] = useState('');
 
@@ -567,6 +570,28 @@ function App() {
     setCommentDrafts((current) => ({ ...current, [id]: '' }));
   }
 
+  function submitSourceReport(id) {
+    const text = (sourceReportDrafts[id] || '').trim();
+    if (!text) {
+      showNotice('Add a report note first');
+      return;
+    }
+    setSourceReports((current) => ({
+      ...current,
+      [id]: [
+        ...(current[id] || []),
+        {
+          id: `${id}-report-${Date.now()}`,
+          text,
+          created: 'Just now',
+          status: 'Queued for source review'
+        }
+      ]
+    }));
+    setSourceReportDrafts((current) => ({ ...current, [id]: '' }));
+    showNotice('Source report saved');
+  }
+
   function resetLocalData() {
     Object.values(storageKeys).forEach((key) => {
       try {
@@ -582,6 +607,8 @@ function App() {
     setReposted(new Set());
     setUserPosts([]);
     setLocalComments({});
+    setSourceReports({});
+    setSourceReportDrafts({});
     showNotice('Local demo data reset');
   }
 
@@ -647,9 +674,13 @@ function App() {
             comments={localComments[activeOverview.id] || []}
             commentDraft={commentDrafts[activeOverview.id] || ''}
             commentCount={getCommentCount(activeOverview, localComments)}
+            sourceReports={sourceReports[activeOverview.id] || []}
+            sourceReportDraft={sourceReportDrafts[activeOverview.id] || ''}
             onBack={closeOverview}
             onCommentChange={(value) => setCommentDrafts((current) => ({ ...current, [activeOverview.id]: value }))}
             onCommentSubmit={() => addComment(activeOverview.id)}
+            onSourceReportChange={(value) => setSourceReportDrafts((current) => ({ ...current, [activeOverview.id]: value }))}
+            onSourceReportSubmit={() => submitSourceReport(activeOverview.id)}
           />
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
@@ -1412,7 +1443,7 @@ function HashIcon() {
   return <span className="hash-icon">#</span>;
 }
 
-function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCommentChange, onCommentSubmit }) {
+function OverviewPage({ bill, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit }) {
   return (
     <article className="overview-page">
       <button className="overview-back" onClick={onBack}>Back to feed</button>
@@ -1450,6 +1481,33 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
           Text / validation
         </a>
       </div>
+      <SourceMetadata bill={bill} />
+      <section className="report-panel">
+        <div className="section-title">
+          <ShieldCheck size={18} />
+          <strong>Report a problem</strong>
+        </div>
+        <p>Flag a stale source, broken official link, bad summary, duplicate item, or missing jurisdiction.</p>
+        <div className="comment-form">
+          <textarea
+            value={sourceReportDraft}
+            placeholder="Describe the issue"
+            onChange={(event) => onSourceReportChange(event.target.value)}
+          />
+          <button className="location-button" onClick={onSourceReportSubmit}>Submit report</button>
+        </div>
+        {!!sourceReports.length && (
+          <div className="report-list">
+            {sourceReports.map((report) => (
+              <div className="report-row" key={report.id}>
+                <strong>{report.status}</strong>
+                <span>{report.created}</span>
+                <p>{report.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
       <section className="comments-panel">
         <div className="section-title">
           <MessageSquare size={18} />
@@ -1477,6 +1535,49 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, onBack, onCo
         </div>
       </section>
     </article>
+  );
+}
+
+function SourceMetadata({ bill }) {
+  const imported = bill.imported;
+  const metadataRows = imported
+    ? [
+        ['Source system', imported.source],
+        ['Congress', imported.congress],
+        ['Identifier', [imported.type, imported.number].filter(Boolean).join(' ')],
+        ['Introduced', imported.introducedDate],
+        ['Latest action', imported.latestActionDate],
+        ['Updated', imported.updateDate],
+        ['Detail import', imported.detailLoaded ? 'Sponsor, committee, and action context loaded' : 'Basic bill record loaded']
+      ].filter(([, value]) => value !== undefined && value !== null && value !== '')
+    : [
+        ['Source system', bill.sourceName],
+        ['Coverage stage', 'Prototype seed record'],
+        ['Validation', 'Official portal linked; item-specific import pending']
+      ];
+
+  return (
+    <section className="source-metadata-panel">
+      <div className="section-title">
+        <ShieldCheck size={18} />
+        <strong>Source freshness</strong>
+      </div>
+      <p>{bill.sourceStatus}. {bill.lastUpdated}. {bill.deadline}.</p>
+      <div className="metadata-grid">
+        {metadataRows.map(([label, value]) => (
+          <div className="metadata-row" key={label}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+      </div>
+      {imported?.apiUrl && (
+        <a className="source-link" href={imported.apiUrl} target="_blank" rel="noreferrer">
+          <ExternalLink size={15} />
+          API record
+        </a>
+      )}
+    </section>
   );
 }
 

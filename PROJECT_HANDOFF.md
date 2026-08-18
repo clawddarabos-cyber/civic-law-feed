@@ -69,8 +69,8 @@ Current prototype includes:
 - Feed cards with images, summaries, source links, Yes/No voting, comment counts, save, and share.
 - Card image/title/description open the dedicated post page.
 - Plain-English summary route at `#/overview/:id`.
-- Post page with Plain-English summary, pros/cons, official source links, comments, and a local comment form.
-- Votes, saved items, followed sources, reminders, demo posts, and local comments persist to browser localStorage as the launch scaffold before a real backend is added.
+- Post page with Plain-English summary, pros/cons, official source links, comments, a local comment form, source freshness, imported metadata, API record links when available, and report-a-problem flow.
+- Votes, saved items, followed sources, reminders, demo posts, local comments, and source reports persist to browser localStorage as the launch scaffold before a real backend is added.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
 - Officials section framed as nationwide official profiles, currently seeded by one federal sponsor record and Florida Senate official data.
