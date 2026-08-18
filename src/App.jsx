@@ -31,6 +31,7 @@ import {
   X
 } from 'lucide-react';
 import federalCivicItems from '../data/federal-civic-items.json';
+import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
 
 const prototypeBills = [
@@ -233,6 +234,21 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
   votes: {},
   archiveSince: String(floridaOfficialData.window.mvpStartYear),
   archive: []
+}));
+
+const federalOfficialProfiles = federalOfficialData.officials.map((official) => ({
+  id: official.id,
+  name: official.name,
+  office: official.office,
+  jurisdiction: official.jurisdiction,
+  party: official.party,
+  status: official.status,
+  sourceName: official.sourceName,
+  sourceUrl: official.sourceUrl,
+  votes: official.votes || {},
+  sponsoredItems: official.sponsoredItems || [],
+  archiveSince: official.archiveSince,
+  archive: official.archive || []
 }));
 
 const defaultJurisdiction = {
@@ -563,7 +579,7 @@ function App() {
           />
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
-            profiles={floridaOfficialProfiles}
+            profiles={[...federalOfficialProfiles, ...floridaOfficialProfiles]}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
@@ -618,6 +634,7 @@ function App() {
           <MorePage
             sourceRegistry={officialSourceRegistry}
             federalData={federalCivicItems}
+            federalOfficialData={federalOfficialData}
             officialData={floridaOfficialData}
             jurisdiction={jurisdiction}
             onAction={showNotice}
@@ -1224,7 +1241,7 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, federalData, officialData, jurisdiction, onAction }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, onAction }) {
   const settingsSections = [
     ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
@@ -1250,7 +1267,7 @@ function MorePage({ sourceRegistry, federalData, officialData, jurisdiction, onA
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>
-        <span>{federalData.count} current federal bills are imported from Congress.gov, alongside {officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records from official Florida Senate pages.</span>
+        <span>{federalData.count} current federal bills and {federalOfficialData.count} federal official profiles are imported from Congress.gov, alongside {officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records from official Florida Senate pages.</span>
         <a href={federalData.source} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Congress.gov API source
@@ -1421,6 +1438,15 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                 <strong>{profile.archive.length + Object.keys(profile.votes).length} recorded votes</strong>
                 <span>Prototype archive since {profile.archiveSince}; store all available records, show recent first.</span>
               </div>
+              {!!profile.sponsoredItems?.length && (
+                <div className="sponsor-summary">
+                  <strong>{profile.sponsoredItems.length} sponsored item</strong>
+                  {profile.sponsoredItems.map((billId) => {
+                    const bill = bills.find((item) => item.id === billId);
+                    return <span key={billId}>{bill?.chamber || billId}: {bill?.title || 'Imported federal item'}</span>;
+                  })}
+                </div>
+              )}
               <div className="vote-record">
                 <div className="vote-record-label">Current comparison items</div>
                 {!Object.keys(profile.votes).length && (

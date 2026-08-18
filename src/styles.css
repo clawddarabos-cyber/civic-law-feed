@@ -844,7 +844,8 @@ button {
 .friend-box,
 .comment-box,
 .alignment-box,
-.archive-summary {
+.archive-summary,
+.sponsor-summary {
   border: 1px solid #eff3f4;
   border-radius: 12px;
   background: #fff;
@@ -862,6 +863,8 @@ button {
 .alignment-box span,
 .archive-summary strong,
 .archive-summary span,
+.sponsor-summary strong,
+.sponsor-summary span,
 .data-spike-panel strong,
 .data-spike-panel span,
 .source-registry-panel strong,
@@ -871,7 +874,8 @@ button {
 
 .detail-vote-box span,
 .alignment-box span,
-.archive-summary span {
+.archive-summary span,
+.sponsor-summary span {
   margin-top: 3px;
   font-size: 14px;
 }
@@ -1415,6 +1419,7 @@ button {
   .comment-box,
   .alignment-box,
   .archive-summary,
+  .sponsor-summary,
   .source-registry-group,
   .quick-grid button,
   .compact-row,
@@ -1453,6 +1458,7 @@ button {
   .comment-box,
   .alignment-box,
   .archive-summary,
+  .sponsor-summary,
   .source-registry-group,
   .vote-record,
   .comment-row,
@@ -1522,6 +1528,7 @@ button {
   .source-registry-panel span,
   .alignment-box span,
   .archive-summary span,
+  .sponsor-summary span,
   .vote-record-row span,
   .vote-pair span:last-child,
   .compact-row span,

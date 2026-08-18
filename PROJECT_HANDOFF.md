@@ -72,13 +72,13 @@ Current prototype includes:
 - Post page with Plain-English summary, pros/cons, official source links, comments, and a local comment form.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
-- Officials section framed as nationwide official profiles, currently seeded by Florida Senate official data.
+- Officials section framed as nationwide official profiles, currently seeded by one federal sponsor record and Florida Senate official data.
 - Official profile cards include source links, recorded votes, comparison against the user's votes, and a Claim Profile CTA.
 - Florida data importer script that pulls official Florida Senate members and a first page of 2026 Senate bills into `data/florida-official-data.json`.
 
 ## Data Sources and Caveats
 
-The app now renders a small static import of current federal bills from the official Congress.gov API ahead of the prototype records in `src/App.jsx`. State/local feed items and official profile records are still mostly prototype or seed data.
+The app now renders a small static import of current federal bills from the official Congress.gov API ahead of the prototype records in `src/App.jsx`. One federal official profile is seeded from imported sponsor context. State/local feed items and official profile records are still mostly prototype or seed data.
 
 Current official source targets and coverage plan:
 
@@ -105,10 +105,13 @@ Current data spike:
 
 - `npm run import:florida`
 - `npm run import:federal`
+- `npm run import:federal-officials`
 - Script: `scripts/import-florida-official-data.mjs`
 - Script: `scripts/import-federal-civic-items.mjs`
+- Script: `scripts/import-federal-official-data.mjs`
 - Output: `data/florida-official-data.json`
 - Output: `data/federal-civic-items.json`
+- Output: `data/federal-official-data.json`
 - Last federal import pulled 6 current 119th Congress bills from Congress.gov v3. The importer now supports sponsor, committee, action, and summary detail imports. It uses `CONGRESS_GOV_API_KEY` when present and falls back to `DEMO_KEY`, but the public demo key rate-limits quickly, so regular detail imports need a real key.
 - Last run imported 40 Florida Senate officials, 40 Florida Senate bills, and 28 vote-history records from official Senate pages.
 - Vote-history records currently include roll-call summary counts and source PDF links. Per-senator PDF parsing is not implemented yet.

@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-08-18T21:36:30.000Z",
+  "source": "https://api.congress.gov/",
+  "congress": 119,
+  "count": 1,
+  "officials": [
+    {
+      "id": "congress-member-W000802",
+      "bioguideId": "W000802",
+      "name": "Sen. Whitehouse, Sheldon [D-RI]",
+      "office": "Senate, RI",
+      "jurisdiction": "Federal",
+      "state": "RI",
+      "district": null,
+      "party": "D",
+      "status": "Official profile",
+      "sourceName": "Congress.gov member record",
+      "sourceUrl": "https://www.congress.gov/member/sheldon-whitehouse/W000802",
+      "apiUrl": "https://api.congress.gov/v3/member/W000802?format=json",
+      "votes": {},
+      "sponsoredItems": ["congress-119-s-5269"],
+      "archiveSince": "119",
+      "archive": []
+    }
+  ]
+}
