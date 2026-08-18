@@ -258,18 +258,74 @@ const defaultJurisdiction = {
   levels: ['Federal', 'State', 'County']
 };
 
+const storageKeys = {
+  votes: 'civic-feed:votes',
+  saved: 'civic-feed:saved',
+  followed: 'civic-feed:followed',
+  reminders: 'civic-feed:reminders',
+  reposted: 'civic-feed:reposted',
+  userPosts: 'civic-feed:user-posts',
+  localComments: 'civic-feed:local-comments'
+};
+
+function readStoredValue(key, fallback) {
+  try {
+    const value = window.localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeStoredValue(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Local storage can be unavailable in private or restricted browser contexts.
+  }
+}
+
+function useStoredState(key, fallback) {
+  const [value, setValue] = useState(() => readStoredValue(key, fallback));
+
+  function setStoredValue(updater) {
+    setValue((current) => {
+      const next = typeof updater === 'function' ? updater(current) : updater;
+      writeStoredValue(key, next);
+      return next;
+    });
+  }
+
+  return [value, setStoredValue];
+}
+
+function useStoredSet(key, fallback) {
+  const [value, setValue] = useState(() => new Set(readStoredValue(key, fallback)));
+
+  function setStoredValue(updater) {
+    setValue((current) => {
+      const nextValue = typeof updater === 'function' ? updater(new Set(current)) : updater;
+      const next = nextValue instanceof Set ? nextValue : new Set(nextValue);
+      writeStoredValue(key, Array.from(next));
+      return next;
+    });
+  }
+
+  return [value, setStoredValue];
+}
+
 function App() {
   const [activeSection, setActiveSection] = useState('feed');
   const [activeTab, setActiveTab] = useState('forYou');
   const [activeFilter, setActiveFilter] = useState('All');
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState(bills[0].id);
-  const [votes, setVotes] = useState({});
-  const [saved, setSaved] = useState(() => new Set(['hb-771']));
-  const [followed, setFollowed] = useState(() => new Set(['Federal', 'Congress.gov']));
-  const [reminders, setReminders] = useState(() => new Set(['sb-144']));
-  const [reposted, setReposted] = useState(() => new Set());
-  const [userPosts, setUserPosts] = useState([]);
+  const [votes, setVotes] = useStoredState(storageKeys.votes, {});
+  const [saved, setSaved] = useStoredSet(storageKeys.saved, ['hb-771']);
+  const [followed, setFollowed] = useStoredSet(storageKeys.followed, ['Federal', 'Congress.gov']);
+  const [reminders, setReminders] = useStoredSet(storageKeys.reminders, ['sb-144']);
+  const [reposted, setReposted] = useStoredSet(storageKeys.reposted, []);
+  const [userPosts, setUserPosts] = useStoredState(storageKeys.userPosts, []);
   const [composerDraft, setComposerDraft] = useState('');
   const [chatDraft, setChatDraft] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
@@ -278,7 +334,7 @@ function App() {
   const [locationStatus, setLocationStatus] = useState('idle');
   const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
-  const [localComments, setLocalComments] = useState({});
+  const [localComments, setLocalComments] = useStoredState(storageKeys.localComments, {});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [notice, setNotice] = useState('');
 
@@ -511,6 +567,24 @@ function App() {
     setCommentDrafts((current) => ({ ...current, [id]: '' }));
   }
 
+  function resetLocalData() {
+    Object.values(storageKeys).forEach((key) => {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Ignore storage errors; in-memory state can still be reset.
+      }
+    });
+    setVotes({});
+    setSaved(new Set(['hb-771']));
+    setFollowed(new Set(['Federal', 'Congress.gov']));
+    setReminders(new Set(['sb-144']));
+    setReposted(new Set());
+    setUserPosts([]);
+    setLocalComments({});
+    showNotice('Local demo data reset');
+  }
+
   return (
     <div className="app-shell">
       <aside className="left-rail" aria-label="Primary navigation">
@@ -637,6 +711,7 @@ function App() {
             federalOfficialData={federalOfficialData}
             officialData={floridaOfficialData}
             jurisdiction={jurisdiction}
+            onResetData={resetLocalData}
             onAction={showNotice}
           />
         ) : (
@@ -1241,8 +1316,9 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, onAction }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, onResetData, onAction }) {
   const settingsSections = [
+    ['Account', 'Guest session; votes, saves, follows, reminders, posts, and comments persist on this device.', CircleUserRound],
     ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
     ['Notifications', 'Bill status changes, official votes, replies, and source updates.', Bell],
@@ -1264,6 +1340,11 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
             <ChevronRight size={18} />
           </button>
         ))}
+        <button className="settings-row" onClick={onResetData}>
+          <X size={20} />
+          <span><strong>Reset demo data</strong><small>Clear local votes, saves, follows, reminders, posts, and comments on this device.</small></span>
+          <ChevronRight size={18} />
+        </button>
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>

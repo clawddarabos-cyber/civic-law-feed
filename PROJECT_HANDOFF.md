@@ -4,7 +4,7 @@ Last updated: 2026-08-17
 
 ## Current Status
 
-This is a public React/Vite prototype for a nationwide, location-aware civic briefing feed. Users can browse civic items, vote Yes/No, save and share posts, open Plain-English summary pages, add local comments, allow location lookup, and compare their votes against starter official profiles.
+This is a public React/Vite prototype for a nationwide, location-aware civic briefing feed. Users can browse civic items, vote Yes/No, save and share posts, set reminders, open Plain-English summary pages, add local comments, allow location lookup, and compare their votes against starter official profiles.
 
 - Live site: https://civics.johndarabos.com/
 - GitHub repo: https://github.com/clawddarabos-cyber/civic-law-feed
@@ -70,6 +70,7 @@ Current prototype includes:
 - Card image/title/description open the dedicated post page.
 - Plain-English summary route at `#/overview/:id`.
 - Post page with Plain-English summary, pros/cons, official source links, comments, and a local comment form.
+- Votes, saved items, followed sources, reminders, demo posts, and local comments persist to browser localStorage as the launch scaffold before a real backend is added.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
 - Officials section framed as nationwide official profiles, currently seeded by one federal sponsor record and Florida Senate official data.
@@ -167,7 +168,7 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 - Votes, saves, comments, and claim actions are local React state only.
 - No authentication.
 - No backend.
-- No persistent database.
+- No persistent server database. Browser localStorage is used as the temporary persistence layer.
 - No real comments/moderation system.
 - No real official-profile claiming workflow.
 - No live roll-call ingestion.
