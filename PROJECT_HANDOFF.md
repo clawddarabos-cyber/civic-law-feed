@@ -50,8 +50,10 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 ## Files
 
 - `src/App.jsx` contains the prototype data, imported federal records, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share/reminder behavior, location lookup, source coverage registry, and official profile comparison.
+- `src/storage.js` wraps localStorage behind a small storage adapter so the same user-action surface can later move to Supabase/Postgres.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
+- `supabase/schema.sql` defines the launch backend tables for profiles, sources, civic items, officials, source checks, votes, saved items, follows, reminders, comments, source reports, and claim requests.
 - `index.html` is the Vite entry.
 - `package.json` contains scripts and dependencies.
 
@@ -169,7 +171,7 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 - Votes, saves, comments, and claim actions are local React state only.
 - No authentication.
 - No backend.
-- No persistent server database. Browser localStorage is used as the temporary persistence layer.
+- No persistent server database is connected yet. Browser localStorage is used as the temporary persistence layer, and `supabase/schema.sql` is the proposed first backend schema.
 - No real comments/moderation system.
 - No real official-profile claiming workflow.
 - No live roll-call ingestion.
