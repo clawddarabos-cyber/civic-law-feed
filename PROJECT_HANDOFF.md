@@ -60,6 +60,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 Current prototype includes:
 
 - Single top nav bar on mobile with Feed, Officials, Saved, Alerts, search, and profile/location icons.
+- First-run guest-mode onboarding panel with location, explore, and dismiss actions.
 - Search icon opens the tucked search/filter panel.
 - Profile icon opens a location panel.
 - Browser geolocation permission flow.
@@ -70,7 +71,7 @@ Current prototype includes:
 - Card image/title/description open the dedicated post page.
 - Plain-English summary route at `#/overview/:id`.
 - Post page with Plain-English summary, pros/cons, official source links, comments, a local comment form, source freshness, imported metadata, API record links when available, and report-a-problem flow.
-- Votes, saved items, followed sources, reminders, demo posts, local comments, and source reports persist to browser localStorage as the launch scaffold before a real backend is added.
+- Votes, saved items, followed sources, reminders, demo posts, local comments, source reports, and onboarding dismissal persist to browser localStorage as the launch scaffold before a real backend is added.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
 - Officials section framed as nationwide official profiles, currently seeded by one federal sponsor record and Florida Senate official data.

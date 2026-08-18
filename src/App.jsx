@@ -266,7 +266,8 @@ const storageKeys = {
   reposted: 'civic-feed:reposted',
   userPosts: 'civic-feed:user-posts',
   localComments: 'civic-feed:local-comments',
-  sourceReports: 'civic-feed:source-reports'
+  sourceReports: 'civic-feed:source-reports',
+  onboardingDismissed: 'civic-feed:onboarding-dismissed'
 };
 
 function readStoredValue(key, fallback) {
@@ -337,6 +338,7 @@ function App() {
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
   const [localComments, setLocalComments] = useStoredState(storageKeys.localComments, {});
   const [sourceReports, setSourceReports] = useStoredState(storageKeys.sourceReports, {});
+  const [onboardingDismissed, setOnboardingDismissed] = useStoredState(storageKeys.onboardingDismissed, false);
   const [sourceReportDrafts, setSourceReportDrafts] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [notice, setNotice] = useState('');
@@ -609,6 +611,7 @@ function App() {
     setLocalComments({});
     setSourceReports({});
     setSourceReportDrafts({});
+    setOnboardingDismissed(false);
     showNotice('Local demo data reset');
   }
 
@@ -765,6 +768,13 @@ function App() {
               <button className={activeTab === 'forYou' ? 'active' : ''} onClick={() => setActiveTab('forYou')}>For you</button>
               <button className={activeTab === 'following' ? 'active' : ''} onClick={() => setActiveTab('following')}>Following</button>
             </div>
+            {!onboardingDismissed && (
+              <LaunchOnboarding
+                onDismiss={() => setOnboardingDismissed(true)}
+                onUseLocation={requestLocation}
+                onExplore={() => openSection('explore')}
+              />
+            )}
             {locationOpen && (
           <section className="location-panel" aria-label="Location settings">
             <div className="location-copy">
@@ -912,6 +922,31 @@ function FederalContext({ bill }) {
       {committee && <span><BadgeCheck size={14} /> {committee.name}</span>}
       {action && <span><FileText size={14} /> {action.date}</span>}
     </div>
+  );
+}
+
+function LaunchOnboarding({ onDismiss, onUseLocation, onExplore }) {
+  return (
+    <section className="launch-onboarding" aria-label="Getting started">
+      <div className="launch-onboarding-copy">
+        <span><ShieldCheck size={16} /> Guest mode</span>
+        <strong>Official-source civic feed</strong>
+        <p>Track bills, agendas, officials, votes, reminders, and source reports. This preview saves activity on this device until account sync is added.</p>
+      </div>
+      <div className="launch-onboarding-actions">
+        <button className="small-pill active" onClick={onUseLocation}>
+          <LocateFixed size={15} />
+          Use location
+        </button>
+        <button className="small-pill" onClick={onExplore}>
+          <Search size={15} />
+          Explore
+        </button>
+        <button className="round-action" onClick={onDismiss} aria-label="Dismiss getting started">
+          <X size={18} />
+        </button>
+      </div>
+    </section>
   );
 }
 

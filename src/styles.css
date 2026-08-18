@@ -248,6 +248,7 @@ button {
 }
 
 .location-panel,
+.launch-onboarding,
 .controls,
 .composer,
 .bill-card,
@@ -269,6 +270,54 @@ button {
   justify-content: space-between;
   gap: 14px;
   padding: 14px 16px;
+}
+
+.launch-onboarding {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid #eff3f4;
+  padding: 14px 16px;
+}
+
+.launch-onboarding-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.launch-onboarding-copy > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border-radius: 999px;
+  background: #e8f5fd;
+  color: #0a66a3;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.launch-onboarding-copy strong {
+  color: #0f1419;
+  font-size: 20px;
+}
+
+.launch-onboarding-copy p {
+  max-width: 490px;
+  margin: 0;
+  color: #536471;
+  line-height: 1.45;
+}
+
+.launch-onboarding-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .location-copy {
@@ -1446,6 +1495,7 @@ button {
   .feed-area,
   .detail-panel,
   .location-panel,
+  .launch-onboarding,
   .controls,
   .composer,
   .bill-card,
@@ -1489,6 +1539,7 @@ button {
   .timeline-header,
   .timeline-tabs,
   .location-panel,
+  .launch-onboarding,
   .controls,
   .composer,
   .bill-card,
@@ -1550,6 +1601,7 @@ button {
   .rail-search input,
   .metadata-row strong,
   .report-row strong,
+  .launch-onboarding-copy strong,
   .overview-back {
     color: #e7e9ea;
   }
@@ -1593,6 +1645,7 @@ button {
   .report-panel p,
   .metadata-row span,
   .report-row span,
+  .launch-onboarding-copy p,
   .source-note {
     color: #71767b;
   }
@@ -1621,6 +1674,11 @@ button {
   .profile-status-row span,
   .notification-icon {
     background: #202327;
+  }
+
+  .launch-onboarding-copy > span {
+    background: #061726;
+    color: #8ecdf8;
   }
 
   .next-action-box {
@@ -1733,6 +1791,15 @@ button {
   .location-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .launch-onboarding {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .launch-onboarding-actions {
+    justify-content: flex-start;
   }
 
   .bill-card,
