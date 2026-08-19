@@ -33,7 +33,8 @@ import {
 import federalCivicItems from '../data/federal-civic-items.json';
 import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
-import { removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
+import { backendLabel, syncSavedItem } from './backend.js';
+import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
 
 const prototypeBills = [
   {
@@ -327,16 +328,19 @@ function App() {
   }
 
   function toggleSaved(id) {
+    const shouldSave = !saved.has(id);
     setSaved((current) => {
       const next = new Set(current);
       if (next.has(id)) {
         next.delete(id);
-        showNotice('Removed from saved');
       } else {
         next.add(id);
-        showNotice('Saved');
       }
       return next;
+    });
+    showNotice(shouldSave ? 'Saved' : 'Removed from saved');
+    syncSavedItem(getGuestProfileId(), id, shouldSave).catch(() => {
+      showNotice('Saved locally; sync failed');
     });
   }
 
@@ -682,6 +686,7 @@ function App() {
             federalOfficialData={federalOfficialData}
             officialData={floridaOfficialData}
             jurisdiction={jurisdiction}
+            backendLabel={backendLabel}
             onResetData={resetLocalData}
             onAction={showNotice}
           />
@@ -1319,9 +1324,9 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, onResetData, onAction }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, backendLabel, onResetData, onAction }) {
   const settingsSections = [
-    ['Account', 'Guest session; votes, saves, follows, reminders, posts, and comments persist on this device.', CircleUserRound],
+    ['Account', `${backendLabel}; votes, saves, follows, reminders, posts, and comments persist on this device.`, CircleUserRound],
     ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
     ['Notifications', 'Bill status changes, official votes, replies, and source updates.', Bell],

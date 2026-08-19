@@ -9,7 +9,8 @@ export const storageKeys = {
   userPosts: 'civic-feed:user-posts',
   localComments: 'civic-feed:local-comments',
   sourceReports: 'civic-feed:source-reports',
-  onboardingDismissed: 'civic-feed:onboarding-dismissed'
+  onboardingDismissed: 'civic-feed:onboarding-dismissed',
+  guestProfileId: 'civic-feed:guest-profile-id'
 };
 
 export function readStoredValue(key, fallback) {
@@ -37,6 +38,15 @@ export function removeStoredValues(keys = Object.values(storageKeys)) {
       // In-memory state can still be reset even when localStorage is unavailable.
     }
   });
+}
+
+export function getGuestProfileId() {
+  const existing = readStoredValue(storageKeys.guestProfileId, null);
+  if (existing) return existing;
+
+  const generated = window.crypto?.randomUUID?.() || `guest-${Date.now()}`;
+  writeStoredValue(storageKeys.guestProfileId, generated);
+  return generated;
 }
 
 export function useStoredState(key, fallback) {
