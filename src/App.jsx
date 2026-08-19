@@ -33,7 +33,7 @@ import {
 import federalCivicItems from '../data/federal-civic-items.json';
 import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
-import { backendLabel, syncSavedItem, syncUserVote } from './backend.js';
+import { backendLabel, createComment, createSourceReport, syncSavedItem, syncUserVote } from './backend.js';
 import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
 
 const prototypeBills = [
@@ -517,6 +517,7 @@ function App() {
   }
 
   function addComment(id) {
+    const bill = bills.find((item) => item.id === id);
     const text = (commentDrafts[id] || '').trim();
     if (!text) return;
     setLocalComments((current) => ({
@@ -531,9 +532,13 @@ function App() {
       ]
     }));
     setCommentDrafts((current) => ({ ...current, [id]: '' }));
+    createComment(getGuestProfileId(), bill || id, text).catch(() => {
+      showNotice('Comment saved locally; sync failed');
+    });
   }
 
   function submitSourceReport(id) {
+    const bill = bills.find((item) => item.id === id);
     const text = (sourceReportDrafts[id] || '').trim();
     if (!text) {
       showNotice('Add a report note first');
@@ -553,6 +558,9 @@ function App() {
     }));
     setSourceReportDrafts((current) => ({ ...current, [id]: '' }));
     showNotice('Source report saved');
+    createSourceReport(getGuestProfileId(), bill || id, text).catch(() => {
+      showNotice('Report saved locally; sync failed');
+    });
   }
 
   function resetLocalData() {

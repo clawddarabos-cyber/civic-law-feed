@@ -51,7 +51,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 
 - `src/App.jsx` contains the prototype data, imported federal records, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share/reminder behavior, location lookup, source coverage registry, and official profile comparison.
 - `src/storage.js` wraps localStorage behind a small storage adapter so the same user-action surface can later move to Supabase/Postgres.
-- `src/backend.js` provides the optional Supabase adapter. Saved items and votes still update locally first, then sync to `saved_items` and `user_votes` when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured. The adapter also upserts a guest profile and minimal civic item record before syncing those actions.
+- `src/backend.js` provides the optional Supabase adapter. Saved items, votes, comments, and source reports still update locally first, then sync to `saved_items`, `user_votes`, `comments`, and `source_reports` when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured. The adapter also upserts a guest profile and minimal civic item record before syncing those actions.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
 - `supabase/schema.sql` defines the launch backend tables for profiles, sources, civic items, officials, source checks, votes, saved items, follows, reminders, comments, source reports, and claim requests.
@@ -75,7 +75,7 @@ Current prototype includes:
 - Card image/title/description open the dedicated post page.
 - Plain-English summary route at `#/overview/:id`.
 - Post page with Plain-English summary, pros/cons, official source links, comments, a local comment form, source freshness, imported metadata, API record links when available, and report-a-problem flow.
-- Votes, saved items, followed sources, reminders, demo posts, local comments, source reports, and onboarding dismissal persist to browser localStorage as the launch scaffold before a real backend is added.
+- Votes, saved items, followed sources, reminders, demo posts, local comments, source reports, and onboarding dismissal persist to browser localStorage as the launch scaffold before a real backend is added; saves, votes, comments, and reports are also wired for optional Supabase sync.
 - Save button toggles bookmark state and shows toast feedback.
 - Share button uses native Web Share when available or copies the post URL to clipboard.
 - Officials section framed as nationwide official profiles, currently seeded by one federal sponsor record and Florida Senate official data.

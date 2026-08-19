@@ -122,3 +122,46 @@ export async function syncUserVote(profileId, civicItem, vote) {
   if (error) throw error;
   return { mode: 'supabase', action: 'removed' };
 }
+
+export async function createComment(profileId, civicItem, body) {
+  if (!supabase) {
+    return { mode: 'local' };
+  }
+
+  await ensureProfile(profileId);
+  const civicItemId = await ensureCivicItem(civicItem);
+
+  const { error } = await supabase
+    .from('comments')
+    .insert({
+      profile_id: profileId,
+      civic_item_id: civicItemId,
+      body,
+      moderation_status: 'pending'
+    });
+
+  if (error) throw error;
+  return { mode: 'supabase', action: 'queued' };
+}
+
+export async function createSourceReport(profileId, civicItem, body, reportType = 'source_issue') {
+  if (!supabase) {
+    return { mode: 'local' };
+  }
+
+  await ensureProfile(profileId);
+  const civicItemId = await ensureCivicItem(civicItem);
+
+  const { error } = await supabase
+    .from('source_reports')
+    .insert({
+      profile_id: profileId,
+      civic_item_id: civicItemId,
+      report_type: reportType,
+      body,
+      status: 'queued'
+    });
+
+  if (error) throw error;
+  return { mode: 'supabase', action: 'queued' };
+}
