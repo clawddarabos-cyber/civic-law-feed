@@ -44,7 +44,7 @@ export function getGuestProfileId() {
   const existing = readStoredValue(storageKeys.guestProfileId, null);
   if (existing) return existing;
 
-  const generated = window.crypto?.randomUUID?.() || `guest-${Date.now()}`;
+  const generated = window.crypto?.randomUUID?.() || '00000000-0000-4000-8000-000000000000';
   writeStoredValue(storageKeys.guestProfileId, generated);
   return generated;
 }

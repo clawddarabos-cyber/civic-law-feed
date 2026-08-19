@@ -51,7 +51,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 
 - `src/App.jsx` contains the prototype data, imported federal records, routing state, feed UI, Plain-English summary pages, local comments, voting, save/share/reminder behavior, location lookup, source coverage registry, and official profile comparison.
 - `src/storage.js` wraps localStorage behind a small storage adapter so the same user-action surface can later move to Supabase/Postgres.
-- `src/backend.js` provides the optional Supabase adapter. Saved items still update locally first, then sync to `saved_items` when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured.
+- `src/backend.js` provides the optional Supabase adapter. Saved items and votes still update locally first, then sync to `saved_items` and `user_votes` when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured. The adapter also upserts a guest profile and minimal civic item record before syncing those actions.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
 - `supabase/schema.sql` defines the launch backend tables for profiles, sources, civic items, officials, source checks, votes, saved items, follows, reminders, comments, source reports, and claim requests.

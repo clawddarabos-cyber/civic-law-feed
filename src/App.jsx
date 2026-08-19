@@ -33,7 +33,7 @@ import {
 import federalCivicItems from '../data/federal-civic-items.json';
 import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
-import { backendLabel, syncSavedItem } from './backend.js';
+import { backendLabel, syncSavedItem, syncUserVote } from './backend.js';
 import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
 
 const prototypeBills = [
@@ -324,10 +324,24 @@ function App() {
   const activeOverview = bills.find((bill) => bill.id === activeOverviewId);
 
   function voteOnBill(id, vote) {
-    setVotes((current) => ({ ...current, [id]: current[id] === vote ? undefined : vote }));
+    const bill = bills.find((item) => item.id === id);
+    const nextVote = votes[id] === vote ? undefined : vote;
+    setVotes((current) => {
+      const next = { ...current };
+      if (nextVote) {
+        next[id] = nextVote;
+      } else {
+        delete next[id];
+      }
+      return next;
+    });
+    syncUserVote(getGuestProfileId(), bill || id, nextVote).catch(() => {
+      showNotice('Vote saved locally; sync failed');
+    });
   }
 
   function toggleSaved(id) {
+    const bill = bills.find((item) => item.id === id);
     const shouldSave = !saved.has(id);
     setSaved((current) => {
       const next = new Set(current);
@@ -339,7 +353,7 @@ function App() {
       return next;
     });
     showNotice(shouldSave ? 'Saved' : 'Removed from saved');
-    syncSavedItem(getGuestProfileId(), id, shouldSave).catch(() => {
+    syncSavedItem(getGuestProfileId(), bill || id, shouldSave).catch(() => {
       showNotice('Saved locally; sync failed');
     });
   }
