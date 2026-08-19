@@ -1,6 +1,6 @@
 # Civic Law Feed Project Handoff
 
-Last updated: 2026-08-17
+Last updated: 2026-08-19
 
 ## Current Status
 
@@ -11,6 +11,8 @@ This is a public React/Vite prototype for a nationwide, location-aware civic bri
 - Local path: `/Users/adam/.openclaw/workspace/civic-law-feed`
 
 The live site is deployed through GitHub Pages. `civics.johndarabos.com` is proxied through Cloudflare, so browser-facing HTTPS works through Cloudflare even though GitHub Pages may still report native HTTPS enforcement as off for the custom domain.
+
+GitHub Actions now builds and deploys the site on pushes to `main` and on manual dispatch. The workflow reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` from GitHub repository secrets at build time, writes the `CNAME`, and publishes the compiled `dist/` bundle to the existing `gh-pages` branch.
 
 ## Product Direction
 
@@ -58,6 +60,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 - `index.html` is the Vite entry.
 - `package.json` contains scripts and dependencies.
 - `.env.example` documents `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `CONGRESS_GOV_API_KEY`.
+- `.github/workflows/deploy.yml` builds with the optional Supabase env vars and deploys to the existing GitHub Pages branch.
 
 ## Implemented Surface
 
@@ -154,9 +157,35 @@ curl -I https://civics.johndarabos.com/
 
 The build passed and the live HTTPS page returned `200 OK`.
 
+## Supabase Connection Notes
+
+The app-side Supabase client and database schema are ready, but the real project credentials still need to be created or supplied.
+
+Connection steps:
+
+1. Create a Supabase project.
+2. Run `supabase/schema.sql` in that project's SQL editor.
+3. Add GitHub repository secrets named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+4. Push to `main` or run the `Deploy GitHub Pages` workflow manually.
+5. Verify the live site status label changes from `Local guest session` to `Supabase sync configured`.
+
+Local smoke test:
+
+```bash
+VITE_SUPABASE_URL="https://PROJECT_REF.supabase.co" \
+VITE_SUPABASE_ANON_KEY="PUBLIC_ANON_KEY" \
+npm run build
+```
+
 ## Deployment Notes
 
-Deployment is manual:
+Deployment can now run through GitHub Actions:
+
+1. Push to `main`, or open Actions and run `Deploy GitHub Pages`.
+2. The workflow runs `npm ci`, builds the Vite bundle with the Supabase secrets, writes `dist/CNAME`, and pushes the bundle to `gh-pages`.
+3. Wait briefly for GitHub Pages/Cloudflare cache to update.
+
+The older manual path still works:
 
 1. Run `npm run build`.
 2. Add a temporary worktree for `origin/gh-pages`.
@@ -181,13 +210,15 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 
 ## Best Next Steps
 
-1. Build the federal ingestion connector first: Congress.gov bills, members, committees, actions, and roll calls where available.
-2. Define a repeatable state/local source connector schema for legislature, executive rulemaking, county/city agendas, clerks, minutes, and official directories.
-3. Keep Florida as the first state import and add Florida House member/roll-call ingestion.
-4. Replace prototype feed cards with official-source records for federal, state, and local items.
-5. Make official profiles item-specific, source-backed, and nationwide.
-6. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
-7. Add district matching after geolocation so users see their federal, state, county, and municipal officials.
+1. Create/connect the Supabase project, run `supabase/schema.sql`, and add `VITE_SUPABASE_URL` plus `VITE_SUPABASE_ANON_KEY` as GitHub repository secrets.
+2. Trigger the `Deploy GitHub Pages` workflow and verify the live build reports `Supabase sync configured`.
+3. Build the federal ingestion connector first: Congress.gov bills, members, committees, actions, and roll calls where available.
+4. Define a repeatable state/local source connector schema for legislature, executive rulemaking, county/city agendas, clerks, minutes, and official directories.
+5. Keep Florida as the first state import and add Florida House member/roll-call ingestion.
+6. Replace prototype feed cards with official-source records for federal, state, and local items.
+7. Make official profiles item-specific, source-backed, and nationwide.
+8. Add authentication and persistence for user votes, saved posts, comments, and claim requests.
+9. Add district matching after geolocation so users see their federal, state, county, and municipal officials.
 
 ## Resume Checklist
 
