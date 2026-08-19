@@ -22,7 +22,7 @@ async function ensureProfile(profileId) {
         display_name: 'Guest user',
         updated_at: new Date().toISOString()
       },
-      { onConflict: 'id' }
+      { onConflict: 'id', ignoreDuplicates: true }
     );
 
   if (error) throw error;
@@ -71,7 +71,7 @@ export async function syncSavedItem(profileId, civicItem, shouldSave) {
           profile_id: profileId,
           civic_item_id: civicItemId
         },
-        { onConflict: 'profile_id,civic_item_id' }
+        { onConflict: 'profile_id,civic_item_id', ignoreDuplicates: true }
       );
 
     if (error) throw error;

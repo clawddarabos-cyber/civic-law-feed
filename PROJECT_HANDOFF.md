@@ -56,7 +56,7 @@ The local dev server uses Vite with `--host 0.0.0.0`.
 - `src/backend.js` provides the optional Supabase adapter. Saved items, votes, comments, and source reports still update locally first, then sync to `saved_items`, `user_votes`, `comments`, and `source_reports` when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured. The adapter also upserts a guest profile and minimal civic item record before syncing those actions.
 - `src/main.jsx` mounts the React app and imports global CSS.
 - `src/styles.css` contains the responsive visual design.
-- `supabase/schema.sql` defines the launch backend tables for profiles, sources, civic items, officials, source checks, votes, saved items, follows, reminders, comments, source reports, and claim requests.
+- `supabase/schema.sql` defines the launch backend tables for profiles, sources, civic items, officials, source checks, votes, saved items, follows, reminders, comments, source reports, and claim requests, plus launch RLS policies for public read surfaces and guest write queues.
 - `index.html` is the Vite entry.
 - `package.json` contains scripts and dependencies.
 - `.env.example` documents `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `CONGRESS_GOV_API_KEY`.
@@ -160,6 +160,8 @@ The build passed and the live HTTPS page returned `200 OK`.
 ## Supabase Connection Notes
 
 The app-side Supabase client and database schema are ready, but the real project credentials still need to be created or supplied.
+
+The SQL enables row-level security before the public anon key is connected. The current policies are intentionally guest-mode oriented: public civic data can be read, comments and reports enter moderation queues, guest votes/saves can sync, and profile inserts require `email is null`. Tighten these policies when real authentication is added.
 
 Connection steps:
 

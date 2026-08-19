@@ -145,3 +145,126 @@ create index if not exists civic_items_latest_action_idx on public.civic_items(l
 create index if not exists officials_jurisdiction_idx on public.officials(jurisdiction);
 create index if not exists source_checks_checked_at_idx on public.source_checks(checked_at desc);
 create index if not exists comments_civic_item_idx on public.comments(civic_item_id, created_at desc);
+
+alter table public.profiles enable row level security;
+alter table public.sources enable row level security;
+alter table public.civic_items enable row level security;
+alter table public.officials enable row level security;
+alter table public.civic_item_officials enable row level security;
+alter table public.source_checks enable row level security;
+alter table public.user_votes enable row level security;
+alter table public.saved_items enable row level security;
+alter table public.follows enable row level security;
+alter table public.reminders enable row level security;
+alter table public.comments enable row level security;
+alter table public.source_reports enable row level security;
+alter table public.claim_requests enable row level security;
+
+grant usage on schema public to anon, authenticated;
+grant select on public.sources to anon, authenticated;
+grant select on public.civic_items to anon, authenticated;
+grant select on public.officials to anon, authenticated;
+grant select on public.civic_item_officials to anon, authenticated;
+grant select on public.source_checks to anon, authenticated;
+grant insert, update on public.profiles to anon, authenticated;
+grant insert on public.civic_items to anon, authenticated;
+grant update on public.civic_items to authenticated;
+grant select, insert, update, delete on public.user_votes to anon, authenticated;
+grant select, insert, delete on public.saved_items to anon, authenticated;
+grant select, insert, delete on public.follows to anon, authenticated;
+grant select, insert, update, delete on public.reminders to anon, authenticated;
+grant select, insert on public.comments to anon, authenticated;
+grant insert on public.source_reports to anon, authenticated;
+grant insert on public.claim_requests to anon, authenticated;
+
+drop policy if exists "Public can read sources" on public.sources;
+create policy "Public can read sources"
+  on public.sources for select
+  using (true);
+
+drop policy if exists "Public can read civic items" on public.civic_items;
+create policy "Public can read civic items"
+  on public.civic_items for select
+  using (true);
+
+drop policy if exists "Guest sync can stage civic items" on public.civic_items;
+create policy "Guest sync can stage civic items"
+  on public.civic_items for insert
+  with check (true);
+
+drop policy if exists "Authenticated jobs can update civic items" on public.civic_items;
+create policy "Authenticated jobs can update civic items"
+  on public.civic_items for update
+  to authenticated
+  using (true)
+  with check (true);
+
+drop policy if exists "Public can read officials" on public.officials;
+create policy "Public can read officials"
+  on public.officials for select
+  using (true);
+
+drop policy if exists "Public can read civic item officials" on public.civic_item_officials;
+create policy "Public can read civic item officials"
+  on public.civic_item_officials for select
+  using (true);
+
+drop policy if exists "Public can read source checks" on public.source_checks;
+create policy "Public can read source checks"
+  on public.source_checks for select
+  using (true);
+
+drop policy if exists "Guest profiles can be created" on public.profiles;
+create policy "Guest profiles can be created"
+  on public.profiles for insert
+  with check (email is null);
+
+drop policy if exists "Guest profiles can be refreshed" on public.profiles;
+create policy "Guest profiles can be refreshed"
+  on public.profiles for update
+  using (email is null)
+  with check (email is null);
+
+drop policy if exists "Guest votes can be synced" on public.user_votes;
+create policy "Guest votes can be synced"
+  on public.user_votes for all
+  using (true)
+  with check (vote in ('yes', 'no'));
+
+drop policy if exists "Guest saved items can be synced" on public.saved_items;
+create policy "Guest saved items can be synced"
+  on public.saved_items for all
+  using (true)
+  with check (true);
+
+drop policy if exists "Guest follows can be synced" on public.follows;
+create policy "Guest follows can be synced"
+  on public.follows for all
+  using (true)
+  with check (true);
+
+drop policy if exists "Guest reminders can be synced" on public.reminders;
+create policy "Guest reminders can be synced"
+  on public.reminders for all
+  using (true)
+  with check (status in ('active', 'dismissed', 'completed'));
+
+drop policy if exists "Public can read approved comments" on public.comments;
+create policy "Public can read approved comments"
+  on public.comments for select
+  using (moderation_status = 'approved');
+
+drop policy if exists "Guest comments enter moderation" on public.comments;
+create policy "Guest comments enter moderation"
+  on public.comments for insert
+  with check (moderation_status = 'pending');
+
+drop policy if exists "Guest source reports can be queued" on public.source_reports;
+create policy "Guest source reports can be queued"
+  on public.source_reports for insert
+  with check (status = 'queued');
+
+drop policy if exists "Guest claim requests can be queued" on public.claim_requests;
+create policy "Guest claim requests can be queued"
+  on public.claim_requests for insert
+  with check (status = 'pending');
