@@ -45,7 +45,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git worktree add /tmp/gh-pages origin/gh-pages
-          rsync -a --delete --exclude .git dist/ /tmp/gh-pages/
+          rsync -a --checksum --delete --exclude .git dist/ /tmp/gh-pages/
           cd /tmp/gh-pages
           git add -A
           if git diff --cached --quiet; then
