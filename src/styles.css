@@ -472,10 +472,10 @@ button {
 
 .bill-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 12px;
-  padding: 14px 16px 10px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 16px;
 }
 
 .bill-card:hover {
@@ -510,7 +510,7 @@ button {
   position: relative;
   z-index: 2;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -630,8 +630,8 @@ button {
 }
 
 .bill-content h2 {
-  font-size: 19px;
-  line-height: 1.2;
+  font-size: 21px;
+  line-height: 1.22;
 }
 
 .post-title-link,
@@ -657,6 +657,67 @@ button {
   line-height: 1.45;
 }
 
+.minimal-card-meta,
+.minimal-card-footer {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #536471;
+  font-size: 13px;
+}
+
+.minimal-card-meta {
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+.ai-summary {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 5px;
+  color: #0f1419;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.ai-summary:hover > span:last-child {
+  text-decoration: underline;
+}
+
+.ai-summary > span:last-child {
+  overflow-wrap: anywhere;
+}
+
+.ai-summary-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #536471;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.minimal-card-footer {
+  justify-content: space-between;
+  padding-top: 2px;
+}
+
+.minimal-card-footer > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.minimal-card-footer .source-link {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .bill-image-link {
   display: block;
   margin-top: 2px;
@@ -664,10 +725,10 @@ button {
 
 .bill-image {
   width: 100%;
-  max-height: 330px;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
-  border: 1px solid #cfd9de;
-  border-radius: 16px;
+  border: 1px solid #d8e0e4;
+  border-radius: 14px;
 }
 
 .source-link,
@@ -701,9 +762,21 @@ button {
   position: relative;
   z-index: 4;
   justify-content: space-between;
-  max-width: 460px;
+  max-width: 360px;
+  border-top: 1px solid #eff3f4;
   color: #536471;
-  padding-top: 2px;
+  padding-top: 8px;
+}
+
+.action-row .icon-action {
+  gap: 5px;
+  width: auto;
+  min-width: 34px;
+  padding: 0 8px;
+}
+
+.action-row .icon-action span {
+  font-size: 12px;
 }
 
 .vote-button {
@@ -1804,7 +1877,6 @@ button {
 
   .bill-card,
   .composer {
-    grid-template-columns: 40px 1fr;
     padding-left: 12px;
     padding-right: 12px;
   }

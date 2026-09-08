@@ -24,6 +24,7 @@ import {
   Settings,
   Share2,
   ShieldCheck,
+  Sparkles,
   SlidersHorizontal,
   ThumbsDown,
   ThumbsUp,
@@ -917,8 +918,6 @@ function LaunchOnboarding({ onDismiss, onUseLocation, onExplore }) {
 function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, reposted, selected, onSelect, onOpenOverview, onVote, onSave, onReminder, onFollow, onRepost, onShare, onActivity }) {
   const yesCount = bill.yes + (userVote === 'yes' ? 1 : 0);
   const noCount = bill.no + (userVote === 'no' ? 1 : 0);
-  const total = yesCount + noCount;
-  const yesPercent = total ? Math.round((yesCount / total) * 100) : 0;
   const overviewHref = `#overview/${bill.id}`;
 
   function handleOverviewClick(event) {
@@ -929,70 +928,35 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
   return (
     <article className={selected ? 'bill-card selected' : 'bill-card'}>
       <button className="card-hit-area" onClick={onSelect} aria-label={`Open ${bill.title}`} />
-      <div className="avatar">{bill.level.slice(0, 2).toUpperCase()}</div>
       <div className="bill-content">
-        <div className="post-author-row">
-          <strong>{bill.sourceName}</strong>
-          <BadgeCheck size={16} />
-          <span>@{bill.level.toLowerCase()}source · {bill.status}</span>
-          <button className="inline-icon" onClick={onFollow} aria-label={followed ? `Unfollow ${bill.sourceName}` : `Follow ${bill.sourceName}`}>
-            {followed ? <Check size={18} /> : <AtSign size={18} />}
-          </button>
-        </div>
-        <div className="meta-row">
+        <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
+          <img src={bill.image} alt="" className="bill-image" />
+        </a>
+        <div className="minimal-card-meta">
           <span>{bill.chamber}</span>
+          <span aria-hidden="true">·</span>
           <span>{bill.jurisdiction}</span>
         </div>
         <a className="post-title-link" href={overviewHref} onClick={handleOverviewClick}>
           <h2>{bill.title}</h2>
         </a>
-        <a className="summary-link" href={overviewHref} onClick={handleOverviewClick}>
-          {bill.summary}
+        <a className="ai-summary" href={overviewHref} onClick={handleOverviewClick}>
+          <span className="ai-summary-label"><Sparkles size={14} /> AI summary</span>
+          <span>{bill.aiSummary || bill.summary}</span>
         </a>
-        <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
-          <img src={bill.image} alt="" className="bill-image" />
-        </a>
-        <div className="status-row">
+        <div className="minimal-card-footer">
           <span>{bill.status}</span>
-          <span>{total ? `${yesPercent}% Yes` : 'Be first to vote'}</span>
-          <span>{commentCount} comments</span>
-        </div>
-        <div className="source-check-row">
-          <span><ShieldCheck size={14} /> {bill.sourceStatus}</span>
-          <span><CalendarDays size={14} /> {bill.deadline}</span>
-          <span>{bill.lastUpdated}</span>
-        </div>
-        <FederalContext bill={bill} />
-        <div className="next-action-box">
-          <strong>Next step</strong>
-          <span>{bill.nextAction}</span>
-        </div>
-        <div className="link-row">
-          <a
-            className="overview-link"
-            href={overviewHref}
-            onClick={handleOverviewClick}
-          >
-            <FileText size={15} />
-            Plain-English summary
-          </a>
           <a className="source-link" href={bill.sourceUrl} target="_blank" rel="noreferrer">
-            <ExternalLink size={15} />
-            {bill.sourceName}
+            <ShieldCheck size={14} />
+            Official source
           </a>
-          <button className={reminderSet ? 'small-pill active' : 'small-pill'} onClick={onReminder}>
-            <CalendarDays size={15} />
-            {reminderSet ? 'Reminder set' : 'Remind me'}
-          </button>
         </div>
         <div className="action-row">
           <VoteButton active={userVote === 'yes'} icon={<ThumbsUp size={18} />} label={formatCount(yesCount)} onClick={() => onVote('yes')} />
           <VoteButton active={userVote === 'no'} icon={<ThumbsDown size={18} />} label={formatCount(noCount)} onClick={() => onVote('no')} />
-          <button className={reposted ? 'icon-action reposted' : 'icon-action'} onClick={onRepost} aria-label={reposted ? 'Remove repost' : 'Repost civic item'}>
-            <Repeat2 size={18} />
-          </button>
           <button className="icon-action" onClick={onActivity} aria-label="View activity">
-            <BarChart3 size={18} />
+            <MessageSquare size={18} />
+            <span>{formatCount(commentCount)}</span>
           </button>
           <button
             className={saved ? 'icon-action saved' : 'icon-action'}
