@@ -1,0 +1,153 @@
+import { createClient } from '@supabase/supabase-js';
+import { readFile } from 'node:fs/promises';
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl || !serviceRoleKey) {
+  throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
+}
+
+const [floridaData, directoryData, federalData] = await Promise.all([
+  readJson('data/florida-official-data.json'),
+  readJson('data/representative-directory.json'),
+  readJson('data/federal-civic-items.json')
+]);
+const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
+
+async function readJson(path) {
+  return JSON.parse(await readFile(path, 'utf8'));
+}
+
+async function upsertBatches(table, rows, onConflict, size = 500) {
+  for (let index = 0; index < rows.length; index += size) {
+    const { error } = await supabase.from(table).upsert(rows.slice(index, index + size), { onConflict });
+    if (error) throw new Error(`${table}: ${error.message}`);
+  }
+}
+
+function isoDate(value) {
+  const [month, day, year] = String(value).split('/').map(Number);
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+const floridaOfficials = floridaData.officials.map((official) => ({
+  id: official.id,
+  name: official.name,
+  office: `${official.chamber} District ${official.district}`,
+  jurisdiction: 'Florida',
+  party: official.party,
+  state: 'FL',
+  district: String(official.district),
+  source_url: official.profileUrl,
+  claim_status: official.claimStatus,
+  imported_metadata: { chamber: official.chamber, source: 'Florida Senate' },
+  updated_at: floridaData.generatedAt
+}));
+const directoryOfficials = directoryData.officials.map((official) => ({
+  id: official.id,
+  name: official.name,
+  office: official.office,
+  jurisdiction: official.level === 'Federal' ? 'Federal' : 'Florida',
+  party: official.party,
+  state: official.state,
+  district: official.district === null ? null : String(official.district),
+  source_url: official.sourceUrl,
+  claim_status: 'unclaimed',
+  imported_metadata: { chamber: official.chamber, bioguideId: official.bioguideId || null },
+  updated_at: directoryData.generatedAt
+}));
+const officialMap = new Map([...directoryOfficials, ...floridaOfficials].map((official) => [official.id, official]));
+
+const floridaItems = floridaData.bills.map((bill) => ({
+  id: bill.id,
+  title: bill.title,
+  chamber: bill.chamber,
+  jurisdiction: 'Florida',
+  level: 'State',
+  status: bill.lastAction,
+  category: 'Legislation',
+  summary: bill.title,
+  detail: bill.lastAction,
+  source_url: bill.sourceUrl,
+  official_text_url: bill.sourceUrl,
+  imported_at: floridaData.generatedAt,
+  imported_metadata: { number: bill.number, session: bill.session, filedBy: bill.filedBy }
+}));
+const federalItems = federalData.items.map((bill) => ({
+  id: bill.id,
+  title: bill.title,
+  chamber: bill.chamber,
+  jurisdiction: bill.jurisdiction,
+  level: bill.level,
+  status: bill.status,
+  category: bill.category,
+  summary: bill.summary,
+  detail: bill.detail,
+  source_url: bill.sourceUrl,
+  official_text_url: bill.officialTextUrl,
+  imported_at: federalData.generatedAt,
+  imported_metadata: bill.imported || {}
+}));
+
+const rollCalls = floridaData.rollCalls.map((rollCall) => ({
+  id: rollCall.id,
+  civic_item_id: rollCall.billId,
+  bill_number: rollCall.billNumber,
+  title: rollCall.billTitle,
+  chamber: rollCall.chamber,
+  vote_date: isoDate(rollCall.date),
+  yea_count: rollCall.yeas,
+  nay_count: rollCall.nays,
+  source_url: rollCall.sourceUrl,
+  validation_status: rollCall.validation?.matchesPublishedTotals ? 'validated' : 'rejected',
+  imported_at: floridaData.generatedAt
+}));
+
+const floridaBySurname = new Map(floridaData.officials.map((official) => [official.name.split(',')[0].trim().toLowerCase(), official.id]));
+const officialVotes = [];
+let historicalOfficials = 0;
+for (const rollCall of floridaData.rollCalls) {
+  for (const memberVote of rollCall.memberVotes || []) {
+    const surname = memberVote.name.trim().toLowerCase();
+    let officialId = floridaBySurname.get(surname);
+    if (!officialId) {
+      officialId = `fl-senate-historical-${surname.replace(/[^a-z0-9]+/g, '-')}`;
+      if (!officialMap.has(officialId)) {
+        historicalOfficials += 1;
+        officialMap.set(officialId, {
+          id: officialId,
+          name: memberVote.name.trim(),
+          office: 'Florida Senate (historical member)',
+          jurisdiction: 'Florida',
+          party: null,
+          state: 'FL',
+          district: null,
+          source_url: rollCall.sourceUrl,
+          claim_status: 'inactive',
+          imported_metadata: { chamber: 'Florida Senate', historical: true },
+          updated_at: floridaData.generatedAt
+        });
+      }
+    }
+    officialVotes.push({
+      roll_call_id: rollCall.id,
+      official_id: officialId,
+      vote: memberVote.vote,
+      source_url: rollCall.sourceUrl
+    });
+  }
+}
+
+await upsertBatches('officials', [...officialMap.values()], 'id');
+await upsertBatches('civic_items', [...federalItems, ...floridaItems], 'id');
+await upsertBatches('roll_calls', rollCalls, 'id');
+await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id');
+
+console.log(JSON.stringify({
+  officials: officialMap.size,
+  civicItems: federalItems.length + floridaItems.length,
+  rollCalls: rollCalls.length,
+  officialVotes: officialVotes.length,
+  historicalOfficials,
+  skippedVotes: 0
+}, null, 2));

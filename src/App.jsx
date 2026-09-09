@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AtSign,
   Bell,
@@ -37,7 +37,23 @@ import federalCivicItems from '../data/federal-civic-items.json';
 import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
 import representativeDirectory from '../data/representative-directory.json';
-import { backendLabel, createComment, createSourceReport, syncSavedItem, syncUserVote } from './backend.js';
+import {
+  backendLabel,
+  cloudConfigured,
+  createComment,
+  createSourceReport,
+  getAuthSession,
+  loadCloudActivity,
+  sendSignInLink,
+  signOutUser,
+  subscribeToAuth,
+  syncFollowTarget,
+  syncLocalSnapshot,
+  syncPreferences,
+  syncReminder,
+  syncSavedItem,
+  syncUserVote
+} from './backend.js';
 import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
 
 const prototypeBills = [
@@ -346,11 +362,63 @@ function App() {
     storageKeys.theme,
     window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   );
+  const [authSession, setAuthSession] = useState(null);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authStatus, setAuthStatus] = useState(cloudConfigured ? 'Checking account…' : 'Cloud project not connected');
+  const [cloudReady, setCloudReady] = useState(false);
+  const activitySnapshotRef = useRef(null);
+  const hydratingUserRef = useRef(null);
+  activitySnapshotRef.current = { votes, saved: [...saved], followed: [...followed], reminders: [...reminders], jurisdiction, theme };
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    let active = true;
+    async function hydrate(session) {
+      if (!active) return;
+      setAuthSession(session);
+      if (!session) {
+        hydratingUserRef.current = null;
+        setCloudReady(false);
+        setAuthStatus(cloudConfigured ? 'Not signed in' : 'Cloud project not connected');
+        return;
+      }
+      if (hydratingUserRef.current === session.user.id) return;
+      hydratingUserRef.current = session.user.id;
+      setAuthStatus('Syncing this device…');
+      try {
+        const cloud = await loadCloudActivity();
+        if (!active || !cloud) return;
+        await syncLocalSnapshot(activitySnapshotRef.current, bills);
+        setVotes((current) => ({ ...cloud.votes, ...current }));
+        setSaved((current) => new Set([...cloud.saved, ...current]));
+        setFollowed((current) => new Set([...cloud.followed, ...current]));
+        setReminders((current) => new Set([...cloud.reminders, ...current]));
+        if (cloud.profile?.jurisdiction_data?.stateCode) setJurisdiction(cloud.profile.jurisdiction_data);
+        if (['light', 'dark'].includes(cloud.profile?.theme_preference)) setTheme(cloud.profile.theme_preference);
+        setCloudReady(true);
+        setAuthStatus('Synced');
+      } catch {
+        hydratingUserRef.current = null;
+        setCloudReady(false);
+        if (active) setAuthStatus('Signed in; sync needs attention');
+      }
+    }
+    getAuthSession().then(hydrate);
+    const unsubscribe = subscribeToAuth(hydrate);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!authSession || !cloudReady) return;
+    syncPreferences(jurisdiction, theme).catch(() => setAuthStatus('Signed in; preferences not synced'));
+  }, [authSession, cloudReady, jurisdiction, theme]);
 
   useEffect(() => {
     function syncHashRoute() {
@@ -426,6 +494,7 @@ function App() {
   }
 
   function toggleFollow(key, label = key) {
+    const shouldFollow = !followed.has(key);
     setFollowed((current) => {
       const next = new Set(current);
       if (next.has(key)) {
@@ -437,6 +506,8 @@ function App() {
       }
       return next;
     });
+    const targetType = filters.includes(key) ? 'level' : bills.some((bill) => bill.sourceName === key) ? 'source' : 'topic';
+    syncFollowTarget(key, shouldFollow, targetType).catch(() => showNotice('Follow saved locally; sync failed'));
   }
 
   function toggleRepost(id) {
@@ -454,6 +525,8 @@ function App() {
   }
 
   function toggleReminder(id) {
+    const bill = bills.find((item) => item.id === id);
+    const shouldRemind = !reminders.has(id);
     setReminders((current) => {
       const next = new Set(current);
       if (next.has(id)) {
@@ -465,6 +538,35 @@ function App() {
       }
       return next;
     });
+    syncReminder(getGuestProfileId(), bill || id, shouldRemind).catch(() => showNotice('Reminder saved locally; sync failed'));
+  }
+
+  async function requestSignIn(event) {
+    event?.preventDefault();
+    const email = authEmail.trim();
+    if (!email) {
+      setAuthStatus('Enter your email address');
+      return;
+    }
+    setAuthStatus('Sending secure sign-in link…');
+    try {
+      await sendSignInLink(email);
+      setAuthStatus('Check your email for the sign-in link');
+    } catch (error) {
+      setAuthStatus(error?.message || 'Sign-in link could not be sent');
+    }
+  }
+
+  async function signOut() {
+    try {
+      await signOutUser();
+      setAuthSession(null);
+      setCloudReady(false);
+      setAuthStatus(cloudConfigured ? 'Not signed in' : 'Cloud project not connected');
+      showNotice('Signed out');
+    } catch {
+      showNotice('Sign out failed');
+    }
   }
 
   function createPost() {
@@ -867,6 +969,13 @@ function App() {
             directoryData={representativeDirectory}
             jurisdiction={jurisdiction}
             backendLabel={backendLabel}
+            cloudConfigured={cloudConfigured}
+            authSession={authSession}
+            authEmail={authEmail}
+            authStatus={authStatus}
+            onAuthEmailChange={setAuthEmail}
+            onSignIn={requestSignIn}
+            onSignOut={signOut}
             onResetData={resetLocalData}
             onAction={showNotice}
             onNavigate={openSection}
@@ -1617,7 +1726,7 @@ function formatDistrict(value) {
   return Number.isFinite(Number(value)) && Number(value) > 0 ? `District ${Number(value)}` : 'At Large';
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, directoryData, jurisdiction, backendLabel, onResetData, onAction, onNavigate }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, directoryData, jurisdiction, backendLabel, cloudConfigured, authSession, authEmail, authStatus, onAuthEmailChange, onSignIn, onSignOut, onResetData, onAction, onNavigate }) {
   const activitySections = [
     ['Officials directory', 'Search every imported politician and open their voting profile.', BadgeCheck, 'officials'],
     ['Saved', 'Bills and official sources you bookmarked for later.', Bookmark, 'saved'],
@@ -1625,7 +1734,6 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
     ['Discussions', 'Conversations connected to bills and watched topics.', MessageSquare, 'chat']
   ];
   const settingsSections = [
-    ['Account', `${backendLabel}; votes, saves, follows, reminders, posts, and comments persist on this device.`, CircleUserRound],
     ['Appearance', 'Theme, accessibility, and compact-feed controls.', Sun],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
     ['Notifications', 'Bill status changes, official votes, replies, and source updates.', Bell],
@@ -1639,6 +1747,33 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
   return (
     <section className="view-page" aria-label="Settings">
       <PageHeader title="Settings" subtitle="Your activity, preferences, source policy, privacy, and support." />
+      <div className="settings-group-label">Account and sync</div>
+      <section className="account-sync-card">
+        <div className="account-sync-heading">
+          <div className="notification-icon"><CircleUserRound size={19} /></div>
+          <div>
+            <strong>{authSession?.user?.email || backendLabel}</strong>
+            <span>{authStatus}</span>
+          </div>
+        </div>
+        {authSession ? (
+          <>
+            <p>Your votes, saved items, follows, reminders, districts, and theme sync to this account.</p>
+            <button className="small-pill" onClick={onSignOut}>Sign out</button>
+          </>
+        ) : cloudConfigured ? (
+          <form className="account-signin-form" onSubmit={onSignIn}>
+            <label htmlFor="account-email">Email address</label>
+            <div>
+              <input id="account-email" type="email" autoComplete="email" value={authEmail} onChange={(event) => onAuthEmailChange(event.target.value)} placeholder="you@example.com" />
+              <button className="location-button">Email sign-in link</button>
+            </div>
+            <small>No password required. Your existing activity on this device is copied into your account after sign-in.</small>
+          </form>
+        ) : (
+          <p>Cloud account support is built but the Supabase project has not been provisioned. Guest activity continues to stay on this device.</p>
+        )}
+      </section>
       <div className="settings-group-label">Your activity</div>
       <div className="settings-list">
         {activitySections.map(([title, detail, Icon, section]) => (

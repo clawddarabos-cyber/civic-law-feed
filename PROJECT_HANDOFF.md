@@ -1,6 +1,6 @@
 # Civic Law Feed Project Handoff
 
-Last updated: 2026-08-19
+Last updated: 2026-09-09
 
 ## Current Status
 
@@ -159,15 +159,17 @@ The build passed and the live HTTPS page returned `200 OK`.
 
 ## Supabase Connection Notes
 
-The app-side Supabase client and database schema are ready, but the real project credentials still need to be created or supplied.
+The app-side Supabase client, passwordless email sign-in UI, authenticated data adapter, database schema, migration, and service-only civic-data sync job are ready. The real project still needs to be provisioned and connected.
 
-The SQL enables row-level security before the public anon key is connected. The current policies are intentionally guest-mode oriented: public civic data can be read, comments and reports enter moderation queues, guest votes/saves can sync, and profile inserts require `email is null`. Tighten these policies when real authentication is added.
+The SQL enables row-level security before the public anon key is connected. Public civic records remain readable, while profiles, votes, saves, follows, and reminders are restricted to `auth.uid()`. Comments, reports, and claim requests require an authenticated owner and enter moderation/queue states. Guest activity stays local instead of using permissive anonymous database writes.
+
+On first authenticated sign-in, existing device activity is copied into the account and merged with cloud activity. District and theme preferences then sync across devices. `scripts/sync-supabase-data.mjs` writes officials, civic items, validated roll calls, and member votes with a service-role key. `.github/workflows/sync-civic-data.yml` refreshes official directories and runs that trusted import daily, but skips safely until its protected secrets are configured.
 
 Connection steps:
 
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in that project's SQL editor.
-3. Add GitHub repository secrets named `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+3. Add GitHub repository secrets named `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY`.
 4. Push to `main` or run the `Deploy GitHub Pages` workflow manually.
 5. Verify the live site status label changes from `Local guest session` to `Supabase sync configured`.
 
@@ -201,10 +203,7 @@ Cloudflare/GitHub caching can show the previous asset bundle for 30-60 seconds a
 
 - Bills/laws are still static prototype records.
 - Official source links point to official portals, not item-specific source documents yet.
-- Votes, saves, comments, and claim actions are local React state only.
-- No authentication.
-- No backend.
-- No persistent server database is connected yet. Browser localStorage is used as the temporary persistence layer, and `supabase/schema.sql` is the proposed first backend schema.
+- The authenticated cloud-sync implementation is deployed behind optional environment configuration, but no Supabase project is connected yet. Until it is provisioned, the live app remains in local guest mode.
 - No real comments/moderation system.
 - No real official-profile claiming workflow.
 - No live roll-call ingestion.

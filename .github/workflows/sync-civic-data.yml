@@ -1,0 +1,50 @@
+name: Sync civic data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 11 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Check cloud configuration
+        id: configured
+        shell: bash
+        run: |
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Supabase sync secrets are not configured; skipping safely."
+          fi
+
+      - name: Checkout
+        if: steps.configured.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.configured.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.configured.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Refresh official directories
+        if: steps.configured.outputs.ready == 'true'
+        run: npm run import:representatives
+
+      - name: Sync validated data
+        if: steps.configured.outputs.ready == 'true'
+        run: npm run sync:supabase

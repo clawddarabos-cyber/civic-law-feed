@@ -2027,6 +2027,65 @@ button {
   text-transform: uppercase;
 }
 
+.account-sync-card {
+  display: grid;
+  gap: 12px;
+  border-bottom: 1px solid #eff3f4;
+  background: #fff;
+  padding: 16px;
+}
+
+.account-sync-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-sync-heading > div:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.account-sync-heading span,
+.account-sync-card p,
+.account-signin-form small {
+  margin: 0;
+  color: #536471;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.account-sync-card > .small-pill {
+  width: fit-content;
+}
+
+.account-signin-form {
+  display: grid;
+  gap: 7px;
+}
+
+.account-signin-form label {
+  color: #0f1419;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.account-signin-form > div {
+  display: flex;
+  gap: 8px;
+}
+
+.account-signin-form input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #cfd9de;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1419;
+  padding: 10px 12px;
+  font: inherit;
+}
+
 .profile-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2381,7 +2440,7 @@ a.vote-record-row:hover strong {
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
   .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
-  , .representative-lookup-panel, .coverage-pending-card,
+  , .representative-lookup-panel, .coverage-pending-card, .account-sync-card,
   .address-lookup-form input, .secondary-location-button
 ) {
   background: #000;
@@ -2404,8 +2463,9 @@ a.vote-record-row:hover strong {
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
   .profile-search, .view-profile-button
-  , .representative-lookup-panel, .coverage-pending-card,
-  .address-lookup-form input, .secondary-location-button, .profiles-limit-note
+  , .representative-lookup-panel, .coverage-pending-card, .account-sync-card,
+  .address-lookup-form input, .secondary-location-button, .profiles-limit-note,
+  .account-signin-form input
 ) {
   border-color: #2f3336;
 }
@@ -2422,7 +2482,8 @@ a.vote-record-row:hover strong {
   .follow-target-copy strong, .profile-metrics strong, .profile-search input,
   .view-profile-button
   , .representative-lookup-panel strong, .coverage-pending-card strong,
-  .address-lookup-form label, .address-lookup-form input, .secondary-location-button
+  .address-lookup-form label, .address-lookup-form input, .secondary-location-button,
+  .account-sync-heading strong, .account-signin-form label, .account-signin-form input
 ) {
   color: #e7e9ea;
 }
@@ -2442,7 +2503,8 @@ a.vote-record-row:hover strong {
   .settings-group-label, .vote-record-label
   , .representative-lookup-panel > div:first-child > span,
   .representatives-section-heading span, .coverage-pending-card span,
-  .address-lookup-form small, .profiles-limit-note
+  .address-lookup-form small, .profiles-limit-note, .account-sync-heading span,
+  .account-sync-card p, .account-signin-form small
 ) {
   color: #8b98a5;
 }
@@ -2477,7 +2539,7 @@ a.vote-record-row:hover strong {
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
   .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
-  , .representative-lookup-panel, .coverage-pending-card,
+  , .representative-lookup-panel, .coverage-pending-card, .account-sync-card,
   .address-lookup-form input, .secondary-location-button
 ) {
   background: #fff;
@@ -2500,8 +2562,9 @@ a.vote-record-row:hover strong {
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
   .profile-search, .view-profile-button
-  , .representative-lookup-panel, .coverage-pending-card,
-  .address-lookup-form input, .secondary-location-button, .profiles-limit-note
+  , .representative-lookup-panel, .coverage-pending-card, .account-sync-card,
+  .address-lookup-form input, .secondary-location-button, .profiles-limit-note,
+  .account-signin-form input
 ) {
   border-color: #eff3f4;
 }
@@ -2518,7 +2581,8 @@ a.vote-record-row:hover strong {
   .follow-target-copy strong, .profile-metrics strong, .profile-search input,
   .view-profile-button
   , .representative-lookup-panel strong, .coverage-pending-card strong,
-  .address-lookup-form label, .address-lookup-form input, .secondary-location-button
+  .address-lookup-form label, .address-lookup-form input, .secondary-location-button,
+  .account-sync-heading strong, .account-signin-form label, .account-signin-form input
 ) {
   color: #0f1419;
 }
@@ -2538,7 +2602,8 @@ a.vote-record-row:hover strong {
   .settings-group-label
   , .representative-lookup-panel > div:first-child > span,
   .representatives-section-heading span, .coverage-pending-card span,
-  .address-lookup-form small, .profiles-limit-note
+  .address-lookup-form small, .profiles-limit-note, .account-sync-heading span,
+  .account-sync-card p, .account-signin-form small
 ) {
   color: #536471;
 }
@@ -2646,6 +2711,15 @@ a.vote-record-row:hover strong {
   .location-panel {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .account-signin-form > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-signin-form .location-button {
+    width: 100%;
   }
 
   .launch-onboarding {
