@@ -10,6 +10,7 @@ export const storageKeys = {
   localComments: 'civic-feed:local-comments',
   sourceReports: 'civic-feed:source-reports',
   onboardingDismissed: 'civic-feed:onboarding-dismissed',
+  theme: 'civic-feed:theme',
   guestProfileId: 'civic-feed:guest-profile-id'
 };
 

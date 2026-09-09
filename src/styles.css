@@ -202,6 +202,12 @@ button {
   display: block;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .timeline-header strong {
   font-size: 20px;
 }
@@ -1723,6 +1729,16 @@ button {
     color: #71767b;
   }
 
+  .ai-summary {
+    color: #e7e9ea;
+  }
+
+  .minimal-card-meta,
+  .minimal-card-footer,
+  .ai-summary-label {
+    color: #8b98a5;
+  }
+
   .nav-item:hover,
   .profile-button:hover,
   .round-action:hover,
@@ -1773,6 +1789,169 @@ button {
     background: #000;
     color: #e7e9ea;
   }
+}
+
+/* Explicit theme choices override the device preference and persist per browser. */
+:root[data-theme="dark"] {
+  background: #000;
+  color: #e7e9ea;
+}
+
+:root[data-theme="dark"] :is(
+  body, .left-rail, .feed-area, .detail-panel, .location-panel,
+  .launch-onboarding, .controls, .composer, .bill-card, .right-card,
+  .ai-overview-box, .comments-panel, .source-metadata-panel, .report-panel,
+  .metadata-row, .report-row, .profile-card, .source-registry-panel,
+  .data-spike-panel, .detail-vote-box, .info-list, .friend-box, .comment-box,
+  .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
+  .quick-grid button, .compact-row, .settings-row, .next-action-box,
+  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a
+) {
+  background: #000;
+}
+
+:root[data-theme="dark"] :is(.timeline-header, .timeline-tabs) {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+:root[data-theme="dark"] :is(
+  .left-rail, .feed-area, .detail-panel, .timeline-header, .timeline-tabs,
+  .location-panel, .launch-onboarding, .controls, .composer, .bill-card,
+  .right-card, .ai-overview-box, .comments-panel, .source-metadata-panel,
+  .report-panel, .metadata-row, .report-row, .profile-card,
+  .source-registry-panel, .data-spike-panel, .detail-vote-box, .info-list,
+  .friend-box, .comment-box, .alignment-box, .archive-summary, .sponsor-summary,
+  .source-registry-group, .vote-record, .comment-row, .friend-row, .trend-link,
+  .rollcall-sample a, .vote-record-row, .vote-record-label, .source-box a,
+  .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
+  .action-row
+) {
+  border-color: #2f3336;
+}
+
+:root[data-theme="dark"] :is(
+  .brand-mark, .nav-item, .profile-button, .round-action, .icon-action,
+  .timeline-tabs button.active, .bill-content h2, .detail-body h2,
+  .overview-page h1, .profiles-header h1, .profile-card h2, .compact-row strong,
+  .settings-row strong, .empty-state strong, .composer textarea,
+  .chat-composer textarea, .summary-link, .ai-summary, .post-author-row strong,
+  .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
+  .rail-search input, .metadata-row strong, .report-row strong,
+  .launch-onboarding-copy strong, .overview-back, .quick-grid button,
+  .follow-target-copy strong
+) {
+  color: #e7e9ea;
+}
+
+:root[data-theme="dark"] :is(
+  .brand span, .rail-account span, .timeline-header span, .timeline-tabs button,
+  .post-author-row, .meta-row, .status-row, .vote-button, .icon-action,
+  .trend-link span, .trend-link small, .detail-copy, .comment-box p,
+  .ai-overview-box p, .comment-row p, .profiles-header p, .profile-card p,
+  .data-spike-panel span, .source-registry-panel span, .alignment-box span,
+  .archive-summary span, .sponsor-summary span, .vote-record-row span,
+  .vote-pair span:last-child, .compact-row span, .compact-row p,
+  .settings-row small, .settings-footer button, .quick-grid small,
+  .next-action-box span, .source-metadata-panel p, .report-panel p,
+  .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label
+) {
+  color: #8b98a5;
+}
+
+:root[data-theme="dark"] :is(
+  .search-box, .rail-search, .meta-row span, .status-row span,
+  .source-check-row span, .federal-context-row span, .profiles-header > span,
+  .profile-status-row span, .notification-icon
+) {
+  background: #202327;
+}
+
+:root[data-theme="dark"] :is(.chip, .small-pill) {
+  border-color: #2f3336;
+  background: #000;
+  color: #e7e9ea;
+}
+
+:root[data-theme="light"] {
+  background: #fff;
+  color: #0f1419;
+}
+
+:root[data-theme="light"] :is(
+  body, .left-rail, .feed-area, .detail-panel, .location-panel,
+  .launch-onboarding, .controls, .composer, .bill-card, .right-card,
+  .ai-overview-box, .comments-panel, .source-metadata-panel, .report-panel,
+  .metadata-row, .report-row, .profile-card, .source-registry-panel,
+  .data-spike-panel, .detail-vote-box, .info-list, .friend-box, .comment-box,
+  .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
+  .quick-grid button, .compact-row, .settings-row, .next-action-box,
+  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a
+) {
+  background: #fff;
+}
+
+:root[data-theme="light"] :is(.timeline-header, .timeline-tabs) {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+:root[data-theme="light"] :is(
+  .left-rail, .feed-area, .detail-panel, .timeline-header, .timeline-tabs,
+  .location-panel, .launch-onboarding, .controls, .composer, .bill-card,
+  .right-card, .ai-overview-box, .comments-panel, .source-metadata-panel,
+  .report-panel, .metadata-row, .report-row, .profile-card,
+  .source-registry-panel, .data-spike-panel, .detail-vote-box, .info-list,
+  .friend-box, .comment-box, .alignment-box, .archive-summary, .sponsor-summary,
+  .source-registry-group, .vote-record, .comment-row, .friend-row, .trend-link,
+  .rollcall-sample a, .vote-record-row, .vote-record-label, .source-box a,
+  .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
+  .action-row
+) {
+  border-color: #eff3f4;
+}
+
+:root[data-theme="light"] :is(
+  .brand-mark, .nav-item, .profile-button, .round-action, .icon-action,
+  .timeline-tabs button.active, .bill-content h2, .detail-body h2,
+  .overview-page h1, .profiles-header h1, .profile-card h2, .compact-row strong,
+  .settings-row strong, .empty-state strong, .composer textarea,
+  .chat-composer textarea, .summary-link, .ai-summary, .post-author-row strong,
+  .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
+  .rail-search input, .metadata-row strong, .report-row strong,
+  .launch-onboarding-copy strong, .overview-back, .quick-grid button,
+  .follow-target-copy strong
+) {
+  color: #0f1419;
+}
+
+:root[data-theme="light"] :is(
+  .brand span, .rail-account span, .timeline-header span, .timeline-tabs button,
+  .post-author-row, .meta-row, .status-row, .vote-button, .icon-action,
+  .trend-link span, .trend-link small, .detail-copy, .comment-box p,
+  .ai-overview-box p, .comment-row p, .profiles-header p, .profile-card p,
+  .data-spike-panel span, .source-registry-panel span, .alignment-box span,
+  .archive-summary span, .sponsor-summary span, .vote-record-row span,
+  .vote-pair span:last-child, .compact-row span, .compact-row p,
+  .settings-row small, .settings-footer button, .quick-grid small,
+  .next-action-box span, .source-metadata-panel p, .report-panel p,
+  .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label
+) {
+  color: #536471;
+}
+
+:root[data-theme="light"] :is(
+  .search-box, .rail-search, .meta-row span, .status-row span,
+  .source-check-row span, .federal-context-row span, .profiles-header > span,
+  .profile-status-row span, .notification-icon
+) {
+  background: #eff3f4;
+}
+
+:root[data-theme="light"] :is(.chip, .small-pill) {
+  border-color: #cfd9de;
+  background: #fff;
+  color: #0f1419;
 }
 
 @media (max-width: 1120px) {

@@ -16,6 +16,7 @@ import {
   LocateFixed,
   MapPin,
   MessageSquare,
+  Moon,
   MoreHorizontal,
   PenLine,
   Repeat2,
@@ -25,6 +26,7 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Sun,
   SlidersHorizontal,
   ThumbsDown,
   ThumbsUp,
@@ -287,6 +289,15 @@ function App() {
   const [sourceReportDrafts, setSourceReportDrafts] = useState({});
   const [commentDrafts, setCommentDrafts] = useState({});
   const [notice, setNotice] = useState('');
+  const [theme, setTheme] = useStoredState(
+    storageKeys.theme,
+    window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  );
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   useEffect(() => {
     function syncHashRoute() {
@@ -720,14 +731,24 @@ function App() {
                 <strong>Home</strong>
                 <span>{jurisdiction.label}</span>
               </div>
-              <button
-                className={locationOpen ? 'round-action active' : 'round-action'}
-                aria-label="Location and profile"
-                aria-expanded={locationOpen}
-                onClick={() => setLocationOpen((open) => !open)}
-              >
-                <MapPin size={19} />
-              </button>
+              <div className="header-actions">
+                <button
+                  className="round-action"
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+                  onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+                </button>
+                <button
+                  className={locationOpen ? 'round-action active' : 'round-action'}
+                  aria-label="Location and profile"
+                  aria-expanded={locationOpen}
+                  onClick={() => setLocationOpen((open) => !open)}
+                >
+                  <MapPin size={19} />
+                </button>
+              </div>
             </header>
             <div className="timeline-tabs" role="tablist" aria-label="Timeline mode">
               <button className={activeTab === 'forYou' ? 'active' : ''} onClick={() => setActiveTab('forYou')}>For you</button>
