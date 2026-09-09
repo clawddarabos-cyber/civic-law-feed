@@ -232,13 +232,28 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
   name: official.name,
   office: `${official.chamber} District ${official.district}`,
   jurisdiction: 'Florida',
+  state: 'FL',
+  district: official.district,
   party: official.party,
   status: official.claimStatus === 'unclaimed' ? 'Unclaimed profile' : 'Claimed profile',
   sourceName: 'Florida Senate profile',
   sourceUrl: official.profileUrl,
   votes: {},
   archiveSince: String(floridaOfficialData.window.mvpStartYear),
-  archive: []
+  archive: floridaOfficialData.rollCalls
+    .flatMap((rollCall) => {
+      const surname = official.name.split(',')[0].trim().toLowerCase();
+      const memberVote = rollCall.memberVotes?.find((vote) => vote.name.toLowerCase() === surname);
+      return memberVote ? [{
+        title: `${rollCall.billNumber}: ${rollCall.billTitle}`,
+        year: rollCall.date,
+        topic: `${rollCall.chamber} vote`,
+        vote: memberVote.vote,
+        sourceUrl: rollCall.sourceUrl,
+        sortDate: new Date(rollCall.date).getTime()
+      }] : [];
+    })
+    .sort((a, b) => b.sortDate - a.sortDate)
 }));
 
 const federalOfficialProfiles = federalOfficialData.officials.map((official) => ({
@@ -247,6 +262,8 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
   name: official.name,
   office: official.office,
   jurisdiction: official.jurisdiction,
+  state: official.state,
+  district: official.district,
   party: official.party,
   status: official.status,
   sourceName: official.sourceName,
@@ -260,7 +277,11 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
 const defaultJurisdiction = {
   label: 'Nationwide demo',
   state: 'All states',
+  stateCode: null,
   county: 'All counties',
+  congressionalDistrict: null,
+  stateSenateDistrict: null,
+  stateHouseDistrict: null,
   levels: ['Federal', 'State', 'County']
 };
 
@@ -280,7 +301,7 @@ function App() {
   const [chatDraft, setChatDraft] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [locationOpen, setLocationOpen] = useState(false);
-  const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
+  const [jurisdiction, setJurisdiction] = useStoredState(storageKeys.jurisdiction, defaultJurisdiction);
   const [locationStatus, setLocationStatus] = useState('idle');
   const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
@@ -493,12 +514,20 @@ function App() {
           const data = await response.json();
           const geographies = data?.result?.geographies || {};
           const state = geographies.States?.[0]?.NAME || 'Florida';
+          const stateCode = geographies.States?.[0]?.STUSAB || null;
           const countyName = geographies.Counties?.[0]?.NAME || 'St. Johns County';
           const county = countyName.endsWith('County') ? countyName : `${countyName} County`;
+          const congressionalDistrict = findDistrict(geographies, 'Congressional District');
+          const stateSenateDistrict = findDistrict(geographies, 'State Legislative Districts - Upper');
+          const stateHouseDistrict = findDistrict(geographies, 'State Legislative Districts - Lower');
           setJurisdiction({
             label: `${county}, ${state}`,
             state,
+            stateCode,
             county,
+            congressionalDistrict,
+            stateSenateDistrict,
+            stateHouseDistrict,
             levels: ['Federal', 'State', 'County']
           });
           setActiveFilter('All');
@@ -588,6 +617,7 @@ function App() {
     setSourceReports({});
     setSourceReportDrafts({});
     setOnboardingDismissed(false);
+    setJurisdiction(defaultJurisdiction);
     showNotice('Local demo data reset');
   }
 
@@ -887,6 +917,14 @@ function App() {
       {notice && <div className="toast" role="status">{notice}</div>}
     </div>
   );
+}
+
+function findDistrict(geographies, label) {
+  const entry = Object.entries(geographies).find(([key]) => key.includes(label));
+  const geography = entry?.[1]?.[0];
+  const value = geography?.BASENAME || geography?.NAME?.match(/District\s+(\d+)/i)?.[1];
+  const district = Number.parseInt(value, 10);
+  return Number.isFinite(district) ? district : null;
 }
 
 function getOverviewIdFromHash() {
@@ -1541,6 +1579,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
     };
   });
   const noFloorVote = !recordedVotes.length;
+  const localProfiles = profiles.filter((profile) => matchesJurisdiction(profile, bill, jurisdiction));
   const locationLabel = jurisdiction.state === 'All states'
     ? 'Use your location to match federal, state, and local representatives.'
     : `Matched to ${jurisdiction.label}. District-level matching is still being added.`;
@@ -1572,8 +1611,79 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
           ))}
         </div>
       )}
+      {!!localProfiles.length && (
+        <div className="local-representatives">
+          <span>Your matched representative{localProfiles.length > 1 ? 's' : ''}</span>
+          {localProfiles.map((profile) => (
+            <RepresentativeHistory key={profile.id} profile={profile} />
+          ))}
+        </div>
+      )}
     </section>
   );
+}
+
+function matchesJurisdiction(profile, bill, jurisdiction) {
+  if (!jurisdiction.stateCode) return false;
+
+  if (bill.level === 'Federal') {
+    return profile.jurisdiction === 'Federal' && profile.state === jurisdiction.stateCode && (
+      profile.district === null || profile.district === undefined || profile.district === jurisdiction.congressionalDistrict
+    );
+  }
+
+  if (bill.level === 'State') {
+    return profile.jurisdiction === jurisdiction.state && (
+      !profile.district || profile.district === jurisdiction.stateSenateDistrict
+    );
+  }
+
+  return profile.jurisdiction === bill.jurisdiction;
+}
+
+function RepresentativeHistory({ profile }) {
+  const recentVotes = profile.archive.slice(0, 3);
+  const prediction = predictRepresentativeVote(recentVotes);
+
+  return (
+    <article className="representative-history-card">
+      <RepresentativeVoteRow official={profile} />
+      <div className="recent-votes">
+        <strong>Last three recorded votes</strong>
+        {recentVotes.length ? recentVotes.map((record) => (
+          <a href={record.sourceUrl} target="_blank" rel="noreferrer" key={`${profile.id}-${record.year}-${record.title}`}>
+            <span>{record.title}</span>
+            <span className={record.vote === 'yes' ? 'history-vote yes' : 'history-vote no'}>{record.vote.toUpperCase()}</span>
+          </a>
+        )) : <span className="history-unavailable">No member-level vote history imported yet.</span>}
+      </div>
+      <div className={prediction.vote ? `ai-vote-estimate ${prediction.vote}` : 'ai-vote-estimate pending'}>
+        <span><Sparkles size={14} /> AI estimate</span>
+        <strong>{prediction.label}</strong>
+        <p>{prediction.detail}</p>
+        <small>Estimate only—not an official position or recorded vote.</small>
+      </div>
+    </article>
+  );
+}
+
+function predictRepresentativeVote(recentVotes) {
+  if (recentVotes.length < 3) {
+    return {
+      vote: null,
+      label: 'Not enough history',
+      detail: 'Three sourced member votes are required before the app will estimate a likely vote.'
+    };
+  }
+
+  const yesVotes = recentVotes.filter((record) => record.vote === 'yes').length;
+  const vote = yesVotes >= 2 ? 'yes' : 'no';
+  const majority = vote === 'yes' ? yesVotes : recentVotes.length - yesVotes;
+  return {
+    vote,
+    label: `Likely ${vote === 'yes' ? 'Yes' : 'No'}`,
+    detail: `${majority} of the representative’s last 3 sourced votes were ${vote.toUpperCase()}. This is a simple recent-vote signal and does not yet account for topic similarity, amendments, or public statements.`
+  };
 }
 
 function RepresentativeVoteRow({ official, sponsor = false }) {
@@ -1601,7 +1711,9 @@ function RepresentativeVoteRow({ official, sponsor = false }) {
 
 function formatOfficialName(name) {
   const senateName = name?.match(/^Sen\.\s+([^,]+),\s+([^\[]+)/);
-  return senateName ? `${senateName[2].trim()} ${senateName[1].trim()}` : name;
+  if (senateName) return `${senateName[2].trim()} ${senateName[1].trim()}`;
+  const directoryName = name?.match(/^([^,]+),\s+(.+)$/);
+  return directoryName ? `${directoryName[2].trim()} ${directoryName[1].trim()}` : name;
 }
 
 function SourceMetadata({ bill }) {

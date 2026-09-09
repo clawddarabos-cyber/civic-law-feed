@@ -420,7 +420,7 @@
     {
       "id": "fl-2026-sb-8",
       "number": "SB 8",
-      "title": "Relief of Patricia Ermini by the Lee County Sheriff’s Office",
+      "title": "Relief of Patricia Ermini by the Lee County Sheriff\u2019s Office",
       "filedBy": "Rodriguez",
       "chamber": "Florida Senate",
       "session": "2026",
@@ -470,7 +470,7 @@
     {
       "id": "fl-2026-sb-18",
       "number": "SB 18",
-      "title": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "title": "Relief of the Estate of M.N. by the Broward County Sheriff\u2019s Office",
       "filedBy": "Martin",
       "chamber": "Florida Senate",
       "session": "2026",
@@ -798,7 +798,53 @@
       "date": "2/3/2026",
       "yeas": 11,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-03%200100PM~S00002%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-03%200100PM~S00002%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-2-vote-2",
@@ -809,7 +855,61 @@
       "date": "2/12/2026",
       "yeas": 13,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-12%200230PM~S00002%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/2/Vote/2026-02-12%200230PM~S00002%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Arrington",
+          "vote": "yes"
+        },
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Bernard",
+          "vote": "yes"
+        },
+        {
+          "name": "Bracy Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Mayfield",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Truenow",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-6-vote-1",
@@ -820,7 +920,53 @@
       "date": "2/3/2026",
       "yeas": 11,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-03%200100PM~S00006%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-03%200100PM~S00006%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-6-vote-2",
@@ -831,7 +977,45 @@
       "date": "2/12/2026",
       "yeas": 9,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-12%200230PM~S00006%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-02-12%200230PM~S00006%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-6-vote-3",
@@ -842,7 +1026,77 @@
       "date": "3/2/2026",
       "yeas": 17,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-03-02%201200PM~S00006%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/6/Vote/2026-03-02%201200PM~S00006%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burgess",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-14-vote-1",
@@ -853,7 +1107,49 @@
       "date": "1/12/2026",
       "yeas": 9,
       "nays": 1,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-12%200400PM~S00014%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-12%200400PM~S00014%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "no"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-14-vote-2",
@@ -864,7 +1160,41 @@
       "date": "1/20/2026",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-20%200100PM~S00014%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-01-20%200100PM~S00014%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-14-vote-3",
@@ -875,7 +1205,105 @@
       "date": "2/3/2026",
       "yeas": 24,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-02-03%200900AM~S00014%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/14/Vote/2026-02-03%200900AM~S00014%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Boyd",
+          "vote": "yes"
+        },
+        {
+          "name": "Bradley",
+          "vote": "yes"
+        },
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burgess",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-16-vote-1",
@@ -886,7 +1314,49 @@
       "date": "1/12/2026",
       "yeas": 9,
       "nays": 1,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-12%200400PM~S00016%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-12%200400PM~S00016%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "no"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-16-vote-2",
@@ -897,7 +1367,41 @@
       "date": "1/20/2026",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-20%200100PM~S00016%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-01-20%200100PM~S00016%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-16-vote-3",
@@ -908,29 +1412,203 @@
       "date": "2/3/2026",
       "yeas": 23,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-02-03%200900AM~S00016%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/16/Vote/2026-02-03%200900AM~S00016%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Boyd",
+          "vote": "yes"
+        },
+        {
+          "name": "Bradley",
+          "vote": "yes"
+        },
+        {
+          "name": "Burgess",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-18-vote-1",
       "billId": "fl-2026-sb-18",
       "billNumber": "SB 18",
-      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff\u2019s Office",
       "chamber": "Committee",
       "date": "2/3/2026",
       "yeas": 10,
       "nays": 1,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-03%200100PM~S00018%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-03%200100PM~S00018%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "no"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-18-vote-2",
       "billId": "fl-2026-sb-18",
       "billNumber": "SB 18",
-      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff’s Office",
+      "billTitle": "Relief of the Estate of M.N. by the Broward County Sheriff\u2019s Office",
       "chamber": "Committee",
       "date": "2/10/2026",
       "yeas": 6,
       "nays": 2,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-10%200300PM~S00018%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/18/Vote/2026-02-10%200300PM~S00018%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "no"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "no"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-24-vote-1",
@@ -941,7 +1619,49 @@
       "date": "1/12/2026",
       "yeas": 9,
       "nays": 1,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-12%200400PM~S00024%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-12%200400PM~S00024%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "no"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-24-vote-2",
@@ -952,7 +1672,41 @@
       "date": "1/20/2026",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-20%200100PM~S00024%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-01-20%200100PM~S00024%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-24-vote-3",
@@ -963,7 +1717,105 @@
       "date": "2/3/2026",
       "yeas": 24,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-02-03%200900AM~S00024%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/24/Vote/2026-02-03%200900AM~S00024%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Boyd",
+          "vote": "yes"
+        },
+        {
+          "name": "Bradley",
+          "vote": "yes"
+        },
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burgess",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-26-vote-1",
@@ -974,7 +1826,53 @@
       "date": "2/3/2026",
       "yeas": 11,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-03%200100PM~S00026%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-03%200100PM~S00026%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-26-vote-2",
@@ -985,7 +1883,61 @@
       "date": "2/12/2026",
       "yeas": 13,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-12%200230PM~S00026%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-02-12%200230PM~S00026%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Arrington",
+          "vote": "yes"
+        },
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Bernard",
+          "vote": "yes"
+        },
+        {
+          "name": "Bracy Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Mayfield",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Truenow",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-26-vote-3",
@@ -996,7 +1948,77 @@
       "date": "3/2/2026",
       "yeas": 17,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-03-02%201200PM~S00026%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/26/Vote/2026-03-02%201200PM~S00026%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burgess",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Grall",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-28-vote-1",
@@ -1007,7 +2029,53 @@
       "date": "2/3/2026",
       "yeas": 11,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-03%200100PM~S00028%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-03%200100PM~S00028%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "DiCeglie",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Hooper",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-28-vote-2",
@@ -1018,7 +2086,41 @@
       "date": "2/10/2026",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-10%200300PM~S00028%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/28/Vote/2026-02-10%200300PM~S00028%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-32-vote-1",
@@ -1029,7 +2131,41 @@
       "date": "11/18/2025",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2025-11-18%201000AM~S00032%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2025-11-18%201000AM~S00032%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Bernard",
+          "vote": "yes"
+        },
+        {
+          "name": "Bradley",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-32-vote-2",
@@ -1040,7 +2176,41 @@
       "date": "1/21/2026",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-01-21%200130PM~S00032%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-01-21%200130PM~S00032%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Polsky",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Smith",
+          "vote": "yes"
+        },
+        {
+          "name": "Wright",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        },
+        {
+          "name": "Martin",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-32-vote-3",
@@ -1051,7 +2221,85 @@
       "date": "2/12/2026",
       "yeas": 19,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-02-12%200900AM~S00032%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/32/Vote/2026-02-12%200900AM~S00032%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Arrington",
+          "vote": "yes"
+        },
+        {
+          "name": "Avila",
+          "vote": "yes"
+        },
+        {
+          "name": "Bernard",
+          "vote": "yes"
+        },
+        {
+          "name": "Boyd",
+          "vote": "yes"
+        },
+        {
+          "name": "Bracy Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Bradley",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Calatayud",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Mayfield",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Simon",
+          "vote": "yes"
+        },
+        {
+          "name": "Truenow",
+          "vote": "yes"
+        },
+        {
+          "name": "Yarborough",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-34-vote-1",
@@ -1062,7 +2310,37 @@
       "date": "11/4/2025",
       "yeas": 7,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/34/Vote/2025-11-04%200330PM~S00034%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/34/Vote/2025-11-04%200330PM~S00034%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Jones",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Pizzo",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "McClain",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-36-vote-1",
@@ -1073,7 +2351,53 @@
       "date": "2/2/2026",
       "yeas": 9,
       "nays": 2,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-02%200330PM~S00036%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-02%200330PM~S00036%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Calatayud",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Leek",
+          "vote": "yes"
+        },
+        {
+          "name": "Massullo",
+          "vote": "no"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "no"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-36-vote-2",
@@ -1084,7 +2408,45 @@
       "date": "2/12/2026",
       "yeas": 8,
       "nays": 1,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-12%200230PM~S00036%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/36/Vote/2026-02-12%200230PM~S00036%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Brodeur",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        },
+        {
+          "name": "Garcia",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "no"
+        },
+        {
+          "name": "Rodriguez",
+          "vote": "yes"
+        },
+        {
+          "name": "Rouson",
+          "vote": "yes"
+        },
+        {
+          "name": "Sharief",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        }
+      ]
     },
     {
       "id": "fl-2026-sb-40-vote-1",
@@ -1095,7 +2457,41 @@
       "date": "11/18/2025",
       "yeas": 8,
       "nays": 0,
-      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/40/Vote/2025-11-18%201000AM~S00040%20Vote%20Record.PDF"
+      "sourceUrl": "https://www.flsenate.gov/Session/Bill/2026/40/Vote/2025-11-18%201000AM~S00040%20Vote%20Record.PDF",
+      "memberVotes": [
+        {
+          "name": "Berman",
+          "vote": "yes"
+        },
+        {
+          "name": "Davis",
+          "vote": "yes"
+        },
+        {
+          "name": "Gaetz",
+          "vote": "yes"
+        },
+        {
+          "name": "Osgood",
+          "vote": "yes"
+        },
+        {
+          "name": "Passidomo",
+          "vote": "yes"
+        },
+        {
+          "name": "Trumbull",
+          "vote": "yes"
+        },
+        {
+          "name": "Harrell",
+          "vote": "yes"
+        },
+        {
+          "name": "Burton",
+          "vote": "yes"
+        }
+      ]
     }
   ]
 }

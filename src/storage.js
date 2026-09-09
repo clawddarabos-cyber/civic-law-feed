@@ -11,6 +11,7 @@ export const storageKeys = {
   sourceReports: 'civic-feed:source-reports',
   onboardingDismissed: 'civic-feed:onboarding-dismissed',
   theme: 'civic-feed:theme',
+  jurisdiction: 'civic-feed:jurisdiction',
   guestProfileId: 'civic-feed:guest-profile-id'
 };
 
