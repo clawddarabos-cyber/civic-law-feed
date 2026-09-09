@@ -1451,6 +1451,27 @@ button {
   gap: 14px;
 }
 
+.profile-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #cfd9de;
+  border-radius: 999px;
+  background: #fff;
+  color: #536471;
+  padding: 10px 14px;
+}
+
+.profile-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0f1419;
+  font: inherit;
+}
+
 .source-registry-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1811,6 +1832,42 @@ button {
   justify-content: space-between;
 }
 
+.profile-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid #eff3f4;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.profile-metrics > div {
+  display: grid;
+  gap: 2px;
+  border-left: 1px solid #eff3f4;
+  padding: 11px;
+}
+
+.profile-metrics > div:first-child {
+  border-left: 0;
+}
+
+.profile-metrics strong {
+  color: #0f1419;
+  font-size: 19px;
+}
+
+.profile-metrics span {
+  color: #536471;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.profile-estimate {
+  border-top: 1px solid #eff3f4;
+  border-right: 1px solid #eff3f4;
+  border-bottom: 1px solid #eff3f4;
+}
+
 .vote-record {
   display: grid;
   max-height: 430px;
@@ -1824,7 +1881,26 @@ button {
   align-items: start;
   justify-content: space-between;
   border-top: 1px solid #eff3f4;
+  color: inherit;
   padding: 11px 0;
+  text-decoration: none;
+}
+
+a.vote-record-row:hover strong {
+  text-decoration: underline;
+}
+
+.archive-toggle {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #eff3f4;
+  background: transparent;
+  color: #1d9bf0;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
 }
 
 .vote-record-label {
@@ -1855,6 +1931,13 @@ button {
   display: grid;
   gap: 4px;
   text-align: right;
+}
+
+.vote-pair span:last-child {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2100,7 +2183,9 @@ button {
   .data-spike-panel, .detail-vote-box, .info-list, .friend-box, .comment-box,
   .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
   .quick-grid button, .compact-row, .settings-row, .next-action-box,
-  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a
+  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
+  .profile-search,
+  .profile-metrics
 ) {
   background: #000;
 }
@@ -2119,7 +2204,9 @@ button {
   .source-registry-group, .vote-record, .comment-row, .friend-row, .trend-link,
   .rollcall-sample a, .vote-record-row, .vote-record-label, .source-box a,
   .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
-  .action-row
+  .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
+  .archive-toggle,
+  .profile-search
 ) {
   border-color: #2f3336;
 }
@@ -2133,7 +2220,7 @@ button {
   .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
   .rail-search input, .metadata-row strong, .report-row strong,
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
-  .follow-target-copy strong
+  .follow-target-copy strong, .profile-metrics strong, .profile-search input
 ) {
   color: #e7e9ea;
 }
@@ -2149,7 +2236,7 @@ button {
   .settings-row small, .settings-footer button, .quick-grid small,
   .next-action-box span, .source-metadata-panel p, .report-panel p,
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
-  .minimal-card-meta, .minimal-card-footer, .ai-summary-label
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span
 ) {
   color: #8b98a5;
 }
@@ -2181,7 +2268,9 @@ button {
   .data-spike-panel, .detail-vote-box, .info-list, .friend-box, .comment-box,
   .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
   .quick-grid button, .compact-row, .settings-row, .next-action-box,
-  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a
+  .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
+  .profile-search,
+  .profile-metrics
 ) {
   background: #fff;
 }
@@ -2200,7 +2289,9 @@ button {
   .source-registry-group, .vote-record, .comment-row, .friend-row, .trend-link,
   .rollcall-sample a, .vote-record-row, .vote-record-label, .source-box a,
   .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
-  .action-row
+  .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
+  .archive-toggle,
+  .profile-search
 ) {
   border-color: #eff3f4;
 }
@@ -2214,7 +2305,7 @@ button {
   .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
   .rail-search input, .metadata-row strong, .report-row strong,
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
-  .follow-target-copy strong
+  .follow-target-copy strong, .profile-metrics strong, .profile-search input
 ) {
   color: #0f1419;
 }
@@ -2230,7 +2321,7 @@ button {
   .settings-row small, .settings-footer button, .quick-grid small,
   .next-action-box span, .source-metadata-panel p, .report-panel p,
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
-  .minimal-card-meta, .minimal-card-footer, .ai-summary-label
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span
 ) {
   color: #536471;
 }
@@ -2384,6 +2475,19 @@ button {
   .vote-record-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .profile-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-metrics > div:nth-child(3) {
+    border-top: 1px solid #eff3f4;
+    border-left: 0;
+  }
+
+  .profile-metrics > div:nth-child(4) {
+    border-top: 1px solid #eff3f4;
   }
 
   .source-registry-grid,

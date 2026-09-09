@@ -50,7 +50,7 @@ function parseSenators(html) {
 
 function parseSenateBills(html) {
   const rows = [...html.matchAll(/<tr[^>]*>\s*<th scope="row"><a href="(\/Session\/Bill\/2026\/\d+)">([^<]+)<\/a><\/th>([\s\S]*?)<\/tr>/g)];
-  return rows.slice(0, 40).map((match) => {
+  return rows.map((match) => {
     const [, href, number, rowHtml] = match;
     const cells = [...rowHtml.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((cell) => cleanText(cell[1]));
     const [title, filedBy, lastActionCell] = cells;
@@ -66,6 +66,49 @@ function parseSenateBills(html) {
       sourceUrl: new URL(href, sources.senateBills).toString()
     };
   });
+}
+
+function getPageCount(html) {
+  const pageNumbers = [...html.matchAll(/PageNumber=(\d+)/g)].map((match) => Number(match[1]));
+  return Math.max(1, ...pageNumbers);
+}
+
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex++;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker));
+  return results;
+}
+
+function formatEasternDate(date) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}
+
+async function importSenateBills(firstPageResponse) {
+  if (!firstPageResponse.ok) return [];
+  const pageCount = getPageCount(firstPageResponse.body);
+  const remainingPages = Array.from({ length: pageCount - 1 }, (_, index) => index + 2);
+  const pageResponses = await mapWithConcurrency(remainingPages, 6, (pageNumber) => (
+    fetchText(`${sources.senateBills}?PageNumber=${pageNumber}`)
+  ));
+  const bills = [firstPageResponse, ...pageResponses]
+    .filter((response) => response.ok)
+    .flatMap((response) => parseSenateBills(response.body));
+  return [...new Map(bills.map((bill) => [bill.id, bill])).values()];
 }
 
 function parseVoteHistory(html, bill) {
@@ -92,25 +135,36 @@ function parseVoteHistory(html, bill) {
   }).filter(Boolean);
 }
 
-async function importVoteHistory(bills) {
-  const rollCalls = [];
-  for (const bill of bills.slice(0, 20)) {
+async function importVoteHistory(bills, windowStartDate) {
+  const rollCallGroups = await mapWithConcurrency(bills, 4, async (bill) => {
     const response = await fetchText(bill.sourceUrl);
-    if (!response.ok) continue;
-    rollCalls.push(...parseVoteHistory(response.body, bill));
-  }
-  return rollCalls;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    if (!response.ok) return [];
+    return parseVoteHistory(response.body, bill).filter((rollCall) => {
+      const voteDate = new Date(rollCall.date);
+      return Number.isFinite(voteDate.getTime()) && voteDate >= windowStartDate;
+    });
+  });
+  return rollCallGroups.flat();
 }
 
 const senateMembersResponse = await fetchText(sources.senateMembers);
 const senateBillsResponse = await fetchText(sources.senateBills);
 const houseMembersResponse = await fetchText(sources.houseMembers);
+const generatedAt = new Date();
+const windowStartDate = new Date(generatedAt);
+windowStartDate.setUTCDate(windowStartDate.getUTCDate() - 365);
+const windowEndDate = formatEasternDate(generatedAt);
+const windowStart = formatEasternDate(windowStartDate);
+const senateBills = await importSenateBills(senateBillsResponse);
 
 const data = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: generatedAt.toISOString(),
   window: {
-    mvpStartYear: 2020,
-    note: 'Store all available official records; default MVP views to 2020-present.'
+    startDate: windowStart,
+    endDate: windowEndDate,
+    label: 'Past 12 months',
+    note: 'Florida Senate roll calls published during the stated 12-month window. Profiles show only sourced member-level votes.'
   },
   sources,
   sourceStatus: {
@@ -123,11 +177,11 @@ const data = {
     }
   },
   officials: senateMembersResponse.ok ? parseSenators(senateMembersResponse.body) : [],
-  bills: senateBillsResponse.ok ? parseSenateBills(senateBillsResponse.body) : [],
+  bills: senateBills,
   rollCalls: []
 };
 
-data.rollCalls = await importVoteHistory(data.bills);
+data.rollCalls = await importVoteHistory(data.bills, windowStartDate);
 
 await mkdir('data', { recursive: true });
 await writeFile('data/florida-official-data.json', `${JSON.stringify(data, null, 2)}\n`);

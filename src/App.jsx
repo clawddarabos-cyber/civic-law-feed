@@ -239,12 +239,13 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
   sourceName: 'Florida Senate profile',
   sourceUrl: official.profileUrl,
   votes: {},
-  archiveSince: String(floridaOfficialData.window.mvpStartYear),
+  archiveWindow: floridaOfficialData.window,
   archive: floridaOfficialData.rollCalls
     .flatMap((rollCall) => {
       const surname = official.name.split(',')[0].trim().toLowerCase();
       const memberVote = rollCall.memberVotes?.find((vote) => vote.name.toLowerCase() === surname);
       return memberVote ? [{
+        id: rollCall.id,
         title: `${rollCall.billNumber}: ${rollCall.billTitle}`,
         year: rollCall.date,
         topic: `${rollCall.chamber} vote`,
@@ -270,7 +271,12 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
   sourceUrl: official.sourceUrl,
   votes: official.votes || {},
   sponsoredItems: official.sponsoredItems || [],
-  archiveSince: official.archiveSince,
+  archiveWindow: official.archiveWindow || {
+    startDate: official.archiveSince,
+    endDate: 'Present',
+    label: 'Available official history',
+    note: 'Federal member-level roll-call history has not been imported yet.'
+  },
   archive: official.archive || []
 }));
 
@@ -1651,7 +1657,7 @@ function RepresentativeHistory({ profile }) {
       <div className="recent-votes">
         <strong>Last three recorded votes</strong>
         {recentVotes.length ? recentVotes.map((record) => (
-          <a href={record.sourceUrl} target="_blank" rel="noreferrer" key={`${profile.id}-${record.year}-${record.title}`}>
+          <a href={record.sourceUrl} target="_blank" rel="noreferrer" key={`${profile.id}-${record.id || `${record.year}-${record.title}`}`}>
             <span>{record.title}</span>
             <span className={record.vote === 'yes' ? 'history-vote yes' : 'history-vote no'}>{record.vote.toUpperCase()}</span>
           </a>
@@ -1760,18 +1766,44 @@ function SourceMetadata({ bill }) {
 }
 
 function PoliticianProfilesPage({ profiles, votes, onClaim }) {
+  const [profileQuery, setProfileQuery] = useState('');
+  const [expandedProfiles, setExpandedProfiles] = useState(() => new Set());
+  const visibleProfiles = profiles
+    .filter((profile) => (
+      `${profile.name} ${profile.office} ${profile.party || ''}`.toLowerCase().includes(profileQuery.trim().toLowerCase())
+    ))
+    .sort((left, right) => (
+      right.archive.length - left.archive.length || left.name.localeCompare(right.name)
+    ));
+
   return (
     <section className="profiles-page" aria-label="Nationwide official profiles">
       <div className="profiles-header">
         <div>
-          <h1>Nationwide Official Profiles</h1>
-          <p>Auto-created public profiles compare official votes with your votes on federal, state, and local items.</p>
+          <h1>Official Profiles</h1>
+          <p>Public voting records, sourced roll calls, and clearly labeled recent-vote signals for each imported politician.</p>
         </div>
-        <span>Official profiles</span>
+        <span>{profiles.length} profiles</span>
       </div>
+      <label className="profile-search">
+        <Search size={17} />
+        <input
+          type="search"
+          value={profileQuery}
+          onChange={(event) => setProfileQuery(event.target.value)}
+          placeholder="Search by politician, office, or party"
+          aria-label="Search official profiles"
+        />
+      </label>
       <div className="profiles-grid">
-        {profiles.map((profile) => {
+        {visibleProfiles.map((profile) => {
           const comparison = compareVotes(profile, votes);
+          const history = summarizeVoteHistory(profile.archive);
+          const prediction = predictRepresentativeVote(profile.archive.slice(0, 3));
+          const coverageStart = formatArchiveDate(profile.archiveWindow?.startDate);
+          const coverageEnd = formatArchiveDate(profile.archiveWindow?.endDate);
+          const archiveExpanded = expandedProfiles.has(profile.id);
+          const visibleArchive = archiveExpanded ? profile.archive : profile.archive.slice(0, 5);
           return (
             <article className="profile-card" key={profile.id}>
               <div className="profile-card-head">
@@ -1779,7 +1811,7 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                   <Users size={22} />
                 </div>
                 <div>
-                  <h2>{profile.name}</h2>
+                  <h2>{formatOfficialName(profile.name)}</h2>
                   <p>{profile.office} · {profile.party || profile.jurisdiction}</p>
                 </div>
               </div>
@@ -1794,9 +1826,33 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                 <strong>{comparison.label}</strong>
                 <span>{comparison.detail}</span>
               </div>
+              <div className="profile-metrics" aria-label={`${profile.name} voting record summary`}>
+                <div>
+                  <strong>{history.total}</strong>
+                  <span>Recorded votes</span>
+                </div>
+                <div>
+                  <strong>{history.yes}</strong>
+                  <span>Yes</span>
+                </div>
+                <div>
+                  <strong>{history.no}</strong>
+                  <span>No</span>
+                </div>
+                <div>
+                  <strong>{history.total ? `${history.yesRate}%` : '—'}</strong>
+                  <span>Yes rate</span>
+                </div>
+              </div>
               <div className="archive-summary">
-                <strong>{profile.archive.length + Object.keys(profile.votes).length} recorded votes</strong>
-                <span>Prototype archive since {profile.archiveSince}; store all available records, show recent first.</span>
+                <strong>{profile.archiveWindow?.label || 'Official voting archive'}</strong>
+                <span>{coverageStart}–{coverageEnd}. {profile.archiveWindow?.note}</span>
+              </div>
+              <div className={prediction.vote ? `ai-vote-estimate profile-estimate ${prediction.vote}` : 'ai-vote-estimate profile-estimate pending'}>
+                <span><Sparkles size={14} /> AI voting outlook</span>
+                <strong>{prediction.label}</strong>
+                <p>{prediction.detail}</p>
+                <small>AI overview only—not an official position or a bill-specific forecast.</small>
               </div>
               {!!profile.sponsoredItems?.length && (
                 <div className="sponsor-summary">
@@ -1808,15 +1864,7 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                 </div>
               )}
               <div className="vote-record">
-                <div className="vote-record-label">Current comparison items</div>
-                {!Object.keys(profile.votes).length && (
-                  <div className="vote-record-row">
-                    <div>
-                      <strong>Roll-call import pending</strong>
-                      <span>Profile generated from official member data; vote records will attach here next.</span>
-                    </div>
-                  </div>
-                )}
+                {!!Object.keys(profile.votes).length && <div className="vote-record-label">Current comparison items</div>}
                 {Object.entries(profile.votes).map(([billId, officialVote]) => {
                   const bill = bills.find((item) => item.id === billId);
                   const userVote = votes[billId];
@@ -1833,26 +1881,40 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                     </div>
                   );
                 })}
-                <div className="vote-record-label">Historical archive</div>
+                <div className="vote-record-label">Past-year official vote record</div>
                 {!profile.archive.length && (
                   <div className="vote-record-row archive-row">
                     <div>
                       <strong>Historical votes not imported yet</strong>
-                      <span>Archive window starts at {profile.archiveSince}; roll-call extraction is the next data step.</span>
+                      <span>No sourced member-level votes are available for this profile in the current coverage window.</span>
                     </div>
                   </div>
                 )}
-                {profile.archive.map((record) => (
-                  <div className="vote-record-row archive-row" key={`${profile.id}-${record.year}-${record.title}`}>
+                {visibleArchive.map((record) => (
+                  <a className="vote-record-row archive-row" href={record.sourceUrl} target="_blank" rel="noreferrer" key={`${profile.id}-${record.id || `${record.year}-${record.title}`}`}>
                     <div>
                       <strong>{record.title}</strong>
                       <span>{record.year} · {record.topic}</span>
                     </div>
                     <div className="vote-pair">
                       <span className={record.vote === 'yes' ? 'friend-yes' : 'friend-no'}>{record.vote.toUpperCase()}</span>
+                      <span>Official record <ExternalLink size={12} /></span>
                     </div>
-                  </div>
+                  </a>
                 ))}
+                {profile.archive.length > 5 && (
+                  <button
+                    className="archive-toggle"
+                    onClick={() => setExpandedProfiles((current) => {
+                      const next = new Set(current);
+                      if (next.has(profile.id)) next.delete(profile.id);
+                      else next.add(profile.id);
+                      return next;
+                    })}
+                  >
+                    {archiveExpanded ? 'Show recent votes only' : `View all ${profile.archive.length} votes`}
+                  </button>
+                )}
               </div>
               <button className="claim-button" onClick={() => onClaim(profile)}>
                 Claim profile
@@ -1863,6 +1925,26 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
       </div>
     </section>
   );
+}
+
+function summarizeVoteHistory(records) {
+  const yes = records.filter((record) => record.vote === 'yes').length;
+  const no = records.filter((record) => record.vote === 'no').length;
+  const total = yes + no;
+  return {
+    yes,
+    no,
+    total,
+    yesRate: total ? Math.round((yes / total) * 100) : 0
+  };
+}
+
+function formatArchiveDate(value) {
+  if (!value || value === 'Present') return value || 'Not available';
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : value;
 }
 
 function compareVotes(profile, votes) {
