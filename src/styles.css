@@ -588,13 +588,26 @@ button {
 }
 
 .source-check-row span,
-.federal-context-row span {
+.federal-context-row span,
+.federal-profile-link {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   border-radius: 999px;
   background: #f7f9f9;
   padding: 5px 8px;
+}
+
+.federal-profile-link {
+  border: 0;
+  color: #1d9bf0;
+  font: inherit;
+  font-weight: 800;
+}
+
+.federal-profile-link:hover,
+.federal-profile-link:focus-visible {
+  text-decoration: underline;
 }
 
 .federal-context-row {
@@ -1677,19 +1690,49 @@ button {
 
 .representative-row {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   border-top: 1px solid #eff3f4;
   padding: 11px 0;
 }
 
-.representative-row:first-child {
-  border-top: 0;
+.representative-identity {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
 }
 
-.representative-row > div:nth-child(2) {
+.representative-identity:not(:disabled) {
+  cursor: pointer;
+}
+
+.representative-identity:not(:disabled):hover strong,
+.representative-identity:not(:disabled):focus-visible strong {
+  color: #1d9bf0;
+  text-decoration: underline;
+}
+
+.representative-copy {
+  display: grid;
+  gap: 2px;
   min-width: 0;
+}
+
+.representative-copy strong,
+.representative-copy > span {
+  overflow-wrap: anywhere;
+}
+
+.representative-row:first-child {
+  border-top: 0;
 }
 
 .representative-row strong,
@@ -1697,7 +1740,7 @@ button {
   display: block;
 }
 
-.representative-row > div:nth-child(2) > span {
+.representative-copy > span {
   overflow: hidden;
   color: #536471;
   font-size: 12px;
@@ -1791,7 +1834,7 @@ button {
   color: #ff9aa9;
 }
 
-:root[data-theme="dark"] :is(.representative-location-note, .representative-empty span, .representative-sponsors > span, .representative-row > div:nth-child(2) > span) {
+:root[data-theme="dark"] :is(.representative-location-note, .representative-empty span, .representative-sponsors > span, .representative-copy > span) {
   color: #8b98a5;
 }
 
@@ -1830,6 +1873,33 @@ button {
 .profile-status-row {
   flex-wrap: wrap;
   justify-content: space-between;
+}
+
+.view-profile-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1px solid #cfd9de;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f1419;
+  padding: 10px 13px;
+  font: inherit;
+  font-weight: 800;
+}
+
+.view-profile-button:hover {
+  border-color: #1d9bf0;
+  color: #1d9bf0;
+}
+
+.settings-group-label {
+  color: #536471;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .profile-metrics {
@@ -2184,7 +2254,7 @@ a.vote-record-row:hover strong {
   .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
   .quick-grid button, .compact-row, .settings-row, .next-action-box,
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
-  .profile-search,
+  .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
 ) {
   background: #000;
@@ -2206,7 +2276,7 @@ a.vote-record-row:hover strong {
   .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
-  .profile-search
+  .profile-search, .view-profile-button
 ) {
   border-color: #2f3336;
 }
@@ -2220,7 +2290,8 @@ a.vote-record-row:hover strong {
   .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
   .rail-search input, .metadata-row strong, .report-row strong,
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
-  .follow-target-copy strong, .profile-metrics strong, .profile-search input
+  .follow-target-copy strong, .profile-metrics strong, .profile-search input,
+  .view-profile-button
 ) {
   color: #e7e9ea;
 }
@@ -2236,14 +2307,15 @@ a.vote-record-row:hover strong {
   .settings-row small, .settings-footer button, .quick-grid small,
   .next-action-box span, .source-metadata-panel p, .report-panel p,
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
-  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span,
+  .settings-group-label, .vote-record-label
 ) {
   color: #8b98a5;
 }
 
 :root[data-theme="dark"] :is(
   .search-box, .rail-search, .meta-row span, .status-row span,
-  .source-check-row span, .federal-context-row span, .profiles-header > span,
+  .source-check-row span, .federal-context-row span, .federal-profile-link, .profiles-header > span,
   .profile-status-row span, .notification-icon
 ) {
   background: #202327;
@@ -2269,7 +2341,7 @@ a.vote-record-row:hover strong {
   .alignment-box, .archive-summary, .sponsor-summary, .source-registry-group,
   .quick-grid button, .compact-row, .settings-row, .next-action-box,
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
-  .profile-search,
+  .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
 ) {
   background: #fff;
@@ -2291,7 +2363,7 @@ a.vote-record-row:hover strong {
   .comment-form textarea, .bill-image, .quick-grid button, .settings-row,
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
-  .profile-search
+  .profile-search, .view-profile-button
 ) {
   border-color: #eff3f4;
 }
@@ -2305,7 +2377,8 @@ a.vote-record-row:hover strong {
   .trend-link strong, .info-list p, .comment-form textarea, .search-box input,
   .rail-search input, .metadata-row strong, .report-row strong,
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
-  .follow-target-copy strong, .profile-metrics strong, .profile-search input
+  .follow-target-copy strong, .profile-metrics strong, .profile-search input,
+  .view-profile-button
 ) {
   color: #0f1419;
 }
@@ -2321,14 +2394,15 @@ a.vote-record-row:hover strong {
   .settings-row small, .settings-footer button, .quick-grid small,
   .next-action-box span, .source-metadata-panel p, .report-panel p,
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
-  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span
+  .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span,
+  .settings-group-label
 ) {
   color: #536471;
 }
 
 :root[data-theme="light"] :is(
   .search-box, .rail-search, .meta-row span, .status-row span,
-  .source-check-row span, .federal-context-row span, .profiles-header > span,
+  .source-check-row span, .federal-context-row span, .federal-profile-link, .profiles-header > span,
   .profile-status-row span, .notification-icon
 ) {
   background: #eff3f4;

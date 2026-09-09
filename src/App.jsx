@@ -280,6 +280,8 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
   archive: official.archive || []
 }));
 
+const officialProfiles = [...federalOfficialProfiles, ...floridaOfficialProfiles];
+
 const defaultJurisdiction = {
   label: 'Nationwide demo',
   state: 'All states',
@@ -311,6 +313,7 @@ function App() {
   const [locationStatus, setLocationStatus] = useState('idle');
   const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
+  const [activeProfileId, setActiveProfileId] = useState(() => getProfileIdFromHash());
   const [localComments, setLocalComments] = useStoredState(storageKeys.localComments, {});
   const [sourceReports, setSourceReports] = useStoredState(storageKeys.sourceReports, {});
   const [onboardingDismissed, setOnboardingDismissed] = useStoredState(storageKeys.onboardingDismissed, false);
@@ -330,6 +333,7 @@ function App() {
   useEffect(() => {
     function syncHashRoute() {
       setActiveOverviewId(getOverviewIdFromHash());
+      setActiveProfileId(getProfileIdFromHash());
     }
 
     window.addEventListener('hashchange', syncHashRoute);
@@ -362,6 +366,7 @@ function App() {
     : 'Follow a source, level, or saved bill to populate this timeline.';
   const selected = bills.find((bill) => bill.id === selectedId) || visibleBills[0] || bills[0];
   const activeOverview = bills.find((bill) => bill.id === activeOverviewId);
+  const activeProfile = officialProfiles.find((profile) => profile.id === activeProfileId);
 
   function voteOnBill(id, vote) {
     const bill = bills.find((item) => item.id === id);
@@ -459,9 +464,10 @@ function App() {
   }
 
   function openSection(section) {
-    closeOverview();
+    clearDetailRoute();
     setActiveSection(section);
     if (section === 'explore') setSearchOpen(true);
+    window.scrollTo(0, 0);
   }
 
   function showNotice(message) {
@@ -553,13 +559,36 @@ function App() {
   }
 
   function openOverview(id) {
+    setActiveProfileId(null);
     setActiveOverviewId(id);
-    window.location.hash = `overview/${id}`;
+    window.location.hash = `overview/${encodeURIComponent(id)}`;
+    window.scrollTo(0, 0);
   }
 
   function closeOverview() {
     setActiveOverviewId(null);
     if (window.location.hash.startsWith('#overview/')) {
+      window.history.pushState('', document.title, window.location.pathname + window.location.search);
+    }
+  }
+
+  function openProfile(id) {
+    setActiveOverviewId(null);
+    setActiveProfileId(id);
+    window.location.hash = `official/${encodeURIComponent(id)}`;
+    window.scrollTo(0, 0);
+  }
+
+  function closeProfile() {
+    clearDetailRoute();
+    setActiveSection('officials');
+    window.scrollTo(0, 0);
+  }
+
+  function clearDetailRoute() {
+    setActiveOverviewId(null);
+    setActiveProfileId(null);
+    if (window.location.hash.startsWith('#overview/') || window.location.hash.startsWith('#official/')) {
       window.history.pushState('', document.title, window.location.pathname + window.location.search);
     }
   }
@@ -653,8 +682,6 @@ function App() {
             <Search size={24} /><span>Explore</span>
           </button>
           <button className={activeSection === 'notifications' ? 'nav-item active' : 'nav-item'} aria-label="Notifications" onClick={() => openSection('notifications')}><Bell size={24} /><span>Notifications</span></button>
-          <button className={activeSection === 'follow' ? 'nav-item active' : 'nav-item'} aria-label="Follow" onClick={() => openSection('follow')}><Users size={24} /><span>Follow</span></button>
-          <button className={activeSection === 'chat' ? 'nav-item active' : 'nav-item'} aria-label="Chat" onClick={() => openSection('chat')}><MessageSquare size={24} /><span>Chat</span></button>
           <button
             className={activeSection === 'officials' ? 'nav-item active' : 'nav-item'}
             aria-label="Officials"
@@ -662,8 +689,7 @@ function App() {
           >
             <BadgeCheck size={24} /><span>Officials</span>
           </button>
-          <button className={activeSection === 'saved' ? 'nav-item active' : 'nav-item'} aria-label="Saved" onClick={() => openSection('saved')}><Bookmark size={24} /><span>Saved</span></button>
-          <button className={activeSection === 'more' ? 'nav-item active' : 'nav-item'} aria-label="More" onClick={() => openSection('more')}><MoreHorizontal size={24} /><span>More</span></button>
+          <button className={['more', 'follow', 'chat', 'saved'].includes(activeSection) ? 'nav-item active' : 'nav-item'} aria-label="Settings" onClick={() => openSection('more')}><Settings size={24} /><span>Settings</span></button>
         </nav>
         <button className="post-button" onClick={() => openSection('feed')}><PenLine size={18} /><span>Post</span></button>
         <div className="top-actions">
@@ -686,7 +712,7 @@ function App() {
         {activeOverview ? (
           <OverviewPage
             bill={activeOverview}
-            officialProfiles={[...federalOfficialProfiles, ...floridaOfficialProfiles]}
+            officialProfiles={officialProfiles}
             jurisdiction={jurisdiction}
             comments={localComments[activeOverview.id] || []}
             commentDraft={commentDrafts[activeOverview.id] || ''}
@@ -698,12 +724,21 @@ function App() {
             onCommentSubmit={() => addComment(activeOverview.id)}
             onSourceReportChange={(value) => setSourceReportDrafts((current) => ({ ...current, [activeOverview.id]: value }))}
             onSourceReportSubmit={() => submitSourceReport(activeOverview.id)}
+            onOpenProfile={openProfile}
+          />
+        ) : activeProfile ? (
+          <PoliticianProfilePage
+            profile={activeProfile}
+            votes={votes}
+            onBack={closeProfile}
+            onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
           />
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
-            profiles={[...federalOfficialProfiles, ...floridaOfficialProfiles]}
+            profiles={officialProfiles}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
+            onOpenProfile={openProfile}
           />
         ) : activeSection === 'explore' ? (
           <ExplorePage
@@ -762,6 +797,7 @@ function App() {
             backendLabel={backendLabel}
             onResetData={resetLocalData}
             onAction={showNotice}
+            onNavigate={openSection}
           />
         ) : (
           <>
@@ -918,6 +954,7 @@ function App() {
           query={query}
           onQueryChange={setQuery}
           onOpenExplore={() => openSection('explore')}
+          onOpenProfile={openProfile}
         />
       )}
       {notice && <div className="toast" role="status">{notice}</div>}
@@ -938,12 +975,20 @@ function getOverviewIdFromHash() {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+function getProfileIdFromHash() {
+  const match = window.location.hash.match(/^#official\/(.+)$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
-function FederalContext({ bill }) {
+function FederalContext({ bill, onOpenProfile }) {
   const sponsor = bill.sponsors?.[0];
+  const sponsorProfile = sponsor && officialProfiles.find((profile) => (
+    profile.bioguideId === sponsor.bioguideId || profile.name === sponsor.name
+  ));
   const committee = bill.committees?.[0];
   const action = bill.actions?.[0];
 
@@ -951,7 +996,11 @@ function FederalContext({ bill }) {
 
   return (
     <div className="federal-context-row">
-      {sponsor && <span><Users size={14} /> {sponsor.name}</span>}
+      {sponsor && sponsorProfile && onOpenProfile ? (
+        <button className="federal-profile-link" onClick={() => onOpenProfile(sponsorProfile.id)}>
+          <Users size={14} /> {sponsor.name}
+        </button>
+      ) : sponsor && <span><Users size={14} /> {sponsor.name}</span>}
       {committee && <span><BadgeCheck size={14} /> {committee.name}</span>}
       {action && <span><FileText size={14} /> {action.date}</span>}
     </div>
@@ -1067,7 +1116,7 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, onSave, onReminder, query, onQueryChange, onOpenExplore }) {
+function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, onSave, onReminder, query, onQueryChange, onOpenExplore, onOpenProfile }) {
   return (
     <aside className="detail-panel" aria-label="Timeline context">
       <label className="rail-search">
@@ -1117,7 +1166,7 @@ function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, o
             {reminderSet ? 'Reminder set' : 'Remind me'}
           </button>
         </div>
-        <FederalContext bill={bill} />
+        <FederalContext bill={bill} onOpenProfile={onOpenProfile} />
         <div className="source-box">
           <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
@@ -1378,10 +1427,15 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, backendLabel, onResetData, onAction }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, backendLabel, onResetData, onAction, onNavigate }) {
+  const activitySections = [
+    ['Saved', 'Bills and official sources you bookmarked for later.', Bookmark, 'saved'],
+    ['Following', 'Sources, levels, and topics shaping your personalized feed.', Users, 'follow'],
+    ['Discussions', 'Conversations connected to bills and watched topics.', MessageSquare, 'chat']
+  ];
   const settingsSections = [
     ['Account', `${backendLabel}; votes, saves, follows, reminders, posts, and comments persist on this device.`, CircleUserRound],
-    ['Settings', 'Theme, accessibility, account, and compact-feed controls.', Settings],
+    ['Appearance', 'Theme, accessibility, and compact-feed controls.', Sun],
     ['Location', `${jurisdiction.label}; manage nationwide, state, county, and city coverage.`, MapPin],
     ['Notifications', 'Bill status changes, official votes, replies, and source updates.', Bell],
     ['Privacy', 'Saved items, public votes, profile visibility, and comment identity.', ShieldCheck],
@@ -1392,8 +1446,19 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
   ];
 
   return (
-    <section className="view-page" aria-label="More">
-      <PageHeader title="More" subtitle="Settings, source policy, privacy, and product support." />
+    <section className="view-page" aria-label="Settings">
+      <PageHeader title="Settings" subtitle="Your activity, preferences, source policy, privacy, and support." />
+      <div className="settings-group-label">Your activity</div>
+      <div className="settings-list">
+        {activitySections.map(([title, detail, Icon, section]) => (
+          <button className="settings-row" key={title} onClick={() => onNavigate(section)}>
+            <Icon size={20} />
+            <span><strong>{title}</strong><small>{detail}</small></span>
+            <ChevronRight size={18} />
+          </button>
+        ))}
+      </div>
+      <div className="settings-group-label">Preferences and support</div>
       <div className="settings-list">
         {settingsSections.map(([title, detail, Icon]) => (
           <button className="settings-row" key={title} onClick={() => onAction(`${title} opened`)}>
@@ -1474,7 +1539,7 @@ function HashIcon() {
   return <span className="hash-icon">#</span>;
 }
 
-function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit }) {
+function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit, onOpenProfile }) {
   return (
     <article className="overview-page">
       <button className="overview-back" onClick={onBack}>Back to feed</button>
@@ -1489,7 +1554,7 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
         <span><CalendarDays size={14} /> {bill.deadline}</span>
         <span>{bill.lastUpdated}</span>
       </div>
-      <FederalContext bill={bill} />
+      <FederalContext bill={bill} onOpenProfile={onOpenProfile} />
       <h1>{bill.title}</h1>
       <section className="ai-overview-box">
         <div className="section-title">
@@ -1512,7 +1577,7 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
           Text / validation
         </a>
       </div>
-      <RepresentativeVotes bill={bill} profiles={officialProfiles} jurisdiction={jurisdiction} />
+      <RepresentativeVotes bill={bill} profiles={officialProfiles} jurisdiction={jurisdiction} onOpenProfile={onOpenProfile} />
       <SourceMetadata bill={bill} />
       <section className="report-panel">
         <div className="section-title">
@@ -1570,7 +1635,7 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
   );
 }
 
-function RepresentativeVotes({ bill, profiles, jurisdiction }) {
+function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
   const recordedVotes = profiles
     .filter((profile) => profile.votes?.[bill.id])
     .map((profile) => ({ ...profile, vote: profile.votes[bill.id] }));
@@ -1578,6 +1643,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
     const profile = profiles.find((item) => item.bioguideId === sponsor.bioguideId || item.name === sponsor.name);
     return {
       id: sponsor.bioguideId || sponsor.name,
+      profileId: profile?.id || null,
       name: sponsor.name,
       office: profile?.office || [sponsor.party, sponsor.state].filter(Boolean).join(' · '),
       sourceUrl: profile?.sourceUrl || sponsor.url,
@@ -1605,7 +1671,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
       ) : (
         <div className="representative-list">
           {recordedVotes.map((profile) => (
-            <RepresentativeVoteRow key={profile.id} official={profile} />
+            <RepresentativeVoteRow key={profile.id} official={profile} onOpenProfile={onOpenProfile} />
           ))}
         </div>
       )}
@@ -1613,7 +1679,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
         <div className="representative-sponsors">
           <span>Bill sponsor{sponsors.length > 1 ? 's' : ''}</span>
           {sponsors.map((sponsor) => (
-            <RepresentativeVoteRow key={sponsor.id} official={sponsor} sponsor />
+            <RepresentativeVoteRow key={sponsor.id} official={sponsor} sponsor onOpenProfile={onOpenProfile} />
           ))}
         </div>
       )}
@@ -1621,7 +1687,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction }) {
         <div className="local-representatives">
           <span>Your matched representative{localProfiles.length > 1 ? 's' : ''}</span>
           {localProfiles.map((profile) => (
-            <RepresentativeHistory key={profile.id} profile={profile} />
+            <RepresentativeHistory key={profile.id} profile={profile} onOpenProfile={onOpenProfile} />
           ))}
         </div>
       )}
@@ -1647,13 +1713,13 @@ function matchesJurisdiction(profile, bill, jurisdiction) {
   return profile.jurisdiction === bill.jurisdiction;
 }
 
-function RepresentativeHistory({ profile }) {
+function RepresentativeHistory({ profile, onOpenProfile }) {
   const recentVotes = profile.archive.slice(0, 3);
   const prediction = predictRepresentativeVote(recentVotes);
 
   return (
     <article className="representative-history-card">
-      <RepresentativeVoteRow official={profile} />
+      <RepresentativeVoteRow official={profile} onOpenProfile={onOpenProfile} />
       <div className="recent-votes">
         <strong>Last three recorded votes</strong>
         {recentVotes.length ? recentVotes.map((record) => (
@@ -1692,17 +1758,26 @@ function predictRepresentativeVote(recentVotes) {
   };
 }
 
-function RepresentativeVoteRow({ official, sponsor = false }) {
+function RepresentativeVoteRow({ official, sponsor = false, onOpenProfile }) {
   const vote = official.vote?.toLowerCase();
   const voteLabel = vote === 'yes' ? 'Voted Yes' : vote === 'no' ? 'Voted No' : sponsor ? 'Sponsor · Vote pending' : 'Not recorded';
+  const profileId = sponsor ? official.profileId : official.id;
+  const hasProfile = Boolean(onOpenProfile && profileId);
 
   return (
     <div className="representative-row">
-      <div className="representative-avatar"><Users size={17} /></div>
-      <div>
-        <strong>{formatOfficialName(official.name)}</strong>
-        <span>{official.office}</span>
-      </div>
+      <button
+        className="representative-identity"
+        onClick={() => hasProfile && onOpenProfile(profileId)}
+        disabled={!hasProfile}
+        aria-label={hasProfile ? `View voting profile for ${formatOfficialName(official.name)}` : undefined}
+      >
+        <div className="representative-avatar"><Users size={17} /></div>
+        <div className="representative-copy">
+          <strong>{formatOfficialName(official.name)}</strong>
+          <span>{official.office}</span>
+        </div>
+      </button>
       <div className="representative-row-action">
         <span className={vote === 'yes' ? 'vote-status yes' : vote === 'no' ? 'vote-status no' : 'vote-status pending'}>{voteLabel}</span>
         {official.sourceUrl && (
@@ -1765,9 +1840,18 @@ function SourceMetadata({ bill }) {
   );
 }
 
-function PoliticianProfilesPage({ profiles, votes, onClaim }) {
+function PoliticianProfilePage({ profile, votes, onBack, onClaim }) {
+  return (
+    <article className="overview-page profile-detail-page">
+      <button className="overview-back" onClick={onBack}>Back to officials</button>
+      <PoliticianProfilesPage profiles={[profile]} votes={votes} onClaim={onClaim} singleProfile />
+    </article>
+  );
+}
+
+function PoliticianProfilesPage({ profiles, votes, onClaim, onOpenProfile, singleProfile = false }) {
   const [profileQuery, setProfileQuery] = useState('');
-  const [expandedProfiles, setExpandedProfiles] = useState(() => new Set());
+  const [expandedProfiles, setExpandedProfiles] = useState(() => new Set(singleProfile && profiles[0] ? [profiles[0].id] : []));
   const visibleProfiles = profiles
     .filter((profile) => (
       `${profile.name} ${profile.office} ${profile.party || ''}`.toLowerCase().includes(profileQuery.trim().toLowerCase())
@@ -1778,23 +1862,27 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
 
   return (
     <section className="profiles-page" aria-label="Nationwide official profiles">
-      <div className="profiles-header">
-        <div>
-          <h1>Official Profiles</h1>
-          <p>Public voting records, sourced roll calls, and clearly labeled recent-vote signals for each imported politician.</p>
-        </div>
-        <span>{profiles.length} profiles</span>
-      </div>
-      <label className="profile-search">
-        <Search size={17} />
-        <input
-          type="search"
-          value={profileQuery}
-          onChange={(event) => setProfileQuery(event.target.value)}
-          placeholder="Search by politician, office, or party"
-          aria-label="Search official profiles"
-        />
-      </label>
+      {!singleProfile && (
+        <>
+          <div className="profiles-header">
+            <div>
+              <h1>Official Profiles</h1>
+              <p>Public voting records, sourced roll calls, and clearly labeled recent-vote signals for each imported politician.</p>
+            </div>
+            <span>{profiles.length} profiles</span>
+          </div>
+          <label className="profile-search">
+            <Search size={17} />
+            <input
+              type="search"
+              value={profileQuery}
+              onChange={(event) => setProfileQuery(event.target.value)}
+              placeholder="Search by politician, office, or party"
+              aria-label="Search official profiles"
+            />
+          </label>
+        </>
+      )}
       <div className="profiles-grid">
         {visibleProfiles.map((profile) => {
           const comparison = compareVotes(profile, votes);
@@ -1916,6 +2004,11 @@ function PoliticianProfilesPage({ profiles, votes, onClaim }) {
                   </button>
                 )}
               </div>
+              {!singleProfile && onOpenProfile && (
+                <button className="view-profile-button" onClick={() => onOpenProfile(profile.id)}>
+                  View voting profile <ChevronRight size={17} />
+                </button>
+              )}
               <button className="claim-button" onClick={() => onClaim(profile)}>
                 Claim profile
               </button>
