@@ -36,6 +36,7 @@ import {
 import federalCivicItems from '../data/federal-civic-items.json';
 import federalOfficialData from '../data/federal-official-data.json';
 import floridaOfficialData from '../data/florida-official-data.json';
+import representativeDirectory from '../data/representative-directory.json';
 import { backendLabel, createComment, createSourceReport, syncSavedItem, syncUserVote } from './backend.js';
 import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
 
@@ -234,6 +235,7 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
   jurisdiction: 'Florida',
   state: 'FL',
   district: official.district,
+  chamber: 'Florida Senate',
   party: official.party,
   status: official.claimStatus === 'unclaimed' ? 'Unclaimed profile' : 'Claimed profile',
   sourceName: 'Florida Senate profile',
@@ -265,6 +267,7 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
   jurisdiction: official.jurisdiction,
   state: official.state,
   district: official.district,
+  chamber: official.office?.toLowerCase().includes('senate') ? 'U.S. Senate' : 'U.S. House',
   party: official.party,
   status: official.status,
   sourceName: official.sourceName,
@@ -280,7 +283,25 @@ const federalOfficialProfiles = federalOfficialData.officials.map((official) => 
   archive: official.archive || []
 }));
 
-const officialProfiles = [...federalOfficialProfiles, ...floridaOfficialProfiles];
+const directoryOfficialProfiles = representativeDirectory.officials.map((official) => ({
+  ...official,
+  jurisdiction: official.level === 'Federal' ? 'Federal' : 'Florida',
+  status: 'Official directory profile',
+  votes: {},
+  archiveWindow: {
+    startDate: null,
+    endDate: 'Present',
+    label: 'Voting history expansion pending',
+    note: 'Member-level voting history has not been imported for this chamber yet.'
+  },
+  archive: []
+}));
+
+const officialProfileMap = new Map(directoryOfficialProfiles.map((profile) => [profile.id, profile]));
+for (const profile of [...federalOfficialProfiles, ...floridaOfficialProfiles]) {
+  officialProfileMap.set(profile.id, { ...officialProfileMap.get(profile.id), ...profile });
+}
+const officialProfiles = [...officialProfileMap.values()];
 
 const defaultJurisdiction = {
   label: 'Nationwide demo',
@@ -312,6 +333,7 @@ function App() {
   const [jurisdiction, setJurisdiction] = useStoredState(storageKeys.jurisdiction, defaultJurisdiction);
   const [locationStatus, setLocationStatus] = useState('idle');
   const [locationMessage, setLocationMessage] = useState('Showing federal, state, and local civic items from official government sources.');
+  const [addressDraft, setAddressDraft] = useState('');
   const [activeOverviewId, setActiveOverviewId] = useState(() => getOverviewIdFromHash());
   const [activeProfileId, setActiveProfileId] = useState(() => getProfileIdFromHash());
   const [localComments, setLocalComments] = useStoredState(storageKeys.localComments, {});
@@ -503,6 +525,61 @@ function App() {
     }
   }
 
+  function applyGeographies(geographies, matchMethod) {
+    const state = geographies.States?.[0]?.NAME;
+    const stateCode = geographies.States?.[0]?.STUSAB || null;
+    const countyName = geographies.Counties?.[0]?.NAME;
+    if (!state || !stateCode || !countyName) throw new Error('Census response did not include a complete jurisdiction.');
+    const county = countyName.endsWith('County') ? countyName : `${countyName} County`;
+    const congressionalDistrict = findDistrict(geographies, 'Congressional District');
+    const stateSenateDistrict = findDistrict(geographies, 'State Legislative Districts - Upper');
+    const stateHouseDistrict = findDistrict(geographies, 'State Legislative Districts - Lower');
+    setJurisdiction({
+      label: `${county}, ${state}`,
+      state,
+      stateCode,
+      county,
+      congressionalDistrict,
+      stateSenateDistrict,
+      stateHouseDistrict,
+      matchMethod,
+      levels: ['Federal', 'State', 'County']
+    });
+    setActiveFilter('All');
+    setLocationStatus('ready');
+    setLocationMessage(`Matched to ${county}, ${state}. Your street address is not saved.`);
+  }
+
+  async function lookupAddress(event) {
+    event?.preventDefault();
+    const address = addressDraft.trim();
+    if (!address) {
+      setLocationStatus('error');
+      setLocationMessage('Enter a complete street address, city, state, and ZIP code.');
+      return;
+    }
+    setLocationStatus('loading');
+    setLocationMessage('Matching address to official districts...');
+    try {
+      const params = new URLSearchParams({
+        address,
+        benchmark: 'Public_AR_Current',
+        vintage: 'Current_Current',
+        format: 'json'
+      });
+      const data = await fetchCensusGeographies('onelineaddress', params);
+      const geographies = data?.result?.addressMatches?.[0]?.geographies;
+      if (!geographies) throw new Error('Address was not matched.');
+      applyGeographies(geographies, 'address');
+      setAddressDraft('');
+      setLocationOpen(false);
+      openSection('representatives');
+    } catch {
+      setLocationStatus('error');
+      setLocationMessage('That address could not be matched. Include street, city, state, and ZIP, then try again.');
+    }
+  }
+
   function requestLocation() {
     if (!navigator.geolocation) {
       setLocationStatus('error');
@@ -522,29 +599,10 @@ function App() {
             vintage: 'Current_Current',
             format: 'json'
           });
-          const response = await fetch(`https://geocoding.geo.census.gov/geocoder/geographies/coordinates?${params}`);
-          const data = await response.json();
-          const geographies = data?.result?.geographies || {};
-          const state = geographies.States?.[0]?.NAME || 'Florida';
-          const stateCode = geographies.States?.[0]?.STUSAB || null;
-          const countyName = geographies.Counties?.[0]?.NAME || 'St. Johns County';
-          const county = countyName.endsWith('County') ? countyName : `${countyName} County`;
-          const congressionalDistrict = findDistrict(geographies, 'Congressional District');
-          const stateSenateDistrict = findDistrict(geographies, 'State Legislative Districts - Upper');
-          const stateHouseDistrict = findDistrict(geographies, 'State Legislative Districts - Lower');
-          setJurisdiction({
-            label: `${county}, ${state}`,
-            state,
-            stateCode,
-            county,
-            congressionalDistrict,
-            stateSenateDistrict,
-            stateHouseDistrict,
-            levels: ['Federal', 'State', 'County']
-          });
-          setActiveFilter('All');
-          setLocationStatus('ready');
-          setLocationMessage(`Showing federal, ${state}, and ${county} items with official government source links.`);
+          const data = await fetchCensusGeographies('coordinates', params);
+          applyGeographies(data?.result?.geographies || {}, 'device');
+          setLocationOpen(false);
+          openSection('representatives');
         } catch {
           setLocationStatus('error');
           setLocationMessage('Location was allowed, but jurisdiction lookup failed. Nationwide demo remains selected.');
@@ -581,7 +639,7 @@ function App() {
 
   function closeProfile() {
     clearDetailRoute();
-    setActiveSection('officials');
+    setActiveSection((current) => current === 'representatives' ? 'representatives' : 'officials');
     window.scrollTo(0, 0);
   }
 
@@ -683,11 +741,11 @@ function App() {
           </button>
           <button className={activeSection === 'notifications' ? 'nav-item active' : 'nav-item'} aria-label="Notifications" onClick={() => openSection('notifications')}><Bell size={24} /><span>Notifications</span></button>
           <button
-            className={activeSection === 'officials' ? 'nav-item active' : 'nav-item'}
-            aria-label="Officials"
-            onClick={() => openSection('officials')}
+            className={activeSection === 'representatives' ? 'nav-item active' : 'nav-item'}
+            aria-label="My representatives"
+            onClick={() => openSection('representatives')}
           >
-            <BadgeCheck size={24} /><span>Officials</span>
+            <Users size={24} /><span>My Reps</span>
           </button>
           <button className={['more', 'follow', 'chat', 'saved'].includes(activeSection) ? 'nav-item active' : 'nav-item'} aria-label="Settings" onClick={() => openSection('more')}><Settings size={24} /><span>Settings</span></button>
         </nav>
@@ -739,6 +797,19 @@ function App() {
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
             onOpenProfile={openProfile}
+          />
+        ) : activeSection === 'representatives' ? (
+          <MyRepresentativesPage
+            jurisdiction={jurisdiction}
+            profiles={officialProfiles}
+            addressDraft={addressDraft}
+            locationStatus={locationStatus}
+            locationMessage={locationMessage}
+            onAddressChange={setAddressDraft}
+            onAddressSubmit={lookupAddress}
+            onUseLocation={requestLocation}
+            onOpenProfile={openProfile}
+            onOpenDirectory={() => openSection('officials')}
           />
         ) : activeSection === 'explore' ? (
           <ExplorePage
@@ -793,6 +864,7 @@ function App() {
             federalData={federalCivicItems}
             federalOfficialData={federalOfficialData}
             officialData={floridaOfficialData}
+            directoryData={representativeDirectory}
             jurisdiction={jurisdiction}
             backendLabel={backendLabel}
             onResetData={resetLocalData}
@@ -849,6 +921,21 @@ function App() {
               <LocateFixed size={17} />
               {locationStatus === 'loading' ? 'Locating' : 'Use my location'}
             </button>
+            <form className="address-lookup-form" onSubmit={lookupAddress}>
+              <label htmlFor="address-lookup">Or enter your address</label>
+              <div>
+                <input
+                  id="address-lookup"
+                  type="text"
+                  autoComplete="street-address"
+                  value={addressDraft}
+                  onChange={(event) => setAddressDraft(event.target.value)}
+                  placeholder="123 Main St, City, FL 12345"
+                />
+                <button className="location-button" disabled={locationStatus === 'loading'}>Match districts</button>
+              </div>
+              <small>Sent to the U.S. Census Geocoder for district lookup. The street address is not saved.</small>
+            </form>
           </section>
             )}
 
@@ -968,6 +1055,29 @@ function findDistrict(geographies, label) {
   const value = geography?.BASENAME || geography?.NAME?.match(/District\s+(\d+)/i)?.[1];
   const district = Number.parseInt(value, 10);
   return Number.isFinite(district) ? district : null;
+}
+
+function fetchCensusGeographies(endpoint, params) {
+  return new Promise((resolve, reject) => {
+    const callbackName = `censusCallback${Date.now()}${Math.random().toString(36).slice(2)}`;
+    const script = document.createElement('script');
+    const timeoutId = window.setTimeout(() => finish(new Error('Census lookup timed out.')), 12000);
+
+    function finish(error, data) {
+      window.clearTimeout(timeoutId);
+      script.remove();
+      delete window[callbackName];
+      if (error) reject(error);
+      else resolve(data);
+    }
+
+    window[callbackName] = (data) => finish(null, data);
+    script.onerror = () => finish(new Error('Census lookup failed.'));
+    params.set('format', 'jsonp');
+    params.set('callback', callbackName);
+    script.src = `https://geocoding.geo.census.gov/geocoder/geographies/${endpoint}?${params}`;
+    document.head.appendChild(script);
+  });
 }
 
 function getOverviewIdFromHash() {
@@ -1427,8 +1537,89 @@ function SavedPage({ bills, onOpenOverview, onSave }) {
   );
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, jurisdiction, backendLabel, onResetData, onAction, onNavigate }) {
+function MyRepresentativesPage({ jurisdiction, profiles, addressDraft, locationStatus, locationMessage, onAddressChange, onAddressSubmit, onUseLocation, onOpenProfile, onOpenDirectory }) {
+  const hasLocation = Boolean(jurisdiction.stateCode);
+  const congressionalDistrict = jurisdiction.congressionalDistrict ?? 0;
+  const matched = hasLocation ? [
+    ...profiles.filter((profile) => profile.chamber === 'U.S. Senate' && profile.state === jurisdiction.stateCode),
+    ...profiles.filter((profile) => profile.chamber === 'U.S. House' && profile.state === jurisdiction.stateCode && Number(profile.district) === Number(congressionalDistrict)),
+    ...profiles.filter((profile) => profile.chamber === 'Florida Senate' && jurisdiction.stateCode === 'FL' && Number(profile.district) === Number(jurisdiction.stateSenateDistrict)),
+    ...profiles.filter((profile) => profile.chamber === 'Florida House' && jurisdiction.stateCode === 'FL' && Number(profile.district) === Number(jurisdiction.stateHouseDistrict))
+  ] : [];
+  const uniqueMatched = [...new Map(matched.map((profile) => [profile.id, profile])).values()];
+  const hasFloridaHouse = uniqueMatched.some((profile) => profile.chamber === 'Florida House');
+
+  return (
+    <section className="view-page representatives-page" aria-label="My representatives">
+      <PageHeader title="My Representatives" subtitle="Match your address to the elected officials who represent your districts." />
+      <section className="representative-lookup-panel">
+        <div>
+          <strong>{hasLocation ? jurisdiction.label : 'Choose your location'}</strong>
+          <span>{hasLocation
+            ? `U.S. House ${formatDistrict(jurisdiction.congressionalDistrict)} · State Senate ${formatDistrict(jurisdiction.stateSenateDistrict)} · State House ${formatDistrict(jurisdiction.stateHouseDistrict)}`
+            : locationMessage}</span>
+        </div>
+        <form className="address-lookup-form" onSubmit={onAddressSubmit}>
+          <label htmlFor="representative-address">Home address</label>
+          <div>
+            <input
+              id="representative-address"
+              type="text"
+              autoComplete="street-address"
+              value={addressDraft}
+              onChange={(event) => onAddressChange(event.target.value)}
+              placeholder="123 Main St, City, State 12345"
+            />
+            <button className="location-button" disabled={locationStatus === 'loading'}>
+              {locationStatus === 'loading' ? 'Matching' : 'Find my reps'}
+            </button>
+          </div>
+          <small>Your address is sent to the official U.S. Census Geocoder and is not saved by this app.</small>
+        </form>
+        <button className="location-button secondary-location-button" onClick={onUseLocation} disabled={locationStatus === 'loading'}>
+          <LocateFixed size={17} /> Use device location
+        </button>
+        {locationStatus === 'error' && <p className="lookup-error">{locationMessage}</p>}
+      </section>
+
+      {hasLocation && (
+        <>
+          <div className="representatives-section-heading">
+            <div>
+              <strong>Your matched officials</strong>
+              <span>Open any profile to see imported voting history and sourced records.</span>
+            </div>
+            <button className="small-pill" onClick={onOpenDirectory}>All officials</button>
+          </div>
+          <div className="matched-representatives-grid">
+            {uniqueMatched.map((profile) => (
+              <RepresentativeHistory key={profile.id} profile={profile} onOpenProfile={onOpenProfile} />
+            ))}
+          </div>
+          {jurisdiction.stateCode === 'FL' && !hasFloridaHouse && (
+            <div className="coverage-pending-card">
+              <strong>Florida House District {jurisdiction.stateHouseDistrict}: directory connection pending</strong>
+              <span>The official Florida House directory is currently rejecting automated requests. The app will not guess or show a stale representative.</span>
+              <a href="https://www.flhouse.gov/representatives" target="_blank" rel="noreferrer"><ExternalLink size={15} /> Check the official directory</a>
+            </div>
+          )}
+          <div className="coverage-pending-card">
+            <strong>County and city offices are next</strong>
+            <span>Current matching covers Congress and imported state-legislative directories. County commission, school board, and city offices will be added from local official sources.</span>
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+function formatDistrict(value) {
+  return Number.isFinite(Number(value)) && Number(value) > 0 ? `District ${Number(value)}` : 'At Large';
+}
+
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, directoryData, jurisdiction, backendLabel, onResetData, onAction, onNavigate }) {
   const activitySections = [
+    ['Officials directory', 'Search every imported politician and open their voting profile.', BadgeCheck, 'officials'],
     ['Saved', 'Bills and official sources you bookmarked for later.', Bookmark, 'saved'],
     ['Following', 'Sources, levels, and topics shaping your personalized feed.', Users, 'follow'],
     ['Discussions', 'Conversations connected to bills and watched topics.', MessageSquare, 'chat']
@@ -1475,7 +1666,7 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>
-        <span>{federalData.count} current federal bills and {federalOfficialData.count} federal official profiles are imported from Congress.gov, alongside {officialData.officials.length} Florida Senate officials, {officialData.bills.length} Senate bills, and {officialData.rollCalls.length} roll-call records from official Florida Senate pages.</span>
+        <span>{federalData.count} current federal bills, {directoryData.counts.usHouse} U.S. House members, {directoryData.counts.usSenate} U.S. senators, and {officialData.officials.length} Florida senators are imported from official directories, alongside {officialData.rollCalls.length} validated Florida Senate roll calls.</span>
         <a href={federalData.source} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Congress.gov API source
@@ -1843,7 +2034,7 @@ function SourceMetadata({ bill }) {
 function PoliticianProfilePage({ profile, votes, onBack, onClaim }) {
   return (
     <article className="overview-page profile-detail-page">
-      <button className="overview-back" onClick={onBack}>Back to officials</button>
+      <button className="overview-back" onClick={onBack}>Back</button>
       <PoliticianProfilesPage profiles={[profile]} votes={votes} onClaim={onClaim} singleProfile />
     </article>
   );
@@ -1854,11 +2045,12 @@ function PoliticianProfilesPage({ profiles, votes, onClaim, onOpenProfile, singl
   const [expandedProfiles, setExpandedProfiles] = useState(() => new Set(singleProfile && profiles[0] ? [profiles[0].id] : []));
   const visibleProfiles = profiles
     .filter((profile) => (
-      `${profile.name} ${profile.office} ${profile.party || ''}`.toLowerCase().includes(profileQuery.trim().toLowerCase())
+      `${profile.name} ${profile.office} ${profile.chamber || ''} ${profile.state || ''} ${profile.party || ''}`.toLowerCase().includes(profileQuery.trim().toLowerCase())
     ))
     .sort((left, right) => (
       right.archive.length - left.archive.length || left.name.localeCompare(right.name)
     ));
+  const renderedProfiles = singleProfile ? visibleProfiles : visibleProfiles.slice(0, 60);
 
   return (
     <section className="profiles-page" aria-label="Nationwide official profiles">
@@ -1884,7 +2076,7 @@ function PoliticianProfilesPage({ profiles, votes, onClaim, onOpenProfile, singl
         </>
       )}
       <div className="profiles-grid">
-        {visibleProfiles.map((profile) => {
+        {renderedProfiles.map((profile) => {
           const comparison = compareVotes(profile, votes);
           const history = summarizeVoteHistory(profile.archive);
           const prediction = predictRepresentativeVote(profile.archive.slice(0, 3));
@@ -2016,6 +2208,9 @@ function PoliticianProfilesPage({ profiles, votes, onClaim, onOpenProfile, singl
           );
         })}
       </div>
+      {!singleProfile && visibleProfiles.length > renderedProfiles.length && (
+        <div className="profiles-limit-note">Showing {renderedProfiles.length} of {visibleProfiles.length} profiles. Search by name, office, state, or party to narrow the list.</div>
+      )}
     </section>
   );
 }

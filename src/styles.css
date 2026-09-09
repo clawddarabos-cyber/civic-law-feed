@@ -278,6 +278,40 @@ button {
   padding: 14px 16px;
 }
 
+.address-lookup-form {
+  display: grid;
+  gap: 6px;
+  min-width: min(100%, 420px);
+}
+
+.address-lookup-form label {
+  color: #0f1419;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.address-lookup-form > div {
+  display: flex;
+  gap: 8px;
+}
+
+.address-lookup-form input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid #cfd9de;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1419;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.address-lookup-form small {
+  color: #536471;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .launch-onboarding {
   display: flex;
   align-items: center;
@@ -1604,6 +1638,96 @@ button {
   padding: 0 12px 12px;
 }
 
+.representatives-page {
+  padding-bottom: 32px;
+}
+
+.representative-lookup-panel {
+  display: grid;
+  gap: 14px;
+  border-bottom: 1px solid #eff3f4;
+  background: #fff;
+  padding: 18px 16px;
+}
+
+.representative-lookup-panel > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.representative-lookup-panel > div:first-child > strong {
+  font-size: 18px;
+}
+
+.representative-lookup-panel > div:first-child > span,
+.representatives-section-heading span,
+.coverage-pending-card span {
+  color: #536471;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.secondary-location-button {
+  width: fit-content;
+  border: 1px solid #cfd9de;
+  background: #fff;
+  color: #0f1419;
+}
+
+.lookup-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
+}
+
+.representatives-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 16px 10px;
+}
+
+.representatives-section-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.matched-representatives-grid {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.coverage-pending-card {
+  display: grid;
+  gap: 6px;
+  margin: 0 16px 12px;
+  border: 1px solid #eff3f4;
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px;
+}
+
+.coverage-pending-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: #0a66a3;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.profiles-limit-note {
+  border-top: 1px solid #eff3f4;
+  color: #536471;
+  padding: 14px 16px 24px;
+  font-size: 13px;
+  text-align: center;
+}
+
 .recent-votes {
   display: grid;
   gap: 7px;
@@ -1794,12 +1918,13 @@ button {
 
 @media (max-width: 520px) {
   .representative-row {
-    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .representative-row-action {
-    grid-column: 2;
-    justify-content: space-between;
+    grid-column: 1;
+    justify-content: flex-start;
+    margin-left: 46px;
   }
 }
 
@@ -2256,6 +2381,8 @@ a.vote-record-row:hover strong {
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
   .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
+  , .representative-lookup-panel, .coverage-pending-card,
+  .address-lookup-form input, .secondary-location-button
 ) {
   background: #000;
 }
@@ -2277,6 +2404,8 @@ a.vote-record-row:hover strong {
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
   .profile-search, .view-profile-button
+  , .representative-lookup-panel, .coverage-pending-card,
+  .address-lookup-form input, .secondary-location-button, .profiles-limit-note
 ) {
   border-color: #2f3336;
 }
@@ -2292,6 +2421,8 @@ a.vote-record-row:hover strong {
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
   .follow-target-copy strong, .profile-metrics strong, .profile-search input,
   .view-profile-button
+  , .representative-lookup-panel strong, .coverage-pending-card strong,
+  .address-lookup-form label, .address-lookup-form input, .secondary-location-button
 ) {
   color: #e7e9ea;
 }
@@ -2309,6 +2440,9 @@ a.vote-record-row:hover strong {
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
   .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span,
   .settings-group-label, .vote-record-label
+  , .representative-lookup-panel > div:first-child > span,
+  .representatives-section-heading span, .coverage-pending-card span,
+  .address-lookup-form small, .profiles-limit-note
 ) {
   color: #8b98a5;
 }
@@ -2343,6 +2477,8 @@ a.vote-record-row:hover strong {
   .settings-footer button, .chat-composer, .comment-form textarea, .source-box a,
   .profile-search, .view-profile-button, .vote-record-label,
   .profile-metrics
+  , .representative-lookup-panel, .coverage-pending-card,
+  .address-lookup-form input, .secondary-location-button
 ) {
   background: #fff;
 }
@@ -2364,6 +2500,8 @@ a.vote-record-row:hover strong {
   .action-row, .profile-metrics, .profile-metrics > div, .profile-estimate,
   .archive-toggle,
   .profile-search, .view-profile-button
+  , .representative-lookup-panel, .coverage-pending-card,
+  .address-lookup-form input, .secondary-location-button, .profiles-limit-note
 ) {
   border-color: #eff3f4;
 }
@@ -2379,6 +2517,8 @@ a.vote-record-row:hover strong {
   .launch-onboarding-copy strong, .overview-back, .quick-grid button,
   .follow-target-copy strong, .profile-metrics strong, .profile-search input,
   .view-profile-button
+  , .representative-lookup-panel strong, .coverage-pending-card strong,
+  .address-lookup-form label, .address-lookup-form input, .secondary-location-button
 ) {
   color: #0f1419;
 }
@@ -2396,6 +2536,9 @@ a.vote-record-row:hover strong {
   .metadata-row span, .report-row span, .launch-onboarding-copy p, .source-note,
   .minimal-card-meta, .minimal-card-footer, .ai-summary-label, .profile-metrics span,
   .settings-group-label
+  , .representative-lookup-panel > div:first-child > span,
+  .representatives-section-heading span, .coverage-pending-card span,
+  .address-lookup-form small, .profiles-limit-note
 ) {
   color: #536471;
 }
