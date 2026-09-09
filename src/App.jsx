@@ -243,6 +243,7 @@ const floridaOfficialProfiles = floridaOfficialData.officials.map((official) => 
 
 const federalOfficialProfiles = federalOfficialData.officials.map((official) => ({
   id: official.id,
+  bioguideId: official.bioguideId,
   name: official.name,
   office: official.office,
   jurisdiction: official.jurisdiction,
@@ -649,6 +650,8 @@ function App() {
         {activeOverview ? (
           <OverviewPage
             bill={activeOverview}
+            officialProfiles={[...federalOfficialProfiles, ...floridaOfficialProfiles]}
+            jurisdiction={jurisdiction}
             comments={localComments[activeOverview.id] || []}
             commentDraft={commentDrafts[activeOverview.id] || ''}
             commentCount={getCommentCount(activeOverview, localComments)}
@@ -1427,7 +1430,7 @@ function HashIcon() {
   return <span className="hash-icon">#</span>;
 }
 
-function OverviewPage({ bill, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit }) {
+function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit }) {
   return (
     <article className="overview-page">
       <button className="overview-back" onClick={onBack}>Back to feed</button>
@@ -1465,6 +1468,7 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, sourceReport
           Text / validation
         </a>
       </div>
+      <RepresentativeVotes bill={bill} profiles={officialProfiles} jurisdiction={jurisdiction} />
       <SourceMetadata bill={bill} />
       <section className="report-panel">
         <div className="section-title">
@@ -1520,6 +1524,84 @@ function OverviewPage({ bill, comments, commentDraft, commentCount, sourceReport
       </section>
     </article>
   );
+}
+
+function RepresentativeVotes({ bill, profiles, jurisdiction }) {
+  const recordedVotes = profiles
+    .filter((profile) => profile.votes?.[bill.id])
+    .map((profile) => ({ ...profile, vote: profile.votes[bill.id] }));
+  const sponsors = (bill.sponsors || []).map((sponsor) => {
+    const profile = profiles.find((item) => item.bioguideId === sponsor.bioguideId || item.name === sponsor.name);
+    return {
+      id: sponsor.bioguideId || sponsor.name,
+      name: sponsor.name,
+      office: profile?.office || [sponsor.party, sponsor.state].filter(Boolean).join(' · '),
+      sourceUrl: profile?.sourceUrl || sponsor.url,
+      vote: profile?.votes?.[bill.id] || null
+    };
+  });
+  const noFloorVote = !recordedVotes.length;
+  const locationLabel = jurisdiction.state === 'All states'
+    ? 'Use your location to match federal, state, and local representatives.'
+    : `Matched to ${jurisdiction.label}. District-level matching is still being added.`;
+
+  return (
+    <section className="representative-votes-panel">
+      <div className="section-title">
+        <Users size={18} />
+        <strong>How your representatives voted</strong>
+      </div>
+      <p className="representative-location-note">{locationLabel}</p>
+      {noFloorVote ? (
+        <div className="representative-empty">
+          <strong>No recorded floor vote yet</strong>
+          <span>This proposal has not reached a roll-call vote, or individual votes have not yet been published by the official source.</span>
+        </div>
+      ) : (
+        <div className="representative-list">
+          {recordedVotes.map((profile) => (
+            <RepresentativeVoteRow key={profile.id} official={profile} />
+          ))}
+        </div>
+      )}
+      {!!sponsors.length && (
+        <div className="representative-sponsors">
+          <span>Bill sponsor{sponsors.length > 1 ? 's' : ''}</span>
+          {sponsors.map((sponsor) => (
+            <RepresentativeVoteRow key={sponsor.id} official={sponsor} sponsor />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function RepresentativeVoteRow({ official, sponsor = false }) {
+  const vote = official.vote?.toLowerCase();
+  const voteLabel = vote === 'yes' ? 'Voted Yes' : vote === 'no' ? 'Voted No' : sponsor ? 'Sponsor · Vote pending' : 'Not recorded';
+
+  return (
+    <div className="representative-row">
+      <div className="representative-avatar"><Users size={17} /></div>
+      <div>
+        <strong>{formatOfficialName(official.name)}</strong>
+        <span>{official.office}</span>
+      </div>
+      <div className="representative-row-action">
+        <span className={vote === 'yes' ? 'vote-status yes' : vote === 'no' ? 'vote-status no' : 'vote-status pending'}>{voteLabel}</span>
+        {official.sourceUrl && (
+          <a href={official.sourceUrl} target="_blank" rel="noreferrer" aria-label={`Official profile for ${official.name}`}>
+            <ExternalLink size={14} />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatOfficialName(name) {
+  const senateName = name?.match(/^Sen\.\s+([^,]+),\s+([^\[]+)/);
+  return senateName ? `${senateName[2].trim()} ${senateName[1].trim()}` : name;
 }
 
 function SourceMetadata({ bill }) {
