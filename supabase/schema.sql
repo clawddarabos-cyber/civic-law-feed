@@ -203,7 +203,7 @@ grant select on public.official_votes to anon, authenticated;
 grant select on public.source_checks to anon, authenticated;
 revoke all on public.profiles, public.user_votes, public.saved_items, public.follows, public.reminders from anon;
 grant select, insert, update on public.profiles to authenticated;
-grant insert on public.civic_items to authenticated;
+revoke insert, update, delete on public.civic_items from anon, authenticated;
 grant select, insert, update, delete on public.user_votes to authenticated;
 grant select, insert, delete on public.saved_items to authenticated;
 grant select, insert, delete on public.follows to authenticated;
@@ -225,17 +225,7 @@ create policy "Public can read civic items"
 
 drop policy if exists "Authenticated users can stage known civic items" on public.civic_items;
 drop policy if exists "Guest sync can stage civic items" on public.civic_items;
-create policy "Authenticated users can stage known civic items"
-  on public.civic_items for insert
-  to authenticated
-  with check (true);
-
 drop policy if exists "Authenticated jobs can update civic items" on public.civic_items;
-create policy "Authenticated jobs can update civic items"
-  on public.civic_items for update
-  to authenticated
-  using (true)
-  with check (true);
 
 drop policy if exists "Public can read officials" on public.officials;
 create policy "Public can read officials"

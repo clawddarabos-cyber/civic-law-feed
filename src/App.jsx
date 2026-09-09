@@ -1232,7 +1232,7 @@ function LaunchOnboarding({ onDismiss, onUseLocation, onExplore }) {
       <div className="launch-onboarding-copy">
         <span><ShieldCheck size={16} /> Guest mode</span>
         <strong>Official-source civic feed</strong>
-        <p>Track bills, agendas, officials, votes, reminders, and source reports. This preview saves activity on this device until account sync is added.</p>
+        <p>Track bills, agendas, officials, votes, reminders, and source reports. Guest activity stays on this device; sign in from Settings to sync it across devices.</p>
       </div>
       <div className="launch-onboarding-actions">
         <button className="small-pill active" onClick={onUseLocation}>
@@ -1449,7 +1449,7 @@ function UserPostCard({ post, onShare }) {
         <p>{post.text}</p>
         <div className="source-note">
           <ShieldCheck size={16} />
-          Demo post. Backend moderation and account identity come next.
+          Signed-in comments enter moderation before they appear publicly.
         </div>
         <div className="action-row">
           <button className="icon-action" aria-label="Reply"><MessageSquare size={18} /></button>

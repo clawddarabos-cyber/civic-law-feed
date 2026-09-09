@@ -32,23 +32,7 @@ async function ensureProfile(user, preferences = {}) {
 }
 
 async function ensureCivicItem(civicItem) {
-  if (typeof civicItem === 'string') return civicItem;
-  const { error } = await supabase.from('civic_items').upsert({
-    id: civicItem.id,
-    title: civicItem.title,
-    chamber: civicItem.chamber,
-    jurisdiction: civicItem.jurisdiction,
-    level: civicItem.level,
-    status: civicItem.status,
-    category: civicItem.category,
-    summary: civicItem.summary,
-    detail: civicItem.detail,
-    source_url: civicItem.sourceUrl,
-    official_text_url: civicItem.officialTextUrl,
-    imported_metadata: civicItem.imported || {}
-  }, { onConflict: 'id', ignoreDuplicates: true });
-  if (error) throw error;
-  return civicItem.id;
+  return typeof civicItem === 'string' ? civicItem : civicItem.id;
 }
 
 export async function getAuthSession() {
