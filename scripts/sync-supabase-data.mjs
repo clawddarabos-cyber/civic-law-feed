@@ -7,8 +7,9 @@ if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
 }
 
-const [floridaData, directoryData, federalData] = await Promise.all([
+const [floridaData, floridaHouseData, directoryData, federalData] = await Promise.all([
   readJson('data/florida-official-data.json'),
+  readJson('data/florida-house-official-data.json'),
   readJson('data/representative-directory.json'),
   readJson('data/federal-civic-items.json')
 ]);
@@ -49,6 +50,20 @@ const floridaOfficials = floridaData.officials.map((official) => ({
   imported_metadata: { chamber: official.chamber, source: 'Florida Senate' },
   updated_at: floridaData.generatedAt
 }));
+const floridaHouseOfficials = floridaHouseData.officials.map((official) => ({
+  id: official.id,
+  source_id: 'florida-house',
+  name: official.name,
+  office: official.historical ? 'Florida House (historical member)' : `Florida House District ${official.district}`,
+  jurisdiction: 'Florida',
+  party: official.party,
+  state: 'FL',
+  district: String(official.district),
+  source_url: official.profileUrl,
+  claim_status: official.claimStatus,
+  imported_metadata: { chamber: official.chamber, memberId: official.memberId, historical: official.historical },
+  updated_at: floridaHouseData.generatedAt
+}));
 const directoryOfficials = directoryData.officials.map((official) => ({
   id: official.id,
   source_id: 'us-official-directory',
@@ -63,7 +78,7 @@ const directoryOfficials = directoryData.officials.map((official) => ({
   imported_metadata: { chamber: official.chamber, bioguideId: official.bioguideId || null },
   updated_at: directoryData.generatedAt
 }));
-const officialMap = new Map([...directoryOfficials, ...floridaOfficials].map((official) => [official.id, official]));
+const officialMap = new Map([...directoryOfficials, ...floridaOfficials, ...floridaHouseOfficials].map((official) => [official.id, official]));
 
 const floridaItems = floridaData.bills.map((bill) => ({
   id: bill.id,
@@ -87,6 +102,32 @@ const floridaItems = floridaData.bills.map((bill) => ({
   pros: [],
   cons: [],
   sponsors: [],
+  committees: [],
+  actions: [],
+  imported_metadata: { number: bill.number, session: bill.session, filedBy: bill.filedBy }
+}));
+const floridaHouseItems = floridaHouseData.bills.map((bill) => ({
+  id: bill.id,
+  source_id: 'florida-house',
+  title: bill.title,
+  chamber: bill.number,
+  jurisdiction: 'Florida',
+  level: 'State',
+  status: bill.lastAction,
+  category: 'Legislation',
+  summary: bill.summary,
+  ai_summary: null,
+  detail: bill.summary,
+  source_name: 'Florida House',
+  source_url: bill.sourceUrl,
+  official_text_url: bill.sourceUrl,
+  latest_action_at: floridaActionDate(bill.lastAction),
+  updated_at: floridaHouseData.generatedAt,
+  imported_at: floridaHouseData.generatedAt,
+  image_url: null,
+  pros: [],
+  cons: [],
+  sponsors: bill.filedBy ? [bill.filedBy] : [],
   committees: [],
   actions: [],
   imported_metadata: { number: bill.number, session: bill.session, filedBy: bill.filedBy }
@@ -119,7 +160,7 @@ const federalItems = federalData.items.map((bill) => ({
   imported_metadata: bill.imported || {}
 }));
 
-const rollCalls = floridaData.rollCalls.map((rollCall) => ({
+const rollCalls = [...floridaData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaData.generatedAt })), ...floridaHouseData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaHouseData.generatedAt }))].map((rollCall) => ({
   id: rollCall.id,
   civic_item_id: rollCall.billId,
   bill_number: rollCall.billNumber,
@@ -130,7 +171,7 @@ const rollCalls = floridaData.rollCalls.map((rollCall) => ({
   nay_count: rollCall.nays,
   source_url: rollCall.sourceUrl,
   validation_status: rollCall.validation?.matchesPublishedTotals ? 'validated' : 'rejected',
-  imported_at: floridaData.generatedAt
+  imported_at: rollCall.datasetGeneratedAt
 }));
 
 const floridaBySurname = new Map(floridaData.officials.map((official) => [official.name.split(',')[0].trim().toLowerCase(), official.id]));
@@ -167,6 +208,16 @@ for (const rollCall of floridaData.rollCalls) {
     });
   }
 }
+for (const rollCall of floridaHouseData.rollCalls) {
+  for (const memberVote of rollCall.memberVotes || []) {
+    officialVotes.push({
+      roll_call_id: rollCall.id,
+      official_id: memberVote.officialId,
+      vote: memberVote.vote,
+      source_url: rollCall.sourceUrl
+    });
+  }
+}
 
 const sources = [
   {
@@ -192,6 +243,17 @@ const sources = [
     freshness_status: 'current'
   },
   {
+    id: 'florida-house',
+    name: 'Florida House of Representatives',
+    level: 'State',
+    jurisdiction: 'Florida',
+    homepage_url: 'https://www.flhouse.gov/',
+    api_url: null,
+    source_type: 'official_legislature',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
+  },
+  {
     id: 'us-official-directory',
     name: 'Official congressional directories',
     level: 'Federal',
@@ -206,7 +268,7 @@ const sources = [
 
 await upsertBatches('sources', sources, 'id');
 await upsertBatches('officials', [...officialMap.values()], 'id');
-await upsertBatches('civic_items', [...federalItems, ...floridaItems], 'id');
+await upsertBatches('civic_items', [...federalItems, ...floridaItems, ...floridaHouseItems], 'id');
 await upsertBatches('roll_calls', rollCalls, 'id');
 await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id');
 
@@ -218,7 +280,7 @@ const { error: sourceCheckError } = await supabase.from('source_checks').insert(
   message: 'Official-source sync completed.',
   raw_metadata: {
     officials: officialMap.size,
-    civicItems: federalItems.length + floridaItems.length,
+    civicItems: federalItems.length + floridaItems.length + floridaHouseItems.length,
     rollCalls: rollCalls.length,
     officialVotes: officialVotes.length
   }
@@ -227,7 +289,7 @@ if (sourceCheckError) throw new Error(`source_checks: ${sourceCheckError.message
 
 console.log(JSON.stringify({
   officials: officialMap.size,
-  civicItems: federalItems.length + floridaItems.length,
+  civicItems: federalItems.length + floridaItems.length + floridaHouseItems.length,
   rollCalls: rollCalls.length,
   officialVotes: officialVotes.length,
   historicalOfficials,

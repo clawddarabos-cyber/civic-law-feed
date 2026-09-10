@@ -27,7 +27,10 @@ async function fetchAllPublicRows(table, columns, configureQuery) {
   const total = first.count ?? first.data.length;
   if (total <= publicPageSize) return first.data;
   const starts = Array.from({ length: Math.ceil(total / publicPageSize) - 1 }, (_, index) => (index + 1) * publicPageSize);
-  const remaining = await Promise.all(starts.map((from) => pageQuery(from, false)));
+  const remaining = [];
+  for (let index = 0; index < starts.length; index += 8) {
+    remaining.push(...await Promise.all(starts.slice(index, index + 8).map((from) => pageQuery(from, false))));
+  }
   const failed = remaining.find((result) => result.error);
   if (failed) throw failed.error;
   return [first.data, ...remaining.map((result) => result.data)].flat();

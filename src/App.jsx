@@ -376,6 +376,7 @@ function normalizeCloudPublicData(data) {
     const records = archivesByOfficial.get(officialVote.official_id) || [];
     records.push({
       id: rollCall.id,
+      billId: rollCall.civic_item_id,
       title: `${rollCall.bill_number}: ${rollCall.title}`,
       year: formatCloudDate(rollCall.vote_date),
       topic: `${rollCall.chamber} vote`,
@@ -412,7 +413,9 @@ function normalizeCloudPublicData(data) {
       status: row.claim_status === 'inactive' ? 'Historical official record' : row.claim_status === 'claimed' ? 'Claimed profile' : 'Official directory profile',
       sourceName: fallback.sourceName || `${metadata.chamber || inferOfficialChamber(row.office)} official source`,
       sourceUrl: row.source_url,
-      votes: fallback.votes || {},
+      votes: archive.length
+        ? Object.fromEntries(archive.filter((record) => record.billId).map((record) => [record.billId, record.vote]))
+        : (fallback.votes || {}),
       sponsoredItems: fallback.sponsoredItems || [],
       archiveWindow: archive.length ? cloudArchiveWindow : (fallback.archiveWindow || {
         startDate: null,
@@ -440,7 +443,8 @@ function normalizeCloudPublicData(data) {
       officialVotes: data.officialVotes.length,
       usHouse: cloudProfiles.filter((profile) => profile.chamber === 'U.S. House').length,
       usSenate: cloudProfiles.filter((profile) => profile.chamber === 'U.S. Senate').length,
-      floridaSenate: cloudProfiles.filter((profile) => profile.chamber === 'Florida Senate' && profile.status !== 'Historical official record').length
+      floridaSenate: cloudProfiles.filter((profile) => profile.chamber === 'Florida Senate' && profile.status !== 'Historical official record').length,
+      floridaHouse: cloudProfiles.filter((profile) => profile.chamber === 'Florida House' && profile.status !== 'Historical official record').length
     }
   };
 }
@@ -483,7 +487,8 @@ const fallbackPublicData = {
     officialVotes: floridaOfficialData.rollCalls.reduce((total, rollCall) => total + (rollCall.memberVotes?.length || 0), 0),
     usHouse: representativeDirectory.counts.usHouse,
     usSenate: representativeDirectory.counts.usSenate,
-    floridaSenate: floridaOfficialData.officials.length
+    floridaSenate: floridaOfficialData.officials.length,
+    floridaHouse: representativeDirectory.counts?.floridaHouse || 0
   }
 };
 
@@ -2039,7 +2044,7 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>
-        <span>{publicData.counts.civicItems.toLocaleString()} civic items, {publicData.counts.usHouse.toLocaleString()} U.S. House members, {publicData.counts.usSenate.toLocaleString()} U.S. senators, and {publicData.counts.floridaSenate.toLocaleString()} Florida senators are available, alongside {publicData.counts.rollCalls.toLocaleString()} validated roll calls and {publicData.counts.officialVotes.toLocaleString()} member votes.</span>
+        <span>{publicData.counts.civicItems.toLocaleString()} civic items, {publicData.counts.usHouse.toLocaleString()} U.S. House members, {publicData.counts.usSenate.toLocaleString()} U.S. senators, {publicData.counts.floridaSenate.toLocaleString()} Florida senators, and {publicData.counts.floridaHouse.toLocaleString()} Florida House members are available, alongside {publicData.counts.rollCalls.toLocaleString()} validated roll calls and {publicData.counts.officialVotes.toLocaleString()} member votes.</span>
         <span>{publicData.mode === 'live' ? `Live from Supabase · updated ${formatCloudDate(publicData.lastUpdated)}` : 'Using the bundled official-source fallback.'}</span>
         <a href={federalData.source} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
@@ -2264,6 +2269,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
 
 function matchesJurisdiction(profile, bill, jurisdiction) {
   if (!jurisdiction.stateCode) return false;
+  if (profile.status === 'Historical official record') return false;
 
   if (bill.level === 'Federal') {
     return profile.jurisdiction === 'Federal' && profile.state === jurisdiction.stateCode && (
@@ -2272,9 +2278,12 @@ function matchesJurisdiction(profile, bill, jurisdiction) {
   }
 
   if (bill.level === 'State') {
-    return profile.jurisdiction === jurisdiction.state && (
-      !profile.district || profile.district === jurisdiction.stateSenateDistrict
-    );
+    if (profile.jurisdiction !== jurisdiction.state) return false;
+    const isHouseBill = bill.sourceName === 'Florida House' || /(^|\/)H(?:B|JR|CR|M)\s*\d/i.test(bill.chamber || '');
+    if (isHouseBill) {
+      return profile.chamber === 'Florida House' && Number(profile.district) === Number(jurisdiction.stateHouseDistrict);
+    }
+    return profile.chamber === 'Florida Senate' && Number(profile.district) === Number(jurisdiction.stateSenateDistrict);
   }
 
   return profile.jurisdiction === bill.jurisdiction;

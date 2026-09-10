@@ -45,6 +45,10 @@ jobs:
         if: steps.configured.outputs.ready == 'true'
         run: npm run import:representatives
 
+      - name: Refresh Florida House records
+        if: steps.configured.outputs.ready == 'true'
+        run: npm run import:florida-house
+
       - name: Sync validated data
         if: steps.configured.outputs.ready == 'true'
         run: npm run sync:supabase
