@@ -73,15 +73,18 @@ function analyzeCandidate(record, target, billMap) {
   const text = [record.title, record.topic, billText(linkedBill)].filter(Boolean).join(' ');
   const candidateTokens = tokens(text);
   const candidateTopics = new Set(topicTags(text));
+  const candidatePrimaryTopics = new Set(topicTags([record.title, linkedBill.title, linkedBill.category].filter(Boolean).join(' ')));
+  const sharedPrimaryTopics = intersection(target.primaryTopics, candidatePrimaryTopics);
   const sharedTopics = intersection(target.topics, candidateTopics);
   const sharedTerms = intersection(target.tokens, candidateTokens).slice(0, 4);
   const sameCategory = target.category && linkedBill.category && normalize(target.category) === normalize(linkedBill.category)
     && normalize(target.category) !== 'legislation';
   const floorBoost = normalize(record.topic).includes('floor') ? 3 : 0;
-  const score = sharedTopics.length * 18 + sharedTerms.length * 5 + (sameCategory ? 12 : 0) + floorBoost;
+  const score = sharedPrimaryTopics.length * 30 + sharedTopics.length * 18 + sharedTerms.length * 5 + (sameCategory ? 12 : 0) + floorBoost;
   if (score <= 0 || (target.topics.size && !sharedTopics.length)) return null;
-  const relevance = sharedTopics.length
-    ? sharedTopics.join(', ')
+  const relevanceTopics = [...new Set([...sharedPrimaryTopics, ...sharedTopics])];
+  const relevance = relevanceTopics.length
+    ? relevanceTopics.join(', ')
     : sameCategory
       ? `${target.category} policy`
       : `Shared terms: ${sharedTerms.join(', ')}`;
@@ -95,6 +98,7 @@ export function buildBillVoteForecast(profile, bill, bills = []) {
   const target = {
     tokens: tokens(targetText),
     topics: new Set(topicTags(targetText)),
+    primaryTopics: new Set(topicTags([bill.title, bill.category].filter(Boolean).join(' '))),
     category: bill.category
   };
   const unique = new Map();

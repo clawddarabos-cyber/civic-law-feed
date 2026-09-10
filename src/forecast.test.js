@@ -40,3 +40,21 @@ test('uses sponsorship as a transparent supporting signal', () => {
   assert.equal(result.vote, 'yes');
   assert.match(result.detail, /sponsors the measure/i);
 });
+
+test('prioritizes policy topics named in the bill title', () => {
+  const broadBills = [
+    { id: 'water-1', title: 'Safe Drinking Water Grants', category: 'Environment' },
+    { id: 'water-2', title: 'Water Pollution Control Funding', category: 'Environment' },
+    { id: 'water-3', title: 'Municipal Water Treatment Standards', category: 'Environment' },
+    { id: 'budget-1', title: 'General Appropriations', category: 'Budget', summary: 'Funds water and other state programs.' }
+  ];
+  const broadProfile = {
+    ...profile,
+    archive: [
+      ...profile.archive.filter((record) => record.billId?.startsWith('water-')),
+      { billId: 'budget-1', title: 'General Appropriations', vote: 'no', sortDate: 20, sourceUrl: '#' }
+    ]
+  };
+  const result = buildBillVoteForecast(broadProfile, target, broadBills);
+  assert.deepEqual(result.evidence.map((vote) => vote.billId).sort(), ['water-1', 'water-2', 'water-3']);
+});
