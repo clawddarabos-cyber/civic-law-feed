@@ -413,9 +413,7 @@ function normalizeCloudPublicData(data) {
       status: row.claim_status === 'inactive' ? 'Historical official record' : row.claim_status === 'claimed' ? 'Claimed profile' : 'Official directory profile',
       sourceName: fallback.sourceName || `${metadata.chamber || inferOfficialChamber(row.office)} official source`,
       sourceUrl: row.source_url,
-      votes: archive.length
-        ? Object.fromEntries(archive.filter((record) => record.billId).map((record) => [record.billId, record.vote]))
-        : (fallback.votes || {}),
+      votes: fallback.votes || {},
       sponsoredItems: fallback.sponsoredItems || [],
       archiveWindow: archive.length ? cloudArchiveWindow : (fallback.archiveWindow || {
         startDate: null,
@@ -1086,6 +1084,7 @@ function App() {
         ) : activeProfile ? (
           <PoliticianProfilePage
             profile={activeProfile}
+            bills={bills}
             votes={votes}
             onBack={closeProfile}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
@@ -1093,6 +1092,7 @@ function App() {
         ) : activeSection === 'officials' ? (
           <PoliticianProfilesPage
             profiles={officialProfiles}
+            bills={bills}
             votes={votes}
             onClaim={(profile) => showNotice(`Claim started: ${profile.office}`)}
             onOpenProfile={openProfile}
@@ -2209,8 +2209,11 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
 
 function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
   const recordedVotes = profiles
-    .filter((profile) => profile.votes?.[bill.id])
-    .map((profile) => ({ ...profile, vote: profile.votes[bill.id] }));
+    .map((profile) => ({
+      ...profile,
+      vote: profile.votes?.[bill.id] || profile.archive?.find((record) => record.billId === bill.id)?.vote
+    }))
+    .filter((profile) => profile.vote);
   const sponsors = (bill.sponsors || []).map((sponsor) => {
     const profile = profiles.find((item) => item.bioguideId === sponsor.bioguideId || item.name === sponsor.name);
     return {
@@ -2416,16 +2419,16 @@ function SourceMetadata({ bill }) {
   );
 }
 
-function PoliticianProfilePage({ profile, votes, onBack, onClaim }) {
+function PoliticianProfilePage({ profile, bills, votes, onBack, onClaim }) {
   return (
     <article className="overview-page profile-detail-page">
       <button className="overview-back" onClick={onBack}>Back</button>
-      <PoliticianProfilesPage profiles={[profile]} votes={votes} onClaim={onClaim} singleProfile />
+      <PoliticianProfilesPage profiles={[profile]} bills={bills} votes={votes} onClaim={onClaim} singleProfile />
     </article>
   );
 }
 
-function PoliticianProfilesPage({ profiles, votes, onClaim, onOpenProfile, singleProfile = false }) {
+function PoliticianProfilesPage({ profiles, bills = [], votes, onClaim, onOpenProfile, singleProfile = false }) {
   const [profileQuery, setProfileQuery] = useState('');
   const [expandedProfiles, setExpandedProfiles] = useState(() => new Set(singleProfile && profiles[0] ? [profiles[0].id] : []));
   const visibleProfiles = profiles
