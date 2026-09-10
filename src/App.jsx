@@ -57,6 +57,7 @@ import {
   syncUserVote
 } from './backend.js';
 import { getGuestProfileId, removeStoredValues, storageKeys, useStoredSet, useStoredState } from './storage.js';
+import { buildBillVoteForecast, buildRecentVotePattern } from './forecast.js';
 
 const prototypeBills = [
   {
@@ -1131,6 +1132,7 @@ function App() {
         {activeOverview ? (
           <OverviewPage
             bill={activeOverview}
+            bills={bills}
             officialProfiles={officialProfiles}
             jurisdiction={jurisdiction}
             comments={localComments[activeOverview.id] || []}
@@ -2173,7 +2175,7 @@ function HashIcon() {
   return <span className="hash-icon">#</span>;
 }
 
-function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit, onOpenProfile }) {
+function OverviewPage({ bill, bills, officialProfiles, jurisdiction, comments, commentDraft, commentCount, sourceReports, sourceReportDraft, onBack, onCommentChange, onCommentSubmit, onSourceReportChange, onSourceReportSubmit, onOpenProfile }) {
   return (
     <article className="overview-page">
       <button className="overview-back" onClick={onBack}>Back to feed</button>
@@ -2213,7 +2215,7 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
           Text / validation
         </a>
       </div>
-      <RepresentativeVotes bill={bill} profiles={officialProfiles} jurisdiction={jurisdiction} onOpenProfile={onOpenProfile} />
+      <RepresentativeVotes bill={bill} bills={bills} profiles={officialProfiles} jurisdiction={jurisdiction} onOpenProfile={onOpenProfile} />
       <SourceMetadata bill={bill} />
       <section className="report-panel">
         <div className="section-title">
@@ -2271,7 +2273,7 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
   );
 }
 
-function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
+function RepresentativeVotes({ bill, bills, profiles, jurisdiction, onOpenProfile }) {
   const recordedVotes = profiles
     .map((profile) => ({
       ...profile,
@@ -2331,7 +2333,7 @@ function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
         <div className="local-representatives">
           <span>Your matched representative{localProfiles.length > 1 ? 's' : ''}</span>
           {localProfiles.map((profile) => (
-            <RepresentativeHistory key={profile.id} profile={profile} onOpenProfile={onOpenProfile} />
+            <RepresentativeHistory key={profile.id} profile={profile} bill={bill} bills={bills} onOpenProfile={onOpenProfile} />
           ))}
         </div>
       )}
@@ -2361,49 +2363,32 @@ function matchesJurisdiction(profile, bill, jurisdiction) {
   return profile.jurisdiction === bill.jurisdiction;
 }
 
-function RepresentativeHistory({ profile, onOpenProfile }) {
-  const recentVotes = profile.archive.slice(0, 3);
-  const prediction = predictRepresentativeVote(recentVotes);
+function RepresentativeHistory({ profile, bill, bills, onOpenProfile }) {
+  const officialVote = profile.vote?.toLowerCase();
+  const forecast = buildBillVoteForecast(profile, bill, bills);
 
   return (
     <article className="representative-history-card">
       <RepresentativeVoteRow official={profile} onOpenProfile={onOpenProfile} />
       <div className="recent-votes">
-        <strong>Last three recorded votes</strong>
-        {recentVotes.length ? recentVotes.map((record) => (
+        <strong>Most relevant past votes</strong>
+        {forecast.evidence.length ? forecast.evidence.map((record) => (
           <a href={record.sourceUrl} target="_blank" rel="noreferrer" key={`${profile.id}-${record.id || `${record.year}-${record.title}`}`}>
-            <span>{record.title}</span>
+            <span><b>{record.title}</b><small>{record.relevance}</small></span>
             <span className={record.vote === 'yes' ? 'history-vote yes' : 'history-vote no'}>{record.vote.toUpperCase()}</span>
           </a>
-        )) : <span className="history-unavailable">No member-level vote history imported yet.</span>}
+        )) : <span className="history-unavailable">No sufficiently related member-level votes were found.</span>}
       </div>
-      <div className={prediction.vote ? `ai-vote-estimate ${prediction.vote}` : 'ai-vote-estimate pending'}>
-        <span><Sparkles size={14} /> AI estimate</span>
-        <strong>{prediction.label}</strong>
-        <p>{prediction.detail}</p>
-        <small>Estimate only—not an official position or recorded vote.</small>
+      <div className={officialVote ? `ai-vote-estimate recorded ${officialVote}` : forecast.vote ? `ai-vote-estimate ${forecast.vote}` : 'ai-vote-estimate pending'}>
+        <span><Sparkles size={14} /> {officialVote ? 'Official result available' : 'AI vote outlook'}</span>
+        <strong>{officialVote ? `Voted ${officialVote === 'yes' ? 'Yes' : 'No'}` : forecast.label}</strong>
+        <p>{officialVote ? 'The forecast is replaced by the published member-level vote.' : forecast.detail}</p>
+        {!officialVote && forecast.confidence && <span className="forecast-confidence">{forecast.confidence}</span>}
+        {!officialVote && forecast.signals.map((signal) => <p className="forecast-signal" key={signal}>{signal}</p>)}
+        <small>{officialVote ? 'Official record linked above.' : 'Estimate only—not an official position. Uses related votes and sponsorship when available; weak evidence returns Unclear. Public statements and committee assignments are not yet included.'}</small>
       </div>
     </article>
   );
-}
-
-function predictRepresentativeVote(recentVotes) {
-  if (recentVotes.length < 3) {
-    return {
-      vote: null,
-      label: 'Not enough history',
-      detail: 'Three sourced member votes are required before the app will estimate a likely vote.'
-    };
-  }
-
-  const yesVotes = recentVotes.filter((record) => record.vote === 'yes').length;
-  const vote = yesVotes >= 2 ? 'yes' : 'no';
-  const majority = vote === 'yes' ? yesVotes : recentVotes.length - yesVotes;
-  return {
-    vote,
-    label: `Likely ${vote === 'yes' ? 'Yes' : 'No'}`,
-    detail: `${majority} of the representative’s last 3 sourced votes were ${vote.toUpperCase()}. This is a simple recent-vote signal and does not yet account for topic similarity, amendments, or public statements.`
-  };
 }
 
 function RepresentativeVoteRow({ official, sponsor = false, onOpenProfile }) {
@@ -2536,7 +2521,7 @@ function PoliticianProfilesPage({ profiles, bills = [], votes, onClaim, onOpenPr
         {renderedProfiles.map((profile) => {
           const comparison = compareVotes(profile, votes);
           const history = summarizeVoteHistory(profile.archive);
-          const prediction = predictRepresentativeVote(profile.archive.slice(0, 3));
+          const prediction = buildRecentVotePattern(profile.archive.slice(0, 3));
           const coverageStart = formatArchiveDate(profile.archiveWindow?.startDate);
           const coverageEnd = formatArchiveDate(profile.archiveWindow?.endDate);
           const archiveExpanded = expandedProfiles.has(profile.id);
@@ -2586,10 +2571,10 @@ function PoliticianProfilesPage({ profiles, bills = [], votes, onClaim, onOpenPr
                 <span>{coverageStart}–{coverageEnd}. {profile.archiveWindow?.note}</span>
               </div>
               <div className={prediction.vote ? `ai-vote-estimate profile-estimate ${prediction.vote}` : 'ai-vote-estimate profile-estimate pending'}>
-                <span><Sparkles size={14} /> AI voting outlook</span>
+                <span><BarChart3 size={14} /> Recent voting pattern</span>
                 <strong>{prediction.label}</strong>
                 <p>{prediction.detail}</p>
-                <small>AI overview only—not an official position or a bill-specific forecast.</small>
+                <small>Descriptive history only—not an official position or a bill-specific forecast.</small>
               </div>
               {!!profile.sponsoredItems?.length && (
                 <div className="sponsor-summary">

@@ -12,6 +12,7 @@
     "import:florida": "node scripts/import-florida-official-data.mjs && python3 scripts/enrich-florida-rollcall-members.py && python3 scripts/enrich-florida-floor-votes.py",
     "import:florida-house": "python3 scripts/import-florida-house-data.py",
     "sync:supabase": "node scripts/sync-supabase-data.mjs",
+    "test": "node --test src/forecast.test.js",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
