@@ -2290,10 +2290,15 @@ function RepresentativeVotes({ bill, profiles, jurisdiction, onOpenProfile }) {
     };
   });
   const noFloorVote = !recordedVotes.length;
-  const localProfiles = profiles.filter((profile) => matchesJurisdiction(profile, bill, jurisdiction));
+  const localProfiles = profiles
+    .filter((profile) => matchesJurisdiction(profile, bill, jurisdiction))
+    .map((profile) => ({
+      ...profile,
+      vote: profile.votes?.[bill.id] || profile.archive?.find((record) => record.billId === bill.id)?.vote
+    }));
   const locationLabel = jurisdiction.state === 'All states'
     ? 'Use your location to match federal, state, and local representatives.'
-    : `Matched to ${jurisdiction.label}. District-level matching is still being added.`;
+    : `Matched to ${jurisdiction.label} using your congressional and state legislative districts.`;
 
   return (
     <section className="representative-votes-panel">
