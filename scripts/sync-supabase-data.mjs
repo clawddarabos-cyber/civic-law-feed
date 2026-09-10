@@ -179,7 +179,51 @@ const federalItems = federalData.items.map((bill) => ({
   imported_metadata: bill.imported || {}
 }));
 
-const knownCivicItemIds = new Set([...federalItems, ...floridaItems, ...floridaHouseItems].map((item) => item.id));
+function congressBillUrl(id) {
+  const match = String(id).match(/^congress-(\d+)-(hr|hres|hjres|hconres|s|sres|sjres|sconres)-(\d+)$/);
+  if (!match) return 'https://www.congress.gov/';
+  const paths = {
+    hr: 'house-bill', hres: 'house-resolution', hjres: 'house-joint-resolution', hconres: 'house-concurrent-resolution',
+    s: 'senate-bill', sres: 'senate-resolution', sjres: 'senate-joint-resolution', sconres: 'senate-concurrent-resolution'
+  };
+  return `https://www.congress.gov/bill/${match[1]}th-congress/${paths[match[2]]}/${match[3]}`;
+}
+
+const federalItemIds = new Set(federalItems.map((item) => item.id));
+const federalVoteItemMap = new Map();
+for (const rollCall of federalVoteData.rollCalls) {
+  if (!rollCall.billId || federalItemIds.has(rollCall.billId) || federalVoteItemMap.has(rollCall.billId)) continue;
+  const sourceName = rollCall.chamber === 'U.S. House' ? 'U.S. House Clerk' : 'U.S. Senate';
+  federalVoteItemMap.set(rollCall.billId, {
+    id: rollCall.billId,
+    source_id: rollCall.chamber === 'U.S. House' ? 'us-house-clerk' : 'us-senate-roll-calls',
+    title: rollCall.billTitle,
+    chamber: rollCall.billNumber,
+    jurisdiction: 'Federal',
+    level: 'Federal',
+    status: [rollCall.question, rollCall.result].filter(Boolean).join(' · '),
+    category: 'Federal legislation',
+    summary: rollCall.billTitle,
+    ai_summary: null,
+    detail: rollCall.billTitle,
+    source_name: sourceName,
+    source_url: rollCall.sourceUrl,
+    official_text_url: congressBillUrl(rollCall.billId),
+    latest_action_at: isoDate(rollCall.date),
+    updated_at: federalVoteData.generatedAt,
+    imported_at: federalVoteData.generatedAt,
+    image_url: null,
+    pros: [],
+    cons: [],
+    sponsors: [],
+    committees: [],
+    actions: [],
+    imported_metadata: { source: `${sourceName} roll call`, congress: federalVoteData.congress, number: rollCall.billNumber }
+  });
+}
+const federalVoteItems = [...federalVoteItemMap.values()];
+
+const knownCivicItemIds = new Set([...federalItems, ...federalVoteItems, ...floridaItems, ...floridaHouseItems].map((item) => item.id));
 const rollCalls = [
   ...floridaData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaData.generatedAt })),
   ...floridaHouseData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaHouseData.generatedAt })),
@@ -324,7 +368,7 @@ const sources = [
 
 await upsertBatches('sources', sources, 'id');
 await upsertBatches('officials', [...officialMap.values()], 'id');
-await upsertBatches('civic_items', [...federalItems, ...floridaItems, ...floridaHouseItems], 'id');
+await upsertBatches('civic_items', [...federalItems, ...federalVoteItems, ...floridaItems, ...floridaHouseItems], 'id');
 await upsertBatches('roll_calls', rollCalls, 'id');
 await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id', 2000);
 
@@ -336,7 +380,7 @@ const { error: sourceCheckError } = await supabase.from('source_checks').insert(
   message: 'Official-source sync completed.',
   raw_metadata: {
     officials: officialMap.size,
-    civicItems: federalItems.length + floridaItems.length + floridaHouseItems.length,
+    civicItems: federalItems.length + federalVoteItems.length + floridaItems.length + floridaHouseItems.length,
     rollCalls: rollCalls.length,
     officialVotes: officialVotes.length
   }
@@ -345,7 +389,7 @@ if (sourceCheckError) throw new Error(`source_checks: ${sourceCheckError.message
 
 console.log(JSON.stringify({
   officials: officialMap.size,
-  civicItems: federalItems.length + floridaItems.length + floridaHouseItems.length,
+  civicItems: federalItems.length + federalVoteItems.length + floridaItems.length + floridaHouseItems.length,
   rollCalls: rollCalls.length,
   officialVotes: officialVotes.length,
   historicalOfficials,

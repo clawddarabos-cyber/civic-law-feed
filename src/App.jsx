@@ -397,7 +397,7 @@ function normalizeCloudPublicData(data) {
     label: 'Validated cloud archive',
     note: 'Member-level votes loaded from validated official roll calls in Supabase.'
   };
-  const cloudProfiles = data.officials.map((row) => {
+  const cloudProfiles = data.officials.filter((row) => row.id !== 'congress-member-' && row.name).map((row) => {
     const fallback = fallbackProfileMap.get(row.id) || {};
     const metadata = row.imported_metadata || {};
     const archive = (archivesByOfficial.get(row.id) || []).sort((a, b) => b.sortDate - a.sortDate);

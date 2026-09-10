@@ -55,7 +55,7 @@ function parseUsHouse(xml) {
       sourceName: 'U.S. House Clerk directory',
       sourceUrl: congressProfileUrl(name, bioguideId)
     };
-  });
+  }).filter((official) => official.bioguideId && official.name);
 }
 
 function parseUsSenate(xml) {
