@@ -110,6 +110,29 @@ button {
   font-weight: 800;
 }
 
+.nav-icon-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.nav-icon-badge b {
+  position: absolute;
+  top: -7px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #f4212e;
+  color: #fff;
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 1;
+}
+
 .nav-item:hover,
 .profile-button:hover,
 .round-action:hover,
@@ -1349,6 +1372,164 @@ button {
   color: #1d9bf0;
 }
 
+.notification-controls {
+  display: grid;
+  gap: 14px;
+  border-bottom: 1px solid #eff3f4;
+  background: #fff;
+  padding: 16px;
+}
+
+.notification-controls-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.notification-controls-head > div {
+  display: grid;
+  gap: 4px;
+}
+
+.notification-controls-head span,
+.notification-controls-head label,
+.notification-toggles label,
+.notification-state {
+  color: #536471;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.notification-controls-head label {
+  display: grid;
+  flex: 0 0 150px;
+  gap: 5px;
+  font-weight: 800;
+}
+
+.notification-controls select {
+  min-height: 38px;
+  border: 1px solid #cfd9de;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f1419;
+  padding: 0 10px;
+}
+
+.notification-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.notification-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #0f1419;
+  font-weight: 700;
+}
+
+.notification-toggles input {
+  width: 16px;
+  height: 16px;
+  accent-color: #1d9bf0;
+}
+
+.notification-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eff3f4;
+  padding: 12px 0;
+}
+
+.notification-toolbar > div {
+  display: flex;
+  gap: 7px;
+}
+
+.text-action {
+  border: 0;
+  background: transparent;
+  color: #0a66a3;
+  padding: 7px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.notification-state {
+  border-bottom: 1px solid #eff3f4;
+  padding: 10px 0;
+}
+
+.notification-state.error {
+  color: #b42318;
+}
+
+.notification-row {
+  position: relative;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.notification-row.unread {
+  background: #f3f9fd;
+}
+
+.notification-row.unread::before {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #1d9bf0;
+  content: '';
+}
+
+.notification-copy {
+  display: grid;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.notification-copy:hover strong {
+  text-decoration: underline;
+}
+
+.notification-copy .forecast-result {
+  width: fit-content;
+  margin-top: 7px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.notification-copy .forecast-result.matched {
+  background: #e8f7ee;
+  color: #137333;
+}
+
+.notification-copy .forecast-result.differed {
+  background: #fff3e0;
+  color: #9a5a00;
+}
+
+.notification-list .round-action {
+  display: grid;
+  place-items: center;
+  border: 0;
+  text-decoration: none;
+}
+
 .chat-composer {
   display: grid;
   gap: 12px;
@@ -2000,6 +2181,20 @@ button {
 }
 
 @media (max-width: 520px) {
+  .notification-controls-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .notification-controls-head label {
+    flex-basis: auto;
+  }
+
+  .notification-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .representative-row {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2621,6 +2816,43 @@ a.vote-record-row:hover strong {
   border-color: #2f3336;
   background: #000;
   color: #e7e9ea;
+}
+
+:root[data-theme="dark"] .nav-icon-badge b {
+  border-color: #000;
+}
+
+:root[data-theme="dark"] :is(.notification-controls, .notification-row) {
+  border-color: #2f3336;
+  background: #000;
+}
+
+:root[data-theme="dark"] .notification-row.unread {
+  background: #07141d;
+}
+
+:root[data-theme="dark"] :is(.notification-controls-head span, .notification-controls-head label, .notification-state) {
+  color: #8b98a5;
+}
+
+:root[data-theme="dark"] :is(.notification-controls-head strong, .notification-toggles label) {
+  color: #e7e9ea;
+}
+
+:root[data-theme="dark"] .notification-controls select {
+  border-color: #536471;
+  background: #16181c;
+  color: #e7e9ea;
+}
+
+:root[data-theme="dark"] .notification-copy .forecast-result.matched {
+  background: #0c2f1b;
+  color: #7ee2a8;
+}
+
+:root[data-theme="dark"] .notification-copy .forecast-result.differed {
+  background: #3a2608;
+  color: #ffcf70;
 }
 
 :root[data-theme="light"] {

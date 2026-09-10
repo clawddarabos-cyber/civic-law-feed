@@ -148,6 +148,31 @@ create table if not exists public.reminders (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.notification_preferences (
+  profile_id uuid primary key references public.profiles(id) on delete cascade,
+  frequency text not null default 'immediate' check (frequency in ('immediate', 'daily', 'weekly', 'off')),
+  representative_votes boolean not null default true,
+  bill_updates boolean not null default true,
+  forecast_results boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  event_key text not null,
+  event_type text not null check (event_type in ('representative_vote', 'bill_update', 'forecast_result')),
+  civic_item_id text references public.civic_items(id) on delete cascade,
+  official_id text references public.officials(id) on delete set null,
+  title text not null,
+  body text not null,
+  source_url text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  read_at timestamptz,
+  unique (profile_id, event_key)
+);
+
 create table if not exists public.comments (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references public.profiles(id) on delete set null,
@@ -185,6 +210,8 @@ create index if not exists comments_civic_item_idx on public.comments(civic_item
 create index if not exists roll_calls_vote_date_idx on public.roll_calls(vote_date desc);
 create index if not exists official_votes_official_idx on public.official_votes(official_id, roll_call_id);
 create unique index if not exists reminders_profile_item_idx on public.reminders(profile_id, civic_item_id);
+create index if not exists notifications_profile_created_idx on public.notifications(profile_id, created_at desc);
+create index if not exists notifications_profile_unread_idx on public.notifications(profile_id, read_at, created_at desc);
 
 alter table public.profiles enable row level security;
 alter table public.sources enable row level security;
@@ -198,6 +225,8 @@ alter table public.user_votes enable row level security;
 alter table public.saved_items enable row level security;
 alter table public.follows enable row level security;
 alter table public.reminders enable row level security;
+alter table public.notification_preferences enable row level security;
+alter table public.notifications enable row level security;
 alter table public.comments enable row level security;
 alter table public.source_reports enable row level security;
 alter table public.claim_requests enable row level security;
@@ -210,13 +239,15 @@ grant select on public.civic_item_officials to anon, authenticated;
 grant select on public.roll_calls to anon, authenticated;
 grant select on public.official_votes to anon, authenticated;
 grant select on public.source_checks to anon, authenticated;
-revoke all on public.profiles, public.user_votes, public.saved_items, public.follows, public.reminders from anon;
+revoke all on public.profiles, public.user_votes, public.saved_items, public.follows, public.reminders, public.notification_preferences, public.notifications from anon;
 grant select, insert, update on public.profiles to authenticated;
 revoke insert, update, delete on public.civic_items from anon, authenticated;
 grant select, insert, update, delete on public.user_votes to authenticated;
 grant select, insert, delete on public.saved_items to authenticated;
 grant select, insert, delete on public.follows to authenticated;
 grant select, insert, update, delete on public.reminders to authenticated;
+grant select, insert, update on public.notification_preferences to authenticated;
+grant select, update, delete on public.notifications to authenticated;
 grant select on public.comments to anon, authenticated;
 grant insert on public.comments to authenticated;
 grant insert on public.source_reports to authenticated;
@@ -282,6 +313,22 @@ drop policy if exists "Guest reminders can be synced" on public.reminders;
 drop policy if exists "Users manage their reminders" on public.reminders;
 create policy "Users manage their reminders" on public.reminders for all to authenticated
   using (profile_id = auth.uid()) with check (profile_id = auth.uid() and status in ('active', 'dismissed', 'completed'));
+
+drop policy if exists "Users manage notification preferences" on public.notification_preferences;
+create policy "Users manage notification preferences" on public.notification_preferences for all to authenticated
+  using (profile_id = auth.uid()) with check (profile_id = auth.uid());
+
+drop policy if exists "Users read their notifications" on public.notifications;
+create policy "Users read their notifications" on public.notifications for select to authenticated
+  using (profile_id = auth.uid());
+
+drop policy if exists "Users update their notifications" on public.notifications;
+create policy "Users update their notifications" on public.notifications for update to authenticated
+  using (profile_id = auth.uid()) with check (profile_id = auth.uid());
+
+drop policy if exists "Users delete their notifications" on public.notifications;
+create policy "Users delete their notifications" on public.notifications for delete to authenticated
+  using (profile_id = auth.uid());
 
 drop policy if exists "Public can read approved comments" on public.comments;
 create policy "Public can read approved comments"

@@ -42,15 +42,19 @@ import {
   cloudConfigured,
   createComment,
   createSourceReport,
+  defaultNotificationPreferences,
   getAuthSession,
   loadCloudActivity,
   loadOfficialVoteHistory,
+  loadPersonalizedNotifications,
   loadPublicCivicData,
+  markNotificationRead,
   sendSignInLink,
   signOutUser,
   subscribeToAuth,
   syncFollowTarget,
   syncLocalSnapshot,
+  syncNotificationPreferences,
   syncPreferences,
   syncReminder,
   syncSavedItem,
@@ -571,6 +575,9 @@ function App() {
   const [authEmail, setAuthEmail] = useState('');
   const [authStatus, setAuthStatus] = useState(cloudConfigured ? 'Checking account…' : 'Cloud project not connected');
   const [cloudReady, setCloudReady] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationPreferences, setNotificationPreferences] = useState(defaultNotificationPreferences);
+  const [notificationStatus, setNotificationStatus] = useState('idle');
   const activitySnapshotRef = useRef(null);
   const hydratingUserRef = useRef(null);
   const historyRequestsRef = useRef(new Set());
@@ -600,6 +607,9 @@ function App() {
     if (publicData.mode !== 'live') return;
     const requestedIds = new Set();
     if (activeProfileId) requestedIds.add(activeProfileId);
+    for (const notification of notifications) {
+      if (notification.official_id) requestedIds.add(notification.official_id);
+    }
     if (jurisdiction.stateCode) {
       for (const profile of officialProfiles) {
         const matchesFederalSenate = profile.chamber === 'U.S. Senate' && profile.state === jurisdiction.stateCode;
@@ -627,7 +637,7 @@ function App() {
         })
         .catch(() => historyRequestsRef.current.delete(officialId));
     }
-  }, [activeProfileId, jurisdiction.congressionalDistrict, jurisdiction.stateCode, jurisdiction.stateHouseDistrict, jurisdiction.stateSenateDistrict, officialProfiles, publicData.mode]);
+  }, [activeProfileId, jurisdiction.congressionalDistrict, jurisdiction.stateCode, jurisdiction.stateHouseDistrict, jurisdiction.stateSenateDistrict, notifications, officialProfiles, publicData.mode]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -643,6 +653,8 @@ function App() {
         hydratingUserRef.current = null;
         setCloudReady(false);
         setAuthStatus(cloudConfigured ? 'Not signed in' : 'Cloud project not connected');
+        setNotifications([]);
+        setNotificationPreferences(defaultNotificationPreferences);
         return;
       }
       if (hydratingUserRef.current === session.user.id) return;
@@ -658,6 +670,16 @@ function App() {
         setReminders((current) => new Set([...cloud.reminders, ...current]));
         if (cloud.profile?.jurisdiction_data?.stateCode) setJurisdiction(cloud.profile.jurisdiction_data);
         if (['light', 'dark'].includes(cloud.profile?.theme_preference)) setTheme(cloud.profile.theme_preference);
+        try {
+          const inbox = await loadPersonalizedNotifications();
+          if (active) {
+            setNotifications(inbox.notifications);
+            setNotificationPreferences(inbox.preferences);
+            setNotificationStatus('ready');
+          }
+        } catch {
+          if (active) setNotificationStatus('error');
+        }
         setCloudReady(true);
         setAuthStatus('Synced');
       } catch {
@@ -851,7 +873,50 @@ function App() {
     clearDetailRoute();
     setActiveSection(section);
     if (section === 'explore') setSearchOpen(true);
+    if (section === 'notifications' && authSession) refreshNotifications();
     window.scrollTo(0, 0);
+  }
+
+  async function refreshNotifications() {
+    setNotificationStatus('loading');
+    try {
+      const inbox = await loadPersonalizedNotifications();
+      setNotifications(inbox.notifications);
+      setNotificationPreferences(inbox.preferences);
+      setNotificationStatus('ready');
+    } catch {
+      setNotificationStatus('error');
+    }
+  }
+
+  async function openNotification(notification) {
+    const readAt = notification.read_at || new Date().toISOString();
+    setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, read_at: readAt } : item));
+    markNotificationRead(notification.id).catch(() => setNotificationStatus('error'));
+    if (notification.civic_item_id && bills.some((bill) => bill.id === notification.civic_item_id)) {
+      openOverview(notification.civic_item_id);
+    } else if (notification.source_url) {
+      window.open(notification.source_url, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  async function markAllNotificationsRead() {
+    const readAt = new Date().toISOString();
+    setNotifications((current) => current.map((item) => ({ ...item, read_at: item.read_at || readAt })));
+    try {
+      await markNotificationRead();
+    } catch {
+      setNotificationStatus('error');
+    }
+  }
+
+  function updateNotificationPreference(key, value) {
+    const next = { ...notificationPreferences, [key]: value };
+    setNotificationPreferences(next);
+    syncNotificationPreferences(next).catch(() => {
+      setNotificationStatus('error');
+      showNotice('Alert preference was not synced');
+    });
   }
 
   function showNotice(message) {
@@ -1101,7 +1166,10 @@ function App() {
           >
             <Search size={24} /><span>Explore</span>
           </button>
-          <button className={activeSection === 'notifications' ? 'nav-item active' : 'nav-item'} aria-label="Notifications" onClick={() => openSection('notifications')}><Bell size={24} /><span>Notifications</span></button>
+          <button className={activeSection === 'notifications' ? 'nav-item active' : 'nav-item'} aria-label="Notifications" onClick={() => openSection('notifications')}>
+            <span className="nav-icon-badge"><Bell size={24} />{!!notifications.filter((item) => !item.read_at).length && <b>{Math.min(notifications.filter((item) => !item.read_at).length, 99)}</b>}</span>
+            <span>Notifications</span>
+          </button>
           <button
             className={activeSection === 'representatives' ? 'nav-item active' : 'nav-item'}
             aria-label="My representatives"
@@ -1189,12 +1257,16 @@ function App() {
           />
         ) : activeSection === 'notifications' ? (
           <NotificationsPage
+            signedIn={Boolean(authSession)}
+            notifications={notifications}
             bills={bills}
-            saved={saved}
-            followed={followed}
-            onSave={toggleSaved}
-            onFollow={toggleFollow}
-            onOpenOverview={openOverview}
+            profiles={officialProfiles}
+            preferences={notificationPreferences}
+            status={notificationStatus}
+            onOpenNotification={openNotification}
+            onMarkAllRead={markAllNotificationsRead}
+            onPreferenceChange={updateNotificationPreference}
+            onOpenSettings={() => openSection('more')}
           />
         ) : activeSection === 'follow' ? (
           <FollowPage
@@ -1825,42 +1897,84 @@ function ExplorePage({ query, onQueryChange, activeFilter, onFilterChange, visib
   );
 }
 
-function NotificationsPage({ bills, saved, followed, onSave, onFollow, onOpenOverview }) {
-  const notifications = bills.slice(0, 120).map((bill, index) => ({
-    id: `notification-${bill.id}`,
-    bill,
-    label: index % 2 === 0 ? 'Status update' : 'Official source update',
-    text: `${bill.status}: ${bill.title}`
-  }));
-
+function NotificationsPage({ signedIn, notifications, bills, profiles, preferences, status, onOpenNotification, onMarkAllRead, onPreferenceChange, onOpenSettings }) {
+  const [filter, setFilter] = useState('all');
+  const unreadCount = notifications.filter((notification) => !notification.read_at).length;
+  const visibleNotifications = filter === 'unread' ? notifications.filter((notification) => !notification.read_at) : notifications;
   return (
     <section className="view-page" aria-label="Notifications">
-      <PageHeader title="Notifications" subtitle="Bill movement, source updates, and activity from followed items." />
-      <div className="result-list">
-        {notifications.map(({ id, bill, label, text }) => (
-          <article className="compact-row" key={id}>
-            <div className="notification-icon"><Bell size={18} /></div>
+      <PageHeader title="Notifications" subtitle="Verified activity from your representatives and followed legislation." />
+      {!signedIn ? (
+        <EmptyState title="Sign in for personalized alerts" body="Your representative districts, saves, follows, and read status must be connected to your private account." action="Open account settings" onAction={onOpenSettings} />
+      ) : (
+        <>
+          <section className="notification-controls" aria-label="Notification preferences">
+            <div className="notification-controls-head">
+              <div><strong>Alert preferences</strong><span>In-app alerts are active now. Email delivery will be added after the alert workflow is proven.</span></div>
+              <label>
+                Delivery
+                <select value={preferences.frequency} onChange={(event) => onPreferenceChange('frequency', event.target.value)}>
+                  <option value="immediate">After each sync</option>
+                  <option value="daily">Daily digest</option>
+                  <option value="weekly">Weekly digest</option>
+                  <option value="off">Off</option>
+                </select>
+              </label>
+            </div>
+            <div className="notification-toggles">
+              <label><input type="checkbox" checked={preferences.representative_votes} onChange={(event) => onPreferenceChange('representative_votes', event.target.checked)} /> Representative votes</label>
+              <label><input type="checkbox" checked={preferences.bill_updates} onChange={(event) => onPreferenceChange('bill_updates', event.target.checked)} /> Followed bill updates</label>
+              <label><input type="checkbox" checked={preferences.forecast_results} onChange={(event) => onPreferenceChange('forecast_results', event.target.checked)} /> Forecast comparisons</label>
+            </div>
+          </section>
+          <div className="notification-toolbar">
             <div>
-              <span>{label} · {bill.jurisdiction}</span>
-              <strong>{text}</strong>
-              <p>{bill.sourceName} is linked as the official source.</p>
+              <button className={filter === 'all' ? 'small-pill active' : 'small-pill'} onClick={() => setFilter('all')}>All</button>
+              <button className={filter === 'unread' ? 'small-pill active' : 'small-pill'} onClick={() => setFilter('unread')}>Unread {unreadCount ? `(${unreadCount})` : ''}</button>
             </div>
-            <div className="row-actions">
-              <button className={saved.has(bill.id) ? 'small-pill active' : 'small-pill'} onClick={() => onSave(bill.id)}>
-                {saved.has(bill.id) ? 'Saved' : 'Save'}
-              </button>
-              <button className={followed.has(bill.sourceName) ? 'small-pill active' : 'small-pill'} onClick={() => onFollow(bill.sourceName)}>
-                {followed.has(bill.sourceName) ? 'Following' : 'Follow'}
-              </button>
-              <button className="round-action" onClick={() => onOpenOverview(bill.id)} aria-label={`Open ${bill.title}`}>
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+            {!!unreadCount && <button className="text-action" onClick={onMarkAllRead}>Mark all read</button>}
+          </div>
+          {status === 'loading' && <div className="notification-state">Refreshing verified alerts…</div>}
+          {status === 'error' && <div className="notification-state error">Alerts could not be refreshed. Existing results remain visible.</div>}
+          <div className="result-list notification-list">
+            {visibleNotifications.map((notification) => {
+              const profile = profiles.find((item) => item.id === notification.official_id);
+              const bill = bills.find((item) => item.id === notification.civic_item_id);
+              const forecast = profile && bill && notification.event_type === 'representative_vote'
+                ? buildBillVoteForecast(profile, bill, bills)
+                : null;
+              const actualVote = notification.metadata?.vote;
+              const forecastComparison = preferences.forecast_results && forecast?.vote && actualVote
+                ? forecast.vote === actualVote ? 'Related-vote outlook matched' : 'Related-vote outlook differed'
+                : null;
+              return (
+                <article className={notification.read_at ? 'compact-row notification-row' : 'compact-row notification-row unread'} key={notification.id}>
+                  <div className="notification-icon">{notification.event_type === 'representative_vote' ? <Users size={18} /> : <Bell size={18} />}</div>
+                  <button className="notification-copy" onClick={() => onOpenNotification(notification)}>
+                    <span>{notification.event_type === 'representative_vote' ? 'Representative vote' : notification.event_type === 'forecast_result' ? 'Forecast result' : 'Bill update'} · {formatNotificationTime(notification.created_at)}</span>
+                    <strong>{notification.title}</strong>
+                    <p>{notification.body}</p>
+                    {forecastComparison && <small className={forecast.vote === actualVote ? 'forecast-result matched' : 'forecast-result differed'}>{forecastComparison}</small>}
+                  </button>
+                  <div className="row-actions">
+                    {notification.source_url && <a className="round-action" href={notification.source_url} target="_blank" rel="noreferrer" aria-label="Open official source"><ExternalLink size={16} /></a>}
+                    <button className="round-action" onClick={() => onOpenNotification(notification)} aria-label={`Open ${notification.title}`}><ChevronRight size={18} /></button>
+                  </div>
+                </article>
+              );
+            })}
+            {!visibleNotifications.length && <EmptyState title={filter === 'unread' ? 'No unread alerts' : 'No alerts yet'} body={filter === 'unread' ? 'You are caught up.' : 'New representative votes and changes to followed legislation will appear here after the next official-source sync.'} />}
+          </div>
+        </>
+      )}
     </section>
   );
+}
+
+function formatNotificationTime(value) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return 'Time unavailable';
+  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
 function FollowPage({ bills, followed, saved, onFollow, onOpenOverview }) {

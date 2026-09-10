@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFile } from 'node:fs/promises';
+import { buildNotificationRows } from './notification-engine.mjs';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,10 +21,23 @@ async function readJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
 }
 
-async function upsertBatches(table, rows, onConflict, size = 500) {
+async function upsertBatches(table, rows, onConflict, size = 500, ignoreDuplicates = false) {
   for (let index = 0; index < rows.length; index += size) {
-    const { error } = await supabase.from(table).upsert(rows.slice(index, index + size), { onConflict });
+    const { error } = await supabase.from(table).upsert(rows.slice(index, index + size), { onConflict, ignoreDuplicates });
     if (error) throw new Error(`${table}: ${error.message}`);
+  }
+}
+
+async function fetchAllRows(table, columns, configureQuery) {
+  const rows = [];
+  const size = 1000;
+  for (let from = 0; ; from += size) {
+    let query = supabase.from(table).select(columns).range(from, from + size - 1);
+    if (configureQuery) query = configureQuery(query);
+    const { data, error } = await query;
+    if (error) throw new Error(`${table}: ${error.message}`);
+    rows.push(...data);
+    if (data.length < size) return rows;
   }
 }
 
@@ -366,11 +380,41 @@ const sources = [
   }
 ];
 
+const [existingRollCallRows, existingItemRows] = await Promise.all([
+  fetchAllRows('roll_calls', 'id'),
+  fetchAllRows('civic_items', 'id,status,latest_action_at')
+]);
+const existingRollCallIds = new Set(existingRollCallRows.map((row) => row.id));
+const previousItems = new Map(existingItemRows.map((row) => [row.id, row]));
+
 await upsertBatches('sources', sources, 'id');
 await upsertBatches('officials', [...officialMap.values()], 'id');
 await upsertBatches('civic_items', [...federalItems, ...federalVoteItems, ...floridaItems, ...floridaHouseItems], 'id');
 await upsertBatches('roll_calls', rollCalls, 'id');
 await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id', 2000);
+
+const [profiles, follows, savedItems, reminders, notificationPreferences] = await Promise.all([
+  fetchAllRows('profiles', 'id,home_state,congressional_district,state_senate_district,state_house_district'),
+  fetchAllRows('follows', 'profile_id,target_type,target_id'),
+  fetchAllRows('saved_items', 'profile_id,civic_item_id'),
+  fetchAllRows('reminders', 'profile_id,civic_item_id,status', (query) => query.eq('status', 'active')),
+  fetchAllRows('notification_preferences', 'profile_id,frequency,representative_votes,bill_updates,forecast_results')
+]);
+const notificationRows = buildNotificationRows({
+  profiles,
+  officials: [...officialMap.values()],
+  civicItems: [...federalItems, ...federalVoteItems, ...floridaItems, ...floridaHouseItems],
+  rollCalls,
+  officialVotes,
+  existingRollCallIds,
+  previousItems,
+  follows,
+  savedItems,
+  reminders,
+  preferences: notificationPreferences,
+  createdAt: new Date().toISOString()
+});
+await upsertBatches('notifications', notificationRows, 'profile_id,event_key', 500, true);
 
 const completedAt = new Date().toISOString();
 const { error: sourceCheckError } = await supabase.from('source_checks').insert(sources.map((source) => ({
@@ -392,6 +436,7 @@ console.log(JSON.stringify({
   civicItems: federalItems.length + federalVoteItems.length + floridaItems.length + floridaHouseItems.length,
   rollCalls: rollCalls.length,
   officialVotes: officialVotes.length,
+  notificationsCreated: notificationRows.length,
   historicalOfficials,
   skippedVotes: 0
 }, null, 2));

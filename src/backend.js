@@ -6,6 +6,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const backendMode = supabaseUrl && supabaseAnonKey ? 'supabase' : 'local';
 export const backendLabel = backendMode === 'supabase' ? 'Cloud sync available' : 'Local guest session';
 export const cloudConfigured = backendMode === 'supabase';
+export const defaultNotificationPreferences = {
+  frequency: 'immediate',
+  representative_votes: true,
+  bill_updates: true,
+  forecast_results: true
+};
 
 const supabase = cloudConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
@@ -157,6 +163,56 @@ export async function loadCloudActivity() {
     followed: follows.data.map((item) => item.target_id),
     reminders: reminders.data.map((item) => item.civic_item_id)
   };
+}
+
+export async function loadPersonalizedNotifications() {
+  const user = await authenticatedUser();
+  if (!user) return { notifications: [], preferences: defaultNotificationPreferences };
+  await ensureProfile(user);
+  const [notifications, preferences] = await Promise.all([
+    supabase
+      .from('notifications')
+      .select('id,event_key,event_type,civic_item_id,official_id,title,body,source_url,metadata,created_at,read_at')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(100),
+    supabase
+      .from('notification_preferences')
+      .select('frequency,representative_votes,bill_updates,forecast_results')
+      .eq('profile_id', user.id)
+      .maybeSingle()
+  ]);
+  if (notifications.error) throw notifications.error;
+  if (preferences.error) throw preferences.error;
+  return {
+    notifications: notifications.data || [],
+    preferences: { ...defaultNotificationPreferences, ...(preferences.data || {}) }
+  };
+}
+
+export async function syncNotificationPreferences(preferences) {
+  const user = await authenticatedUser();
+  if (!user) return { mode: 'local' };
+  await ensureProfile(user);
+  const row = {
+    profile_id: user.id,
+    ...defaultNotificationPreferences,
+    ...preferences,
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await supabase.from('notification_preferences').upsert(row, { onConflict: 'profile_id' });
+  if (error) throw error;
+  return { mode: 'supabase' };
+}
+
+export async function markNotificationRead(notificationId) {
+  const user = await authenticatedUser();
+  if (!user) return { mode: 'local' };
+  let query = supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('profile_id', user.id).is('read_at', null);
+  if (notificationId) query = query.eq('id', notificationId);
+  const { error } = await query;
+  if (error) throw error;
+  return { mode: 'supabase' };
 }
 
 export async function syncLocalSnapshot(snapshot, civicItems) {
