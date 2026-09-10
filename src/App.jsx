@@ -222,6 +222,8 @@ const officialSourceRegistry = [
     level: 'Federal',
     sources: [
       { name: 'Congress.gov', url: 'https://www.congress.gov/' },
+      { name: 'U.S. House Clerk roll calls', url: 'https://clerk.house.gov/Votes' },
+      { name: 'U.S. Senate roll calls', url: 'https://www.senate.gov/legislative/votes_new.htm' },
       { name: 'GovInfo', url: 'https://www.govinfo.gov/' },
       { name: 'Federal Register', url: 'https://www.federalregister.gov/' },
       { name: 'Regulations.gov', url: 'https://www.regulations.gov/' },

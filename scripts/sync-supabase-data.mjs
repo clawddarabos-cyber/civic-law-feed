@@ -7,11 +7,12 @@ if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required.');
 }
 
-const [floridaData, floridaHouseData, directoryData, federalData] = await Promise.all([
+const [floridaData, floridaHouseData, directoryData, federalData, federalVoteData] = await Promise.all([
   readJson('data/florida-official-data.json'),
   readJson('data/florida-house-official-data.json'),
   readJson('data/representative-directory.json'),
-  readJson('data/federal-civic-items.json')
+  readJson('data/federal-civic-items.json'),
+  readJson('data/federal-votes.json')
 ]);
 const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
 
@@ -27,6 +28,7 @@ async function upsertBatches(table, rows, onConflict, size = 500) {
 }
 
 function isoDate(value) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
   const [month, day, year] = String(value).split('/').map(Number);
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
@@ -79,6 +81,23 @@ const directoryOfficials = directoryData.officials.map((official) => ({
   updated_at: directoryData.generatedAt
 }));
 const officialMap = new Map([...directoryOfficials, ...floridaOfficials, ...floridaHouseOfficials].map((official) => [official.id, official]));
+for (const official of federalVoteData.historicalOfficials || []) {
+  const chamber = official.office.startsWith('U.S. House') ? 'U.S. House' : 'U.S. Senate';
+  officialMap.set(official.id, {
+    id: official.id,
+    source_id: chamber === 'U.S. House' ? 'us-house-clerk' : 'us-senate-roll-calls',
+    name: official.name,
+    office: official.office,
+    jurisdiction: 'Federal',
+    party: official.party,
+    state: official.state,
+    district: null,
+    source_url: official.sourceUrl,
+    claim_status: 'inactive',
+    imported_metadata: { chamber, lisMemberId: official.lisMemberId || null, historical: true },
+    updated_at: federalVoteData.generatedAt
+  });
+}
 
 const floridaItems = floridaData.bills.map((bill) => ({
   id: bill.id,
@@ -160,9 +179,14 @@ const federalItems = federalData.items.map((bill) => ({
   imported_metadata: bill.imported || {}
 }));
 
-const rollCalls = [...floridaData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaData.generatedAt })), ...floridaHouseData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaHouseData.generatedAt }))].map((rollCall) => ({
+const knownCivicItemIds = new Set([...federalItems, ...floridaItems, ...floridaHouseItems].map((item) => item.id));
+const rollCalls = [
+  ...floridaData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaData.generatedAt })),
+  ...floridaHouseData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: floridaHouseData.generatedAt })),
+  ...federalVoteData.rollCalls.map((rollCall) => ({ ...rollCall, datasetGeneratedAt: federalVoteData.generatedAt }))
+].map((rollCall) => ({
   id: rollCall.id,
-  civic_item_id: rollCall.billId,
+  civic_item_id: knownCivicItemIds.has(rollCall.billId) ? rollCall.billId : null,
   bill_number: rollCall.billNumber,
   title: rollCall.billTitle,
   chamber: rollCall.chamber,
@@ -218,6 +242,16 @@ for (const rollCall of floridaHouseData.rollCalls) {
     });
   }
 }
+for (const rollCall of federalVoteData.rollCalls) {
+  for (const memberVote of rollCall.memberVotes || []) {
+    officialVotes.push({
+      roll_call_id: rollCall.id,
+      official_id: memberVote.officialId,
+      vote: memberVote.vote,
+      source_url: rollCall.sourceUrl
+    });
+  }
+}
 
 const sources = [
   {
@@ -263,6 +297,28 @@ const sources = [
     source_type: 'official_directory',
     last_checked_at: new Date().toISOString(),
     freshness_status: 'current'
+  },
+  {
+    id: 'us-house-clerk',
+    name: 'U.S. House Clerk',
+    level: 'Federal',
+    jurisdiction: 'United States',
+    homepage_url: 'https://clerk.house.gov/Votes',
+    api_url: null,
+    source_type: 'official_roll_calls',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
+  },
+  {
+    id: 'us-senate-roll-calls',
+    name: 'U.S. Senate Roll Call Votes',
+    level: 'Federal',
+    jurisdiction: 'United States',
+    homepage_url: 'https://www.senate.gov/legislative/votes_new.htm',
+    api_url: null,
+    source_type: 'official_roll_calls',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
   }
 ];
 
@@ -270,7 +326,7 @@ await upsertBatches('sources', sources, 'id');
 await upsertBatches('officials', [...officialMap.values()], 'id');
 await upsertBatches('civic_items', [...federalItems, ...floridaItems, ...floridaHouseItems], 'id');
 await upsertBatches('roll_calls', rollCalls, 'id');
-await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id');
+await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id', 2000);
 
 const completedAt = new Date().toISOString();
 const { error: sourceCheckError } = await supabase.from('source_checks').insert(sources.map((source) => ({

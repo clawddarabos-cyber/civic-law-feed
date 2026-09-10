@@ -7,6 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "import:federal": "node scripts/import-federal-civic-items.mjs",
     "import:federal-officials": "node scripts/import-federal-official-data.mjs",
+    "import:federal-votes": "python3 scripts/import-federal-votes.py",
     "import:representatives": "node scripts/import-representative-directory.mjs",
     "import:florida": "node scripts/import-florida-official-data.mjs && python3 scripts/enrich-florida-rollcall-members.py && python3 scripts/enrich-florida-floor-votes.py",
     "import:florida-house": "python3 scripts/import-florida-house-data.py",

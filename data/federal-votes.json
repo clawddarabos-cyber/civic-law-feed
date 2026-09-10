@@ -1,0 +1,22 @@
+{
+  "generatedAt": null,
+  "congress": 119,
+  "coverage": {
+    "startDate": null,
+    "endDate": null
+  },
+  "sources": {
+    "usHouse": "https://clerk.house.gov/Votes",
+    "usSenate": "https://www.senate.gov/legislative/votes_new.htm"
+  },
+  "counts": {
+    "usHouseRollCalls": 0,
+    "usSenateRollCalls": 0,
+    "rollCalls": 0,
+    "memberVotes": 0,
+    "historicalOfficials": 0,
+    "validationMismatches": 0
+  },
+  "historicalOfficials": [],
+  "rollCalls": []
+}
