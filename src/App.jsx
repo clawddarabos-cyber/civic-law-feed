@@ -44,6 +44,7 @@ import {
   createSourceReport,
   getAuthSession,
   loadCloudActivity,
+  loadOfficialVoteHistory,
   loadPublicCivicData,
   sendSignInLink,
   signOutUser,
@@ -438,7 +439,7 @@ function normalizeCloudPublicData(data) {
       civicItems: cloudBills.length,
       officials: cloudProfiles.length,
       rollCalls: data.rollCalls.length,
-      officialVotes: data.officialVotes.length,
+      officialVotes: data.officialVoteCount ?? data.officialVotes.length,
       usHouse: cloudProfiles.filter((profile) => profile.chamber === 'U.S. House').length,
       usSenate: cloudProfiles.filter((profile) => profile.chamber === 'U.S. Senate').length,
       floridaSenate: cloudProfiles.filter((profile) => profile.chamber === 'Florida Senate' && profile.status !== 'Historical official record').length,
@@ -470,6 +471,33 @@ function formatCloudDate(value) {
   return Number.isFinite(date.getTime())
     ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : value;
+}
+
+function normalizeOfficialVoteHistory(rows) {
+  return rows.flatMap((row) => {
+    const rollCall = Array.isArray(row.roll_calls) ? row.roll_calls[0] : row.roll_calls;
+    if (!rollCall) return [];
+    return [{
+      id: rollCall.id,
+      billId: rollCall.civic_item_id,
+      title: `${rollCall.bill_number}: ${rollCall.title}`,
+      year: formatCloudDate(rollCall.vote_date),
+      topic: `${rollCall.chamber} vote`,
+      vote: row.vote,
+      sourceUrl: row.source_url || rollCall.source_url,
+      sortDate: new Date(`${rollCall.vote_date}T00:00:00`).getTime()
+    }];
+  }).sort((left, right) => right.sortDate - left.sortDate);
+}
+
+function archiveWindowForRecords(records) {
+  const sorted = records.map((record) => record.sortDate).filter(Number.isFinite).sort((left, right) => left - right);
+  return {
+    startDate: sorted.length ? new Date(sorted[0]).toISOString().slice(0, 10) : null,
+    endDate: sorted.length ? new Date(sorted.at(-1)).toISOString().slice(0, 10) : 'Present',
+    label: 'Validated cloud archive',
+    note: 'Member-level votes loaded on demand from validated official roll calls in Supabase.'
+  };
 }
 
 const fallbackPublicData = {
@@ -542,6 +570,7 @@ function App() {
   const [cloudReady, setCloudReady] = useState(false);
   const activitySnapshotRef = useRef(null);
   const hydratingUserRef = useRef(null);
+  const historyRequestsRef = useRef(new Set());
   activitySnapshotRef.current = { votes, saved: [...saved], followed: [...followed], reminders: [...reminders], jurisdiction, theme };
 
   useEffect(() => {
@@ -563,6 +592,39 @@ function App() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (publicData.mode !== 'live') return;
+    const requestedIds = new Set();
+    if (activeProfileId) requestedIds.add(activeProfileId);
+    if (jurisdiction.stateCode) {
+      for (const profile of officialProfiles) {
+        const matchesFederalSenate = profile.chamber === 'U.S. Senate' && profile.state === jurisdiction.stateCode;
+        const matchesFederalHouse = profile.chamber === 'U.S. House' && profile.state === jurisdiction.stateCode && Number(profile.district) === Number(jurisdiction.congressionalDistrict ?? 0);
+        const matchesFloridaSenate = profile.chamber === 'Florida Senate' && jurisdiction.stateCode === 'FL' && Number(profile.district) === Number(jurisdiction.stateSenateDistrict);
+        const matchesFloridaHouse = profile.chamber === 'Florida House' && jurisdiction.stateCode === 'FL' && Number(profile.district) === Number(jurisdiction.stateHouseDistrict);
+        if (matchesFederalSenate || matchesFederalHouse || matchesFloridaSenate || matchesFloridaHouse) requestedIds.add(profile.id);
+      }
+    }
+    for (const officialId of requestedIds) {
+      const profile = officialProfiles.find((item) => item.id === officialId);
+      if (!profile || profile.archive.length || historyRequestsRef.current.has(officialId)) continue;
+      historyRequestsRef.current.add(officialId);
+      loadOfficialVoteHistory(officialId)
+        .then((rows) => {
+          const archive = normalizeOfficialVoteHistory(rows);
+          setPublicData((current) => ({
+            ...current,
+            officialProfiles: current.officialProfiles.map((item) => item.id === officialId ? {
+              ...item,
+              archive,
+              archiveWindow: archive.length ? archiveWindowForRecords(archive) : item.archiveWindow
+            } : item)
+          }));
+        })
+        .catch(() => historyRequestsRef.current.delete(officialId));
+    }
+  }, [activeProfileId, jurisdiction.congressionalDistrict, jurisdiction.stateCode, jurisdiction.stateHouseDistrict, jurisdiction.stateSenateDistrict, officialProfiles, publicData.mode]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;

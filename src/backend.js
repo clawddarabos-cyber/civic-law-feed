@@ -50,7 +50,7 @@ export function loadPublicCivicData() {
 }
 
 async function loadPublicCivicDataFromSupabase() {
-  const [civicItems, officials, rollCalls, officialVotes, sourceChecksResult] = await Promise.all([
+  const [civicItems, officials, rollCalls, officialVoteCountResult, sourceChecksResult] = await Promise.all([
     fetchAllPublicRows(
       'civic_items',
       'id,title,chamber,jurisdiction,level,status,category,summary,ai_summary,detail,source_name,source_url,official_text_url,introduced_at,latest_action_at,updated_at,imported_at,imported_metadata,image_url,pros,cons,sponsors,committees,actions',
@@ -66,14 +66,25 @@ async function loadPublicCivicDataFromSupabase() {
       'id,civic_item_id,bill_number,title,chamber,vote_date,yea_count,nay_count,source_url,validation_status,imported_at',
       (query) => query.eq('validation_status', 'validated').order('vote_date', { ascending: false })
     ),
-    fetchAllPublicRows('official_votes', 'roll_call_id,official_id,vote,source_url'),
+    supabase.from('official_votes').select('*', { count: 'exact', head: true }),
     supabase.from('source_checks').select('source_id,checked_at,status,message,raw_metadata').order('checked_at', { ascending: false }).limit(25)
   ]);
   if (sourceChecksResult.error) throw sourceChecksResult.error;
+  if (officialVoteCountResult.error) throw officialVoteCountResult.error;
   const sourceChecks = sourceChecksResult.data;
   if (!civicItems.length || !officials.length) throw new Error('Cloud civic data is empty.');
   const latestCheck = sourceChecks.find((check) => check.status === 'completed') || sourceChecks[0] || null;
-  return { civicItems, officials, rollCalls, officialVotes, sourceChecks, latestCheck };
+  return { civicItems, officials, rollCalls, officialVotes: [], officialVoteCount: officialVoteCountResult.count || 0, sourceChecks, latestCheck };
+}
+
+export async function loadOfficialVoteHistory(officialId) {
+  if (!supabase || !officialId) return [];
+  const { data, error } = await supabase
+    .from('official_votes')
+    .select('vote,source_url,roll_calls!inner(id,civic_item_id,bill_number,title,chamber,vote_date,source_url)')
+    .eq('official_id', officialId);
+  if (error) throw error;
+  return data || [];
 }
 
 async function authenticatedUser() {
