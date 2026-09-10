@@ -607,7 +607,7 @@ function App() {
     if (publicData.mode !== 'live') return;
     const requestedIds = new Set();
     if (activeProfileId) requestedIds.add(activeProfileId);
-    for (const notification of notifications) {
+    for (const notification of notifications.filter((item) => !item.read_at).slice(0, 20)) {
       if (notification.official_id) requestedIds.add(notification.official_id);
     }
     if (jurisdiction.stateCode) {
