@@ -37,6 +37,15 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Restore official-source cache
+        if: steps.configured.outputs.ready == 'true'
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: civic-source-cache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            civic-source-cache-${{ runner.os }}-
+
       - name: Install dependencies
         if: steps.configured.outputs.ready == 'true'
         run: npm ci
