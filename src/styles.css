@@ -253,6 +253,57 @@ button {
   transform: translateX(-50%);
 }
 
+.public-data-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid #eff3f4;
+  background: #f7f9f9;
+  padding: 9px 16px;
+}
+
+.public-data-status > div {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.public-data-status strong {
+  color: #0f1419;
+  font-size: 12px;
+}
+
+.public-data-status span {
+  color: #536471;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.public-data-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #00a86b;
+  box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.12);
+}
+
+.public-data-status.warning .public-data-dot {
+  background: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12);
+}
+
+.feed-limit-note {
+  border-bottom: 1px solid #eff3f4;
+  color: #536471;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .location-panel,
 .launch-onboarding,
 .controls,
@@ -2450,6 +2501,23 @@ a.vote-record-row:hover strong {
   background: rgba(0, 0, 0, 0.9);
 }
 
+:root[data-theme="dark"] .public-data-status {
+  border-color: #2f3336;
+  background: #111315;
+}
+
+:root[data-theme="dark"] .public-data-status strong {
+  color: #e7e9ea;
+}
+
+:root[data-theme="dark"] :is(.public-data-status span, .feed-limit-note) {
+  color: #8b98a5;
+}
+
+:root[data-theme="dark"] .feed-limit-note {
+  border-color: #2f3336;
+}
+
 :root[data-theme="dark"] :is(
   .left-rail, .feed-area, .detail-panel, .timeline-header, .timeline-tabs,
   .location-panel, .launch-onboarding, .controls, .composer, .bill-card,
@@ -2547,6 +2615,19 @@ a.vote-record-row:hover strong {
 
 :root[data-theme="light"] :is(.timeline-header, .timeline-tabs) {
   background: rgba(255, 255, 255, 0.94);
+}
+
+:root[data-theme="light"] .public-data-status {
+  border-color: #eff3f4;
+  background: #f7f9f9;
+}
+
+:root[data-theme="light"] .public-data-status strong {
+  color: #0f1419;
+}
+
+:root[data-theme="light"] :is(.public-data-status span, .feed-limit-note) {
+  color: #536471;
 }
 
 :root[data-theme="light"] :is(

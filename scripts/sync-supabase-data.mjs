@@ -30,8 +30,14 @@ function isoDate(value) {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
+function floridaActionDate(value) {
+  const match = String(value || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  return match ? `${match[3]}-${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}` : null;
+}
+
 const floridaOfficials = floridaData.officials.map((official) => ({
   id: official.id,
+  source_id: 'florida-senate',
   name: official.name,
   office: `${official.chamber} District ${official.district}`,
   jurisdiction: 'Florida',
@@ -45,6 +51,7 @@ const floridaOfficials = floridaData.officials.map((official) => ({
 }));
 const directoryOfficials = directoryData.officials.map((official) => ({
   id: official.id,
+  source_id: 'us-official-directory',
   name: official.name,
   office: official.office,
   jurisdiction: official.level === 'Federal' ? 'Federal' : 'Florida',
@@ -60,6 +67,7 @@ const officialMap = new Map([...directoryOfficials, ...floridaOfficials].map((of
 
 const floridaItems = floridaData.bills.map((bill) => ({
   id: bill.id,
+  source_id: 'florida-senate',
   title: bill.title,
   chamber: bill.chamber,
   jurisdiction: 'Florida',
@@ -67,14 +75,25 @@ const floridaItems = floridaData.bills.map((bill) => ({
   status: bill.lastAction,
   category: 'Legislation',
   summary: bill.title,
+  ai_summary: null,
   detail: bill.lastAction,
+  source_name: 'Florida Senate',
   source_url: bill.sourceUrl,
   official_text_url: bill.sourceUrl,
+  latest_action_at: floridaActionDate(bill.lastAction),
+  updated_at: floridaData.generatedAt,
   imported_at: floridaData.generatedAt,
+  image_url: null,
+  pros: [],
+  cons: [],
+  sponsors: [],
+  committees: [],
+  actions: [],
   imported_metadata: { number: bill.number, session: bill.session, filedBy: bill.filedBy }
 }));
 const federalItems = federalData.items.map((bill) => ({
   id: bill.id,
+  source_id: 'congress-gov',
   title: bill.title,
   chamber: bill.chamber,
   jurisdiction: bill.jurisdiction,
@@ -82,10 +101,21 @@ const federalItems = federalData.items.map((bill) => ({
   status: bill.status,
   category: bill.category,
   summary: bill.summary,
+  ai_summary: bill.aiSummary || bill.summary,
   detail: bill.detail,
+  source_name: bill.sourceName,
   source_url: bill.sourceUrl,
   official_text_url: bill.officialTextUrl,
+  introduced_at: bill.imported?.introducedDate || null,
+  latest_action_at: bill.imported?.latestActionDate || null,
+  updated_at: bill.imported?.updateDate || federalData.generatedAt,
   imported_at: federalData.generatedAt,
+  image_url: bill.image || null,
+  pros: bill.pros || [],
+  cons: bill.cons || [],
+  sponsors: bill.sponsors || [],
+  committees: bill.committees || [],
+  actions: bill.actions || [],
   imported_metadata: bill.imported || {}
 }));
 
@@ -138,10 +168,62 @@ for (const rollCall of floridaData.rollCalls) {
   }
 }
 
+const sources = [
+  {
+    id: 'congress-gov',
+    name: 'Congress.gov',
+    level: 'Federal',
+    jurisdiction: 'United States',
+    homepage_url: 'https://www.congress.gov/',
+    api_url: 'https://api.congress.gov/',
+    source_type: 'legislation_api',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
+  },
+  {
+    id: 'florida-senate',
+    name: 'Florida Senate',
+    level: 'State',
+    jurisdiction: 'Florida',
+    homepage_url: 'https://www.flsenate.gov/',
+    api_url: null,
+    source_type: 'official_legislature',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
+  },
+  {
+    id: 'us-official-directory',
+    name: 'Official congressional directories',
+    level: 'Federal',
+    jurisdiction: 'United States',
+    homepage_url: 'https://www.congress.gov/members',
+    api_url: null,
+    source_type: 'official_directory',
+    last_checked_at: new Date().toISOString(),
+    freshness_status: 'current'
+  }
+];
+
+await upsertBatches('sources', sources, 'id');
 await upsertBatches('officials', [...officialMap.values()], 'id');
 await upsertBatches('civic_items', [...federalItems, ...floridaItems], 'id');
 await upsertBatches('roll_calls', rollCalls, 'id');
 await upsertBatches('official_votes', officialVotes, 'roll_call_id,official_id');
+
+const completedAt = new Date().toISOString();
+const { error: sourceCheckError } = await supabase.from('source_checks').insert(sources.map((source) => ({
+  source_id: source.id,
+  checked_at: completedAt,
+  status: 'completed',
+  message: 'Official-source sync completed.',
+  raw_metadata: {
+    officials: officialMap.size,
+    civicItems: federalItems.length + floridaItems.length,
+    rollCalls: rollCalls.length,
+    officialVotes: officialVotes.length
+  }
+})));
+if (sourceCheckError) throw new Error(`source_checks: ${sourceCheckError.message}`);
 
 console.log(JSON.stringify({
   officials: officialMap.size,

@@ -48,6 +48,15 @@ create table if not exists public.civic_items (
   imported_metadata jsonb not null default '{}'::jsonb
 );
 
+alter table public.civic_items add column if not exists ai_summary text;
+alter table public.civic_items add column if not exists source_name text;
+alter table public.civic_items add column if not exists image_url text;
+alter table public.civic_items add column if not exists pros jsonb not null default '[]'::jsonb;
+alter table public.civic_items add column if not exists cons jsonb not null default '[]'::jsonb;
+alter table public.civic_items add column if not exists sponsors jsonb not null default '[]'::jsonb;
+alter table public.civic_items add column if not exists committees jsonb not null default '[]'::jsonb;
+alter table public.civic_items add column if not exists actions jsonb not null default '[]'::jsonb;
+
 create table if not exists public.officials (
   id text primary key,
   source_id text references public.sources(id),

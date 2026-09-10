@@ -13,6 +13,66 @@ const supabase = cloudConfigured
     })
   : null;
 
+const publicPageSize = 1000;
+
+async function fetchAllPublicRows(table, columns, configureQuery) {
+  function pageQuery(from, count) {
+    let query = supabase.from(table).select(columns, count ? { count: 'exact' } : undefined).range(from, from + publicPageSize - 1);
+    if (configureQuery) query = configureQuery(query);
+    return query;
+  }
+
+  const first = await pageQuery(0, true);
+  if (first.error) throw first.error;
+  const total = first.count ?? first.data.length;
+  if (total <= publicPageSize) return first.data;
+  const starts = Array.from({ length: Math.ceil(total / publicPageSize) - 1 }, (_, index) => (index + 1) * publicPageSize);
+  const remaining = await Promise.all(starts.map((from) => pageQuery(from, false)));
+  const failed = remaining.find((result) => result.error);
+  if (failed) throw failed.error;
+  return [first.data, ...remaining.map((result) => result.data)].flat();
+}
+
+let publicCivicDataPromise;
+
+export function loadPublicCivicData() {
+  if (!supabase) return Promise.resolve(null);
+  if (!publicCivicDataPromise) {
+    publicCivicDataPromise = loadPublicCivicDataFromSupabase().catch((error) => {
+      publicCivicDataPromise = undefined;
+      throw error;
+    });
+  }
+  return publicCivicDataPromise;
+}
+
+async function loadPublicCivicDataFromSupabase() {
+  const [civicItems, officials, rollCalls, officialVotes, sourceChecksResult] = await Promise.all([
+    fetchAllPublicRows(
+      'civic_items',
+      'id,title,chamber,jurisdiction,level,status,category,summary,ai_summary,detail,source_name,source_url,official_text_url,introduced_at,latest_action_at,updated_at,imported_at,imported_metadata,image_url,pros,cons,sponsors,committees,actions',
+      (query) => query.order('latest_action_at', { ascending: false, nullsFirst: false })
+    ),
+    fetchAllPublicRows(
+      'officials',
+      'id,name,office,jurisdiction,party,state,district,source_url,claim_status,imported_metadata,updated_at',
+      (query) => query.order('name')
+    ),
+    fetchAllPublicRows(
+      'roll_calls',
+      'id,civic_item_id,bill_number,title,chamber,vote_date,yea_count,nay_count,source_url,validation_status,imported_at',
+      (query) => query.eq('validation_status', 'validated').order('vote_date', { ascending: false })
+    ),
+    fetchAllPublicRows('official_votes', 'roll_call_id,official_id,vote,source_url'),
+    supabase.from('source_checks').select('source_id,checked_at,status,message,raw_metadata').order('checked_at', { ascending: false }).limit(25)
+  ]);
+  if (sourceChecksResult.error) throw sourceChecksResult.error;
+  const sourceChecks = sourceChecksResult.data;
+  if (!civicItems.length || !officials.length) throw new Error('Cloud civic data is empty.');
+  const latestCheck = sourceChecks.find((check) => check.status === 'completed') || sourceChecks[0] || null;
+  return { civicItems, officials, rollCalls, officialVotes, sourceChecks, latestCheck };
+}
+
 async function authenticatedUser() {
   if (!supabase) return null;
   const { data, error } = await supabase.auth.getUser();

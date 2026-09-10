@@ -44,6 +44,7 @@ import {
   createSourceReport,
   getAuthSession,
   loadCloudActivity,
+  loadPublicCivicData,
   sendSignInLink,
   signOutUser,
   subscribeToAuth,
@@ -185,7 +186,7 @@ const prototypeBills = [
   }
 ];
 
-const bills = [...federalCivicItems.items, ...prototypeBills];
+const fallbackBills = [...federalCivicItems.items, ...prototypeBills];
 
 const filters = ['All', 'Federal', 'State', 'County'];
 
@@ -317,7 +318,174 @@ const officialProfileMap = new Map(directoryOfficialProfiles.map((profile) => [p
 for (const profile of [...federalOfficialProfiles, ...floridaOfficialProfiles]) {
   officialProfileMap.set(profile.id, { ...officialProfileMap.get(profile.id), ...profile });
 }
-const officialProfiles = [...officialProfileMap.values()];
+const fallbackOfficialProfiles = [...officialProfileMap.values()];
+
+const fallbackBillMap = new Map(fallbackBills.map((bill) => [bill.id, bill]));
+const fallbackProfileMap = new Map(fallbackOfficialProfiles.map((profile) => [profile.id, profile]));
+const defaultBillImages = {
+  Federal: 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=80',
+  State: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1200&q=80',
+  County: 'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80',
+  City: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=80'
+};
+
+function normalizeCloudPublicData(data) {
+  const cloudBills = data.civicItems.map((row) => {
+    const fallback = fallbackBillMap.get(row.id) || {};
+    const imported = row.imported_metadata || {};
+    const updatedAt = row.updated_at || row.imported_at || row.latest_action_at;
+    return {
+      ...fallback,
+      id: row.id,
+      title: row.title,
+      chamber: row.chamber || fallback.chamber || 'Legislative item',
+      jurisdiction: row.jurisdiction,
+      level: row.level,
+      status: row.status || 'Official status pending',
+      deadline: row.latest_action_at ? `Latest action ${formatCloudDate(row.latest_action_at)}` : 'No deadline published',
+      lastUpdated: updatedAt ? `Updated ${formatCloudDate(updatedAt)}` : 'Update time unavailable',
+      sourceStatus: 'Official source synced',
+      nextAction: row.detail || row.status || 'Review the official record',
+      category: row.category || 'Legislation',
+      sourceName: row.source_name || fallback.sourceName || inferSourceName(row),
+      sourceUrl: row.source_url,
+      officialTextUrl: row.official_text_url || row.source_url,
+      image: row.image_url || fallback.image || defaultBillImages[row.level] || defaultBillImages.State,
+      summary: row.summary || row.detail || row.title,
+      aiSummary: row.ai_summary || row.summary || row.detail || row.title,
+      summaryLabel: row.ai_summary && row.ai_summary !== row.title ? 'AI summary' : 'Official description',
+      detail: row.detail || row.summary || row.title,
+      pros: Array.isArray(row.pros) && row.pros.length ? row.pros : (fallback.pros || []),
+      cons: Array.isArray(row.cons) && row.cons.length ? row.cons : (fallback.cons || []),
+      sponsors: Array.isArray(row.sponsors) && row.sponsors.length ? row.sponsors : (fallback.sponsors || []),
+      committees: Array.isArray(row.committees) && row.committees.length ? row.committees : (fallback.committees || []),
+      actions: Array.isArray(row.actions) && row.actions.length ? row.actions : (fallback.actions || []),
+      imported: { ...imported, updateDate: imported.updateDate || updatedAt },
+      yes: fallback.yes || 0,
+      no: fallback.no || 0,
+      friendVotes: fallback.friendVotes || [],
+      comments: fallback.comments || 0
+    };
+  });
+
+  const rollCallMap = new Map(data.rollCalls.map((rollCall) => [rollCall.id, rollCall]));
+  const archivesByOfficial = new Map();
+  for (const officialVote of data.officialVotes) {
+    const rollCall = rollCallMap.get(officialVote.roll_call_id);
+    if (!rollCall) continue;
+    const records = archivesByOfficial.get(officialVote.official_id) || [];
+    records.push({
+      id: rollCall.id,
+      title: `${rollCall.bill_number}: ${rollCall.title}`,
+      year: formatCloudDate(rollCall.vote_date),
+      topic: `${rollCall.chamber} vote`,
+      vote: officialVote.vote,
+      sourceUrl: officialVote.source_url || rollCall.source_url,
+      sortDate: new Date(`${rollCall.vote_date}T00:00:00`).getTime()
+    });
+    archivesByOfficial.set(officialVote.official_id, records);
+  }
+
+  const archiveDates = data.rollCalls.map((rollCall) => rollCall.vote_date).filter(Boolean).sort();
+  const cloudArchiveWindow = {
+    startDate: archiveDates[0] || null,
+    endDate: archiveDates.at(-1) || 'Present',
+    label: 'Validated cloud archive',
+    note: 'Member-level votes loaded from validated official roll calls in Supabase.'
+  };
+  const cloudProfiles = data.officials.map((row) => {
+    const fallback = fallbackProfileMap.get(row.id) || {};
+    const metadata = row.imported_metadata || {};
+    const archive = (archivesByOfficial.get(row.id) || []).sort((a, b) => b.sortDate - a.sortDate);
+    const numericDistrict = row.district === null || row.district === '' ? null : Number(row.district);
+    return {
+      ...fallback,
+      id: row.id,
+      bioguideId: metadata.bioguideId || fallback.bioguideId,
+      name: row.name,
+      office: row.office,
+      jurisdiction: row.jurisdiction,
+      state: row.state,
+      district: Number.isFinite(numericDistrict) ? numericDistrict : row.district,
+      chamber: metadata.chamber || fallback.chamber || inferOfficialChamber(row.office),
+      party: row.party,
+      status: row.claim_status === 'inactive' ? 'Historical official record' : row.claim_status === 'claimed' ? 'Claimed profile' : 'Official directory profile',
+      sourceName: fallback.sourceName || `${metadata.chamber || inferOfficialChamber(row.office)} official source`,
+      sourceUrl: row.source_url,
+      votes: fallback.votes || {},
+      sponsoredItems: fallback.sponsoredItems || [],
+      archiveWindow: archive.length ? cloudArchiveWindow : (fallback.archiveWindow || {
+        startDate: null,
+        endDate: 'Present',
+        label: 'Voting history expansion pending',
+        note: 'Member-level voting history has not been imported for this chamber yet.'
+      }),
+      archive: archive.length ? archive : (fallback.archive || [])
+    };
+  });
+  const latestAt = data.latestCheck?.checked_at || newestTimestamp([
+    ...data.civicItems.map((item) => item.updated_at || item.imported_at),
+    ...data.officials.map((official) => official.updated_at)
+  ]);
+  return {
+    bills: cloudBills,
+    officialProfiles: cloudProfiles,
+    mode: 'live',
+    lastUpdated: latestAt,
+    stale: latestAt ? Date.now() - new Date(latestAt).getTime() > 36 * 60 * 60 * 1000 : true,
+    counts: {
+      civicItems: cloudBills.length,
+      officials: cloudProfiles.length,
+      rollCalls: data.rollCalls.length,
+      officialVotes: data.officialVotes.length,
+      usHouse: cloudProfiles.filter((profile) => profile.chamber === 'U.S. House').length,
+      usSenate: cloudProfiles.filter((profile) => profile.chamber === 'U.S. Senate').length,
+      floridaSenate: cloudProfiles.filter((profile) => profile.chamber === 'Florida Senate' && profile.status !== 'Historical official record').length
+    }
+  };
+}
+
+function inferSourceName(row) {
+  if (row.level === 'Federal') return 'Congress.gov';
+  if (row.jurisdiction === 'Florida') return 'Florida Legislature';
+  return `${row.jurisdiction} official source`;
+}
+
+function inferOfficialChamber(office = '') {
+  if (office.includes('Florida Senate')) return 'Florida Senate';
+  if (office.includes('U.S. Senate')) return 'U.S. Senate';
+  if (office.includes('U.S. House')) return 'U.S. House';
+  return 'Public office';
+}
+
+function newestTimestamp(values) {
+  return values.filter(Boolean).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0] || null;
+}
+
+function formatCloudDate(value) {
+  if (!value) return 'Not available';
+  const date = new Date(String(value).length === 10 ? `${value}T00:00:00` : value);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : value;
+}
+
+const fallbackPublicData = {
+  bills: fallbackBills,
+  officialProfiles: fallbackOfficialProfiles,
+  mode: cloudConfigured ? 'loading' : 'fallback',
+  lastUpdated: newestTimestamp([federalCivicItems.generatedAt, floridaOfficialData.generatedAt, representativeDirectory.generatedAt]),
+  stale: true,
+  counts: {
+    civicItems: fallbackBills.length,
+    officials: fallbackOfficialProfiles.length,
+    rollCalls: floridaOfficialData.rollCalls.length,
+    officialVotes: floridaOfficialData.rollCalls.reduce((total, rollCall) => total + (rollCall.memberVotes?.length || 0), 0),
+    usHouse: representativeDirectory.counts.usHouse,
+    usSenate: representativeDirectory.counts.usSenate,
+    floridaSenate: floridaOfficialData.officials.length
+  }
+};
 
 const defaultJurisdiction = {
   label: 'Nationwide demo',
@@ -331,11 +499,14 @@ const defaultJurisdiction = {
 };
 
 function App() {
+  const [publicData, setPublicData] = useState(fallbackPublicData);
+  const bills = publicData.bills;
+  const officialProfiles = publicData.officialProfiles;
   const [activeSection, setActiveSection] = useState('feed');
   const [activeTab, setActiveTab] = useState('forYou');
   const [activeFilter, setActiveFilter] = useState('All');
   const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState(bills[0].id);
+  const [selectedId, setSelectedId] = useState(fallbackBills[0].id);
   const [votes, setVotes] = useStoredState(storageKeys.votes, {});
   const [saved, setSaved] = useStoredSet(storageKeys.saved, ['hb-771']);
   const [followed, setFollowed] = useStoredSet(storageKeys.followed, ['Federal', 'Congress.gov']);
@@ -369,6 +540,26 @@ function App() {
   const activitySnapshotRef = useRef(null);
   const hydratingUserRef = useRef(null);
   activitySnapshotRef.current = { votes, saved: [...saved], followed: [...followed], reminders: [...reminders], jurisdiction, theme };
+
+  useEffect(() => {
+    let active = true;
+    if (!cloudConfigured) return undefined;
+    loadPublicCivicData()
+      .then((cloudData) => {
+        if (active && cloudData) setPublicData(normalizeCloudPublicData(cloudData));
+      })
+      .catch((error) => {
+        if (!active) return;
+        setPublicData({
+          ...fallbackPublicData,
+          mode: 'fallback',
+          error: error?.message || 'Cloud data could not be loaded.'
+        });
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -437,7 +628,7 @@ function App() {
       const needle = `${bill.title} ${bill.summary} ${bill.jurisdiction} ${bill.sourceName}`.toLowerCase();
       return matchesFilter && matchesJurisdiction && needle.includes(query.toLowerCase());
     });
-  }, [activeFilter, jurisdiction.levels, query]);
+  }, [activeFilter, bills, jurisdiction.levels, query]);
 
   const followingBills = useMemo(() => {
     return visibleBills.filter((bill) => (
@@ -448,7 +639,8 @@ function App() {
     ));
   }, [followed, saved, visibleBills]);
 
-  const timelineBills = activeTab === 'following' ? followingBills : visibleBills;
+  const allTimelineBills = activeTab === 'following' ? followingBills : visibleBills;
+  const timelineBills = allTimelineBills.slice(0, query.trim() ? 250 : 120);
   const hasFeedFilters = query.trim() || activeFilter !== 'All';
   const timelineEmptyTitle = hasFeedFilters ? 'No matching civic items' : 'No posts in this feed yet';
   const timelineEmptyBody = hasFeedFilters
@@ -967,6 +1159,7 @@ function App() {
             federalOfficialData={federalOfficialData}
             officialData={floridaOfficialData}
             directoryData={representativeDirectory}
+            publicData={publicData}
             jurisdiction={jurisdiction}
             backendLabel={backendLabel}
             cloudConfigured={cloudConfigured}
@@ -1010,6 +1203,7 @@ function App() {
               <button className={activeTab === 'forYou' ? 'active' : ''} onClick={() => setActiveTab('forYou')}>For you</button>
               <button className={activeTab === 'following' ? 'active' : ''} onClick={() => setActiveTab('following')}>Following</button>
             </div>
+            <PublicDataStatus data={publicData} />
             {!onboardingDismissed && (
               <LaunchOnboarding
                 onDismiss={() => setOnboardingDismissed(true)}
@@ -1117,6 +1311,11 @@ function App() {
               onActivity={() => showNotice(`${formatCount(bill.yes + bill.no)} total votes tracked`)}
             />
           ))}
+          {allTimelineBills.length > timelineBills.length && (
+            <div className="feed-limit-note">
+              Showing the {timelineBills.length} most relevant records. Use search or a level filter to find older items.
+            </div>
+          )}
           {!timelineBills.length && (
             <EmptyState
               title={timelineEmptyTitle}
@@ -1139,6 +1338,7 @@ function App() {
 
       {!activeOverview && (
         <RightRail
+          bills={bills}
           bill={selected}
           commentCount={getCommentCount(selected, localComments)}
           userVote={votes[selected.id]}
@@ -1150,6 +1350,7 @@ function App() {
           query={query}
           onQueryChange={setQuery}
           onOpenExplore={() => openSection('explore')}
+          officialProfiles={officialProfiles}
           onOpenProfile={openProfile}
         />
       )}
@@ -1203,7 +1404,7 @@ function getCommentCount(bill, localComments) {
   return bill.comments + (localComments[bill.id]?.length || 0);
 }
 
-function FederalContext({ bill, onOpenProfile }) {
+function FederalContext({ bill, officialProfiles = [], onOpenProfile }) {
   const sponsor = bill.sponsors?.[0];
   const sponsorProfile = sponsor && officialProfiles.find((profile) => (
     profile.bioguideId === sponsor.bioguideId || profile.name === sponsor.name
@@ -1222,6 +1423,33 @@ function FederalContext({ bill, onOpenProfile }) {
       ) : sponsor && <span><Users size={14} /> {sponsor.name}</span>}
       {committee && <span><BadgeCheck size={14} /> {committee.name}</span>}
       {action && <span><FileText size={14} /> {action.date}</span>}
+    </div>
+  );
+}
+
+function PublicDataStatus({ data }) {
+  const isLoading = data.mode === 'loading';
+  const isFallback = data.mode === 'fallback';
+  const label = isLoading
+    ? 'Refreshing official data'
+    : isFallback
+      ? 'Offline snapshot'
+      : data.stale
+        ? 'Cloud data may be stale'
+        : 'Cloud data current';
+  const detail = isLoading
+    ? 'Showing the bundled snapshot while Supabase loads.'
+    : isFallback
+      ? 'Supabase is unavailable; the bundled official-source snapshot remains usable.'
+      : `${data.counts.civicItems.toLocaleString()} civic items · ${data.counts.officials.toLocaleString()} officials · updated ${formatCloudDate(data.lastUpdated)}`;
+
+  return (
+    <div className={`public-data-status ${isFallback || data.stale ? 'warning' : ''}`} role="status">
+      <span className="public-data-dot" />
+      <div>
+        <strong>{label}</strong>
+        <span>{detail}</span>
+      </div>
     </div>
   );
 }
@@ -1266,7 +1494,7 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
       <button className="card-hit-area" onClick={onSelect} aria-label={`Open ${bill.title}`} />
       <div className="bill-content">
         <a className="bill-image-link" href={overviewHref} onClick={handleOverviewClick} aria-label={`Open Plain-English summary for ${bill.title}`}>
-          <img src={bill.image} alt="" className="bill-image" />
+          <img src={bill.image} alt="" className="bill-image" loading="lazy" />
         </a>
         <div className="minimal-card-meta">
           <span>{bill.chamber}</span>
@@ -1277,7 +1505,10 @@ function BillCard({ bill, commentCount, userVote, saved, reminderSet, followed, 
           <h2>{bill.title}</h2>
         </a>
         <a className="ai-summary" href={overviewHref} onClick={handleOverviewClick}>
-          <span className="ai-summary-label"><Sparkles size={14} /> AI summary</span>
+          <span className="ai-summary-label">
+            {bill.summaryLabel === 'Official description' ? <FileText size={14} /> : <Sparkles size={14} />}
+            {bill.summaryLabel || 'AI summary'}
+          </span>
           <span>{bill.aiSummary || bill.summary}</span>
         </a>
         <div className="minimal-card-footer">
@@ -1335,7 +1566,7 @@ function VoteButton({ active, icon, label, onClick }) {
   );
 }
 
-function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, onSave, onReminder, query, onQueryChange, onOpenExplore, onOpenProfile }) {
+function RightRail({ bills, bill, commentCount, userVote, saved, reminderSet, onVote, onSave, onReminder, query, onQueryChange, onOpenExplore, officialProfiles, onOpenProfile }) {
   return (
     <aside className="detail-panel" aria-label="Timeline context">
       <label className="rail-search">
@@ -1385,7 +1616,7 @@ function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, o
             {reminderSet ? 'Reminder set' : 'Remind me'}
           </button>
         </div>
-        <FederalContext bill={bill} onOpenProfile={onOpenProfile} />
+        <FederalContext bill={bill} officialProfiles={officialProfiles} onOpenProfile={onOpenProfile} />
         <div className="source-box">
           <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
             <ExternalLink size={16} />
@@ -1406,10 +1637,12 @@ function RightRail({ bill, commentCount, userVote, saved, reminderSet, onVote, o
             <VoteButton active={userVote === 'no'} icon={<X size={17} />} label="No" onClick={() => onVote('no')} />
           </div>
         </div>
-        <div className="split-section">
-          <InfoList title="Arguments for" items={bill.pros} tone="yes" />
-          <InfoList title="Arguments against" items={bill.cons} tone="no" />
-        </div>
+        {!!(bill.pros.length || bill.cons.length) && (
+          <div className="split-section">
+            <InfoList title="Arguments for" items={bill.pros} tone="yes" />
+            <InfoList title="Arguments against" items={bill.cons} tone="no" />
+          </div>
+        )}
         <section className="friend-box">
           <div className="section-title">
             <Users size={18} />
@@ -1463,6 +1696,7 @@ function UserPostCard({ post, onShare }) {
 }
 
 function ExplorePage({ query, onQueryChange, activeFilter, onFilterChange, visibleBills, followed, onFollow, onOpenOverview }) {
+  const displayedBills = visibleBills.slice(0, 250);
   return (
     <section className="view-page" aria-label="Explore civic updates">
       <PageHeader title="Explore" subtitle="Search official-source civic items, topics, and source accounts." />
@@ -1495,7 +1729,7 @@ function ExplorePage({ query, onQueryChange, activeFilter, onFilterChange, visib
         ))}
       </section>
       <section className="result-list" aria-label="Search results">
-        {visibleBills.map((bill) => (
+        {displayedBills.map((bill) => (
           <article className="compact-row" key={bill.id}>
             <div>
               <span>{bill.level} · {bill.jurisdiction}</span>
@@ -1512,13 +1746,16 @@ function ExplorePage({ query, onQueryChange, activeFilter, onFilterChange, visib
             </div>
           </article>
         ))}
+        {visibleBills.length > displayedBills.length && (
+          <div className="feed-limit-note">Showing 250 results. Refine the search or level filter to narrow the full database.</div>
+        )}
       </section>
     </section>
   );
 }
 
 function NotificationsPage({ bills, saved, followed, onSave, onFollow, onOpenOverview }) {
-  const notifications = bills.map((bill, index) => ({
+  const notifications = bills.slice(0, 120).map((bill, index) => ({
     id: `notification-${bill.id}`,
     bill,
     label: index % 2 === 0 ? 'Status update' : 'Official source update',
@@ -1561,6 +1798,7 @@ function FollowPage({ bills, followed, saved, onFollow, onOpenOverview }) {
     ...Array.from(new Set(bills.map((bill) => bill.sourceName))).map((source) => ({ key: source, label: source, detail: 'Official source account.' }))
   ];
   const followedBills = bills.filter((bill) => followed.has(bill.level) || followed.has(bill.sourceName) || saved.has(bill.id));
+  const displayedFollowedBills = followedBills.slice(0, 120);
 
   return (
     <section className="view-page" aria-label="Follow">
@@ -1577,7 +1815,7 @@ function FollowPage({ bills, followed, saved, onFollow, onOpenOverview }) {
         ))}
       </div>
       <section className="result-list">
-        {followedBills.map((bill) => (
+        {displayedFollowedBills.map((bill) => (
           <article className="compact-row" key={bill.id}>
             <div>
               <span>{bill.level} · {bill.sourceName}</span>
@@ -1726,7 +1964,7 @@ function formatDistrict(value) {
   return Number.isFinite(Number(value)) && Number(value) > 0 ? `District ${Number(value)}` : 'At Large';
 }
 
-function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, directoryData, jurisdiction, backendLabel, cloudConfigured, authSession, authEmail, authStatus, onAuthEmailChange, onSignIn, onSignOut, onResetData, onAction, onNavigate }) {
+function MorePage({ sourceRegistry, federalData, federalOfficialData, officialData, directoryData, publicData, jurisdiction, backendLabel, cloudConfigured, authSession, authEmail, authStatus, onAuthEmailChange, onSignIn, onSignOut, onResetData, onAction, onNavigate }) {
   const activitySections = [
     ['Officials directory', 'Search every imported politician and open their voting profile.', BadgeCheck, 'officials'],
     ['Saved', 'Bills and official sources you bookmarked for later.', Bookmark, 'saved'],
@@ -1801,7 +2039,8 @@ function MorePage({ sourceRegistry, federalData, federalOfficialData, officialDa
       </div>
       <div className="data-spike-panel">
         <strong>Current coverage snapshot</strong>
-        <span>{federalData.count} current federal bills, {directoryData.counts.usHouse} U.S. House members, {directoryData.counts.usSenate} U.S. senators, and {officialData.officials.length} Florida senators are imported from official directories, alongside {officialData.rollCalls.length} validated Florida Senate roll calls.</span>
+        <span>{publicData.counts.civicItems.toLocaleString()} civic items, {publicData.counts.usHouse.toLocaleString()} U.S. House members, {publicData.counts.usSenate.toLocaleString()} U.S. senators, and {publicData.counts.floridaSenate.toLocaleString()} Florida senators are available, alongside {publicData.counts.rollCalls.toLocaleString()} validated roll calls and {publicData.counts.officialVotes.toLocaleString()} member votes.</span>
+        <span>{publicData.mode === 'live' ? `Live from Supabase · updated ${formatCloudDate(publicData.lastUpdated)}` : 'Using the bundled official-source fallback.'}</span>
         <a href={federalData.source} target="_blank" rel="noreferrer">
           <ExternalLink size={15} />
           Congress.gov API source
@@ -1880,18 +2119,20 @@ function OverviewPage({ bill, officialProfiles, jurisdiction, comments, commentD
         <span><CalendarDays size={14} /> {bill.deadline}</span>
         <span>{bill.lastUpdated}</span>
       </div>
-      <FederalContext bill={bill} onOpenProfile={onOpenProfile} />
+      <FederalContext bill={bill} officialProfiles={officialProfiles} onOpenProfile={onOpenProfile} />
       <h1>{bill.title}</h1>
       <section className="ai-overview-box">
         <div className="section-title">
-          <FileText size={18} />
-          <strong>Plain-English summary</strong>
+          {bill.summaryLabel === 'Official description' ? <FileText size={18} /> : <Sparkles size={18} />}
+          <strong>{bill.summaryLabel || 'Plain-English summary'}</strong>
         </div>
         <p>{bill.detail}</p>
-        <div className="split-section">
-          <InfoList title="Likely benefits" items={bill.pros} tone="yes" />
-          <InfoList title="Likely concerns" items={bill.cons} tone="no" />
-        </div>
+        {!!(bill.pros.length || bill.cons.length) && (
+          <div className="split-section">
+            <InfoList title="Likely benefits" items={bill.pros} tone="yes" />
+            <InfoList title="Likely concerns" items={bill.cons} tone="no" />
+          </div>
+        )}
       </section>
       <div className="source-box">
         <a href={bill.sourceUrl} target="_blank" rel="noreferrer">
